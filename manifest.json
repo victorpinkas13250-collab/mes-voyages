@@ -1,6 +1,6 @@
 {
-  "name": "Mes Voyages 🌴",
-  "short_name": "Mes Voyages",
+  "name": "Book de Voyage",
+  "short_name": "Book Voyage",
   "description": "Crée tes albums photo de vacances et génère de beaux livres PDF",
   "start_url": "./index.html",
   "display": "standalone",
