@@ -1,5 +1,5 @@
 // Service Worker — Mes Voyages PWA
-const CACHE_NAME = 'mes-voyages-v23';
+const CACHE_NAME = 'mes-voyages-v25';
 const ASSETS = [
   './index.html',
   './manifest.json',
