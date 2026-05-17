@@ -806,9 +806,11 @@ function renderWizStep(){
       +'<label>Sous-titre</label><input id="wt1" value="'+wizD.covSub+'" placeholder="Été 2024">'
       +'<label>Auteur(s)</label><input id="wt2" value="'+wizD.covAuth+'" placeholder="Vic & Vali">'
       +'<label>Citation</label><input id="wt3" value="'+wizD.covQuote+'" placeholder="La vie c\'est le voyage..."></div>'
-      +'<div style="margin-bottom:12px"><label style="color:rgba(255,255,255,.45);font-size:.68rem;font-weight:700;text-transform:uppercase;display:block;margin-bottom:7px">Style</label>'
-      var styleLabels={bold:'🌴 Bold',minimal:'✦ Minimal',retro:'📮 Rétro',poster:'🎬 Poster',split:'⬛ Split',magazine:'📰 Magazine',diagonal:'↗ Diagonal',polaroid:'📷 Polaroïd'};
-      +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+Object.keys(styleLabels).map(function(sk){return '<button class="cs-btn '+(wizD.covStyle===sk?'on':'')+'" onclick="wSetCovStyle(\''+sk+'\')">'+styleLabels[sk]+'</button>';}).join('')+'</div></div>'
+      +(function(){
+        var lb={bold:'🌴 Bold',minimal:'✦ Minimal',retro:'📮 Rétro',poster:'🎬 Poster',split:'⬛ Split',magazine:'📰 Magazine',diagonal:'↗ Diagonal',polaroid:'📷 Polaroïd'};
+        return '<div style="margin-bottom:12px"><label style="color:rgba(255,255,255,.45);font-size:.68rem;font-weight:700;text-transform:uppercase;display:block;margin-bottom:7px">Style couverture</label>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+Object.keys(lb).map(function(sk){return '<button class="cs-btn '+(wizD.covStyle===sk?'on':'')+'" onclick="wSetCovStyle(\''+sk+'\')" style="padding:8px 7px;font-size:.7rem">'+lb[sk]+'</button>';}).join('')+'</div></div>';
+      })()
       +'<div class="wiz-nav"><button class="wn-btn wn-prev" onclick="wizPrev()">← Retour</button><button class="wn-btn wn-next" onclick="wSaveCov();wizNext()">Suivant →</button></div>';
   } else if(s==='pages'){
     var a=al(curAlbum);
