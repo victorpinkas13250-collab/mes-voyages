@@ -1,7 +1,7 @@
 /* Numéro de version : à incrémenter à CHAQUE mise à jour du site.
    C'est ce qui force les téléphones à récupérer la nouvelle version
    au lieu de rester bloqués sur l'ancienne en cache. */
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.3.1';
 const CACHE_NAME = 'mes-voyages-' + APP_VERSION;
 
 const ASSETS = [
@@ -9,8 +9,10 @@ const ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './leaflet.js',
+  './leaflet.css',
   'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&family=Caveat:wght@700&family=Bebas+Neue&family=Roboto+Mono:wght@600;700&family=Montserrat:wght@700;800&family=Lobster&family=Oswald:wght@600;700&family=Dancing+Script:wght@700&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  './jspdf.umd.min.js'
 ];
 
 self.addEventListener('install', function(e) {

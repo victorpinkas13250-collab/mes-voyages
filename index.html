@@ -12,7 +12,9 @@
 <meta name="apple-mobile-web-app-title" content="Mes Voyages">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&family=Caveat:wght@700&family=Bebas+Neue&family=Roboto+Mono:wght@600;700&family=Montserrat:wght@700;800&family=Lobster&family=Oswald:wght@600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="leaflet.css">
+<script src="leaflet.js"></script>
 <style>
 :root{
   --bg:#F7F5FC; --surface:#FFFFFF; --ink:#241E38; --ink-soft:#6E6785;
@@ -94,11 +96,15 @@ img{-webkit-user-drag:none;}
 .ah-back{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.2);border:none;border-radius:50px;color:#fff;font-weight:800;font-size:.82rem;padding:9px 16px;backdrop-filter:blur(6px);z-index:2;}
 .ah-pdf{position:absolute;top:16px;right:16px;background:#fff;border:none;border-radius:50px;color:var(--primary-dark);font-weight:800;font-size:.8rem;padding:9px 15px;box-shadow:0 4px 14px rgba(0,0,0,.15);z-index:2;}
 .ah-book{position:absolute;top:60px;right:16px;background:var(--primary);border:none;border-radius:50px;color:#fff;font-weight:800;font-size:.8rem;padding:9px 15px;box-shadow:0 4px 14px rgba(123,47,247,.4);z-index:2;}
+.ah-map{position:absolute;top:104px;right:16px;background:var(--accent);border:none;border-radius:50px;color:#fff;font-weight:800;font-size:.8rem;padding:9px 15px;box-shadow:0 4px 14px rgba(0,194,168,.4);z-index:2;}
 .ah-info{position:absolute;bottom:18px;left:18px;right:18px;}
 .ah-info h2{color:#fff;font-size:1.5rem;font-weight:800;}
 .ah-info p{color:rgba(255,255,255,.85);font-weight:700;font-size:.8rem;margin-top:4px;}
 
 .upload-z{margin:16px;border:2px dashed #D9CCF7;border-radius:var(--r-md);padding:20px;text-align:center;background:var(--surface);}
+.photo-search-row{margin:0 16px 14px;}
+.photo-search-row input{width:100%;border:2px solid var(--border);border-radius:50px;padding:11px 16px;font-size:.85rem;font-weight:700;box-sizing:border-box;background:var(--surface);}
+.photo-search-row input:focus{outline:none;border-color:var(--primary-2);}
 .upload-z .cam{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:1.3rem;}
 .upload-z p{color:var(--ink);font-weight:800;font-size:.88rem;}
 .upload-z small{color:var(--ink-soft);font-size:.72rem;}
@@ -127,6 +133,7 @@ img{-webkit-user-drag:none;}
 .lb-nav:disabled{opacity:.15;}
 .lb-nav.p{left:8px;}.lb-nav.n{right:8px;}
 .lb-bot{padding:12px 16px 22px;flex-shrink:0;}
+.lb-meta{color:rgba(255,255,255,.55);font-size:.7rem;font-weight:700;margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .lb-actions{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
 .lb-like{background:none;border:none;font-size:1.5rem;}
 .lb-cap-input{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 12px;color:#fff;font-size:.85rem;font-weight:600;}
@@ -157,6 +164,18 @@ img{-webkit-user-drag:none;}
 /* ── ÉDITEUR DE LIVRE (pages libres façon Canva) ── */
 #pg-book{display:none;position:fixed;inset:0;background:#EDE8F9;z-index:500;flex-direction:column;}
 #pg-book.on{display:flex;}
+#pg-map{display:none;position:fixed;inset:0;background:#fff;z-index:500;flex-direction:column;}
+#pg-map.on{display:flex;}
+.mp-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface);box-shadow:var(--shadow-sm);flex-shrink:0;z-index:5;}
+.mp-search-row{display:flex;gap:8px;padding:10px 14px;flex-shrink:0;}
+.mp-search-row input{flex:1;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-size:.9rem;font-weight:700;box-sizing:border-box;}
+#mp-search-results{padding:0 14px;max-height:160px;overflow-y:auto;flex-shrink:0;}
+.mp-result-item{padding:10px 12px;background:var(--bg);border-radius:10px;margin-bottom:6px;font-size:.82rem;font-weight:700;cursor:pointer;}
+#mp-leaflet{flex:1;min-height:0;}
+.mp-list{max-height:30vh;overflow-y:auto;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;}
+.mp-place-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.mp-place-row .name{flex:1;font-weight:800;font-size:.85rem;}
+.mp-place-row button{background:none;border:none;font-size:1rem;padding:4px;}
 .bk-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface);box-shadow:var(--shadow-sm);flex-shrink:0;z-index:5;}
 .bk-btn{background:var(--bg);border:none;border-radius:50px;color:var(--ink);font-weight:800;font-size:.78rem;padding:9px 14px;}
 .bk-btn:disabled{opacity:.35;}
@@ -249,7 +268,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.1.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.3.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -261,6 +280,7 @@ img{-webkit-user-drag:none;}
     <button class="ah-back" onclick="go('home')">← Retour</button>
     <button class="ah-pdf" onclick="openPdfSheet()">📕 Export PDF</button>
     <button class="ah-book" onclick="openBookListSheet()">🎨 Mes livres</button>
+    <button class="ah-map" onclick="openMapScreen()">🗺️ Carte</button>
     <div class="ah-info">
       <h2 id="ah-title"></h2>
       <p id="ah-meta"></p>
@@ -273,6 +293,9 @@ img{-webkit-user-drag:none;}
     <input type="file" id="fup" multiple accept="image/*" style="display:none" onchange="addFiles(this.files)">
   </div>
   <div id="upload-progress-holder"></div>
+  <div class="photo-search-row">
+    <input type="text" id="photo-search" placeholder="Rechercher par nom de fichier ou date..." oninput="renderPhotos()">
+  </div>
   <div class="photos-grid" id="pgrid"></div>
 </div>
 
@@ -289,6 +312,7 @@ img{-webkit-user-drag:none;}
     <button class="lb-nav n" id="lbnext" onclick="lbn(1)">›</button>
   </div>
   <div class="lb-bot">
+    <div class="lb-meta" id="lb-meta"></div>
     <div class="lb-actions">
       <button class="lb-like" id="lblike" onclick="lblike()">🤍</button>
       <input class="lb-cap-input" id="lbcap" placeholder="Ajouter une légende..." oninput="lbcaption(this.value)">
@@ -346,6 +370,22 @@ img{-webkit-user-drag:none;}
   </div>
 </div>
 
+<!-- ══════════ CARTE DES LIEUX VISITÉS ══════════ -->
+<div id="pg-map">
+  <div class="mp-top">
+    <button class="bk-btn" onclick="closeMapScreen()">✕ Fermer</button>
+    <div style="font-weight:800;font-size:.85rem" id="mp-count"></div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="mp-search-row">
+    <input type="text" id="mp-search" placeholder="Chercher un lieu (ville, monument...)" onkeydown="if(event.key==='Enter')mpSearchPlace()">
+    <button class="bk-btn primary" onclick="mpSearchPlace()">🔍</button>
+  </div>
+  <div id="mp-search-results"></div>
+  <div id="mp-leaflet"></div>
+  <div class="mp-list" id="mp-list"></div>
+</div>
+
 <!-- ══════════ ÉDITEUR DE LIVRE (pages libres) ══════════ -->
 <div id="pg-book">
   <div class="bk-top">
@@ -366,6 +406,7 @@ img{-webkit-user-drag:none;}
     <button class="bk-tool" onclick="openStickerPicker()"><span class="ic">✨</span>Sticker</button>
     <button class="bk-tool" onclick="openIconPicker()"><span class="ic">◇</span>Icône</button>
     <button class="bk-tool" onclick="openTemplatePicker()"><span class="ic">▦</span>Modèle</button>
+    <button class="bk-tool" onclick="bkAddMapElement()"><span class="ic">🗺️</span>Carte</button>
     <button class="bk-tool" id="bk-group-btn" onclick="bkToggleMultiSelectMode()"><span class="ic">🔗</span>Grouper</button>
     <button class="bk-tool" onclick="bkToggleOrient()"><span class="ic">🔄</span>Format</button>
     <div id="bk-bgswatches" style="display:flex;gap:8px;align-items:center;padding-left:4px"></div>
@@ -621,13 +662,14 @@ function saveAlbumMeta(a){
   dbPut('albums', {
     id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
     createdAt:a.createdAt, photoIds:a.photos.map(function(p){ return p.id; }),
-    books:a.books, book:a.book
+    books:a.books, book:a.book, places:a.places
   });
 }
 // Sauvegarde UNIQUEMENT une photo (léger même si l'album a 1000 photos)
 function savePhoto(albumId, p){
   dbPut('photos', {
-    id:p.id, albumId:albumId, full:p.full, thumb:p.thumb, w:p.w, h:p.h, cap:p.cap, liked:p.liked
+    id:p.id, albumId:albumId, full:p.full, thumb:p.thumb, w:p.w, h:p.h, cap:p.cap, liked:p.liked,
+    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource
   });
 }
 function toast(msg){
@@ -718,6 +760,213 @@ function delAlbum(id){
 }
 
 /* ══════════════════ ALBUM ══════════════════ */
+/* ══════════════════ CARTE DES LIEUX VISITÉS ══════════════════
+   Utilise OpenStreetMap (Leaflet pour la carte interactive + Nominatim pour
+   la recherche de lieux + tuiles OSM pour l'image statique insérée dans le
+   livre) : tout est gratuit et sans clé, mais dépend d'un service externe
+   public (comme les polices ou jsPDF) — donc besoin d'une vraie connexion.
+   Maths de projection (lat/lon <-> position sur la carte) testées séparément
+   avant intégration ici. */
+function ensurePlaces(a){ if(!Array.isArray(a.places)) a.places=[]; }
+
+var mpMap=null, mpMarkers={};
+function openMapScreen(){
+  bkAlbum=al(curAlbum);
+  ensurePlaces(bkAlbum);
+  document.getElementById('pg-map').classList.add('on');
+  document.getElementById('mp-search').value='';
+  document.getElementById('mp-search-results').innerHTML='';
+  if(!mpMap){
+    mpMap=L.map('mp-leaflet').setView([20,0], 2);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19,
+      attribution:'© OpenStreetMap'
+    }).addTo(mpMap);
+    mpMap.on('click', function(e){ mpDropPin(e.latlng.lat, e.latlng.lng); });
+  }
+  setTimeout(function(){ mpMap.invalidateSize(); mpFitAll(); }, 150);
+  mpRenderMarkers();
+  mpRenderList();
+}
+function closeMapScreen(){
+  document.getElementById('pg-map').classList.remove('on');
+}
+function mpFitAll(){
+  if(!bkAlbum.places.length) return;
+  var bounds=bkAlbum.places.map(function(p){ return [p.lat,p.lon]; });
+  if(bounds.length===1) mpMap.setView(bounds[0], 13);
+  else mpMap.fitBounds(bounds, {padding:[40,40]});
+}
+var mpPinIcon=null;
+function mpGetPinIcon(){
+  if(!mpPinIcon){
+    mpPinIcon=L.divIcon({
+      className:'mp-pin-icon',
+      html:'<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;background:#FF5A6E;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);transform:rotate(-45deg);"></div>',
+      iconSize:[26,26],
+      iconAnchor:[13,26]
+    });
+  }
+  return mpPinIcon;
+}
+function mpRenderMarkers(){
+  Object.keys(mpMarkers).forEach(function(id){ mpMap.removeLayer(mpMarkers[id]); });
+  mpMarkers={};
+  bkAlbum.places.forEach(function(p){
+    var m=L.marker([p.lat,p.lon], {icon:mpGetPinIcon()}).addTo(mpMap).bindPopup(esc(p.name));
+    mpMarkers[p.id]=m;
+  });
+  document.getElementById('mp-count').textContent=bkAlbum.places.length+' lieu'+(bkAlbum.places.length!==1?'x':'');
+}
+function mpRenderList(){
+  var h='';
+  bkAlbum.places.forEach(function(p){
+    h+='<div class="mp-place-row"><span class="name">📍 '+esc(p.name)+'</span>'
+      +'<button onclick="mpFocusPlace(\''+p.id+'\')">🎯</button>'
+      +'<button onclick="mpDeletePlace(\''+p.id+'\')">🗑️</button></div>';
+  });
+  document.getElementById('mp-list').innerHTML=h;
+}
+function mpFocusPlace(id){
+  var p=bkAlbum.places.find(function(x){ return x.id===id; });
+  if(p) mpMap.setView([p.lat,p.lon], 14);
+}
+function mpDeletePlace(id){
+  bkAlbum.places=bkAlbum.places.filter(function(p){ return p.id!==id; });
+  saveAlbumMeta(bkAlbum);
+  mpRenderMarkers();
+  mpRenderList();
+}
+function mpAddPlace(name, lat, lon){
+  bkAlbum.places.push({id:gid(), name:name, lat:lat, lon:lon});
+  saveAlbumMeta(bkAlbum);
+  mpRenderMarkers();
+  mpRenderList();
+}
+function mpDropPin(lat, lon){
+  var name=prompt('Nom de ce lieu ?', '');
+  if(name===null) return; // annulé
+  mpAddPlace(name.trim()||'Sans nom', lat, lon);
+  mpMap.setView([lat,lon], Math.max(mpMap.getZoom(),12));
+}
+function mpSearchPlace(){
+  var q=document.getElementById('mp-search').value.trim();
+  if(!q) return;
+  var resultsEl=document.getElementById('mp-search-results');
+  resultsEl.innerHTML='<div class="mp-result-item">Recherche…</div>';
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&q='+encodeURIComponent(q))
+    .then(function(r){ return r.json(); })
+    .then(function(results){
+      if(!results.length){ resultsEl.innerHTML='<div class="mp-result-item">Aucun résultat</div>'; return; }
+      var h='';
+      results.forEach(function(r,i){
+        h+='<div class="mp-result-item" onclick="mpPickSearchResult('+i+')">📍 '+esc(r.display_name)+'</div>';
+      });
+      resultsEl.innerHTML=h;
+      window.__mpSearchResults=results;
+    })
+    .catch(function(){ resultsEl.innerHTML='<div class="mp-result-item">Erreur réseau — vérifie ta connexion</div>'; });
+}
+function mpPickSearchResult(i){
+  var r=window.__mpSearchResults[i];
+  if(!r) return;
+  var shortName=r.display_name.split(',')[0];
+  mpAddPlace(shortName, parseFloat(r.lat), parseFloat(r.lon));
+  mpMap.setView([parseFloat(r.lat), parseFloat(r.lon)], 13);
+  document.getElementById('mp-search-results').innerHTML='';
+  document.getElementById('mp-search').value='';
+}
+
+/* ── Génération de l'image statique de carte (pour l'insérer dans le livre) ──
+   Compose des tuiles OpenStreetMap sur un canevas + dessine les points,
+   comme une vraie carte imprimée — testé unitairement (maths) avant ceci. */
+function bkLon2x(lon,zoom){ return (lon+180)/360 * Math.pow(2,zoom); }
+function bkLat2y(lat,zoom){
+  var rad=lat*Math.PI/180;
+  return (1 - Math.log(Math.tan(rad)+1/Math.cos(rad))/Math.PI) / 2 * Math.pow(2,zoom);
+}
+function bkComputeFitZoom(places, pxW, pxH, padding){
+  if(places.length===1) return 13;
+  var minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+  places.forEach(function(p){
+    minLat=Math.min(minLat,p.lat); maxLat=Math.max(maxLat,p.lat);
+    minLon=Math.min(minLon,p.lon); maxLon=Math.max(maxLon,p.lon);
+  });
+  for(var z=18; z>=1; z--){
+    var x1=bkLon2x(minLon,z), x2=bkLon2x(maxLon,z);
+    var y1=bkLat2y(maxLat,z), y2=bkLat2y(minLat,z);
+    var w=(x2-x1)*256, h=(y2-y1)*256;
+    if(w<=pxW-padding*2 && h<=pxH-padding*2) return z;
+  }
+  return 1;
+}
+function bkGenerateMapSnapshot(places, pxW, pxH){
+  return new Promise(function(resolve, reject){
+    if(!places.length){ reject(new Error('aucun lieu')); return; }
+    var zoom=bkComputeFitZoom(places, pxW, pxH, 50);
+    var minLat=90,maxLat=-90,minLon=180,maxLon=-180;
+    places.forEach(function(p){
+      minLat=Math.min(minLat,p.lat); maxLat=Math.max(maxLat,p.lat);
+      minLon=Math.min(minLon,p.lon); maxLon=Math.max(maxLon,p.lon);
+    });
+    var centerLat=(minLat+maxLat)/2, centerLon=(minLon+maxLon)/2;
+    var centerX=bkLon2x(centerLon,zoom), centerY=bkLat2y(centerLat,zoom);
+    var originX=centerX*256 - pxW/2, originY=centerY*256 - pxH/2; // coin haut-gauche du canevas, en pixels-carte
+
+    var c=document.createElement('canvas'); c.width=pxW; c.height=pxH;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#EDE8F9'; ctx.fillRect(0,0,pxW,pxH);
+
+    var tileMin_tx=Math.floor(originX/256), tileMax_tx=Math.floor((originX+pxW)/256);
+    var tileMin_ty=Math.floor(originY/256), tileMax_ty=Math.floor((originY+pxH)/256);
+    var nTiles=Math.pow(2,zoom);
+    var loads=[];
+    for(var tx=tileMin_tx; tx<=tileMax_tx; tx++){
+      for(var ty=tileMin_ty; ty<=tileMax_ty; ty++){
+        (function(tx,ty){
+          var wrappedX=((tx%nTiles)+nTiles)%nTiles;
+          if(ty<0||ty>=nTiles) return;
+          var url='https://tile.openstreetmap.org/'+zoom+'/'+wrappedX+'/'+ty+'.png';
+          loads.push(bkLoadImg(url).then(function(img){
+            ctx.drawImage(img, tx*256-originX, ty*256-originY, 256, 256);
+          }).catch(function(){ /* tuile manquante : on laisse le fond uni */ }));
+        })(tx,ty);
+      }
+    }
+    Promise.all(loads).then(function(){
+      places.forEach(function(p){
+        var px=bkLon2x(p.lon,zoom)*256-originX, py=bkLat2y(p.lat,zoom)*256-originY;
+        ctx.beginPath();
+        ctx.arc(px,py-7,9,0,Math.PI*2);
+        ctx.fillStyle='#FF5A6E';
+        ctx.fill();
+        ctx.strokeStyle='#FFFFFF'; ctx.lineWidth=3; ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(px-7,py-2); ctx.lineTo(px+7,py-2); ctx.lineTo(px,py+12); ctx.closePath();
+        ctx.fillStyle='#FF5A6E'; ctx.fill();
+      });
+      resolve(c.toDataURL('image/jpeg',0.88));
+    });
+  });
+}
+function bkAddMapElement(){
+  ensurePlaces(bkAlbum);
+  if(!bkAlbum.places.length){ toast('Ajoute au moins un lieu sur la carte avant (bouton 🗺️ Carte depuis l\'album)'); return; }
+  toast('Génération de la carte…');
+  bkGenerateMapSnapshot(bkAlbum.places, 1000, 1000).then(function(dataUrl){
+    bkSnapshot();
+    var page=bkBook.pages[bkPageIdx];
+    var el={id:gid(), type:'photo', photoId:null, mapSnapshot:dataUrl, x:50,y:50,w:90,h:60,rot:0};
+    page.elements.push(el);
+    bkSelId=el.id;
+    bkRenderPage();
+    toast('🗺️ Carte ajoutée');
+  }).catch(function(err){
+    console.error('Erreur génération carte', err);
+    toast('❌ Erreur pendant la génération de la carte');
+  });
+}
+
 function openAlbum(id){
   curAlbum=id;
   var a=al(id);
@@ -727,6 +976,7 @@ function openAlbum(id){
   if(a.photos.length){ hi.src=a.photos[0].full; hi.style.display='block'; he.style.display='none'; }
   else { hi.style.display='none'; he.style.display='flex'; he.textContent=a.emoji; }
   document.getElementById('upload-progress-holder').innerHTML='';
+  document.getElementById('photo-search').value='';
   renderPhotos();
   go('album');
 }
@@ -742,10 +992,24 @@ function refreshAlbumHeader(){
    bloquer le fil principal — c'est ça qui donne une sensation de fluidité
    même sur un album de centaines de photos, au lieu d'un gros freeze. */
 var _renderPhotosToken=0;
+function bkPhotoMatchesSearch(p, query){
+  if(!query) return true;
+  if(p.fileName && p.fileName.toLowerCase().indexOf(query)>-1) return true;
+  if(p.cap && p.cap.toLowerCase().indexOf(query)>-1) return true;
+  if(p.takenAt){
+    var d=bkFormatDate(p.takenAt).toLowerCase();
+    if(d.indexOf(query)>-1) return true;
+    var iso=new Date(p.takenAt).toISOString().slice(0,10); // "2024-07-14"
+    if(iso.indexOf(query)>-1) return true;
+  }
+  return false;
+}
 function renderPhotos(){
   var a=al(curAlbum);
   var grid=document.getElementById('pgrid');
   grid.innerHTML='';
+  var query=(document.getElementById('photo-search').value||'').trim().toLowerCase();
+  var list=query ? a.photos.filter(function(p){ return bkPhotoMatchesSearch(p, query); }) : a.photos;
   var myToken=++_renderPhotosToken; // annule les rendus précédents si on change d'album vite
   var CHUNK=24;
   var i=0;
@@ -759,11 +1023,11 @@ function renderPhotos(){
   }
   function step(){
     if(myToken!==_renderPhotosToken) return; // un rendu plus récent a pris le relais
-    var end=Math.min(i+CHUNK, a.photos.length);
+    var end=Math.min(i+CHUNK, list.length);
     var h='';
-    for(;i<end;i++) h+=photoHTML(a.photos[i]);
+    for(;i<end;i++) h+=photoHTML(list[i]);
     grid.insertAdjacentHTML('beforeend', h);
-    if(i<a.photos.length){
+    if(i<list.length){
       (window.requestAnimationFrame||setTimeout)(step);
     }
   }
@@ -789,6 +1053,85 @@ function readFileAsDataURL(file){
     r.onerror=function(){ reject(new Error('read error')); };
     r.readAsDataURL(file);
   });
+}
+function readFileAsArrayBuffer(file){
+  return new Promise(function(resolve,reject){
+    var r=new FileReader();
+    r.onload=function(){ resolve(r.result); };
+    r.onerror=function(){ reject(new Error('read error')); };
+    r.readAsArrayBuffer(file);
+  });
+}
+/* ── Lecture de la date de prise de vue (EXIF DateTimeOriginal, sinon DateTime) ──
+   Maths/parsing binaire validés séparément (endianness, sous-IFD Exif, cas
+   corrompus/absents) avant intégration ici. Ne plante jamais : renvoie null
+   si le format n'est pas reconnu ou si le JPEG n'a pas d'EXIF. */
+function bkParseExifDate(buf){
+  try{
+    var view=new DataView(buf);
+    if(view.getUint16(0)!==0xFFD8) return null;
+    var offset=2;
+    while(offset<view.byteLength-4){
+      var marker=view.getUint16(offset);
+      if(marker===0xFFE1){
+        var segLen=view.getUint16(offset+2);
+        var segStart=offset+4;
+        if(view.getUint32(segStart)===0x45786966 && view.getUint16(segStart+4)===0x0000){
+          var tiffStart=segStart+6;
+          var little=view.getUint16(tiffStart)===0x4949;
+          var getU16=function(o){ return view.getUint16(o, little); };
+          var getU32=function(o){ return view.getUint32(o, little); };
+          var ifd0Offset=tiffStart+getU32(tiffStart+4);
+          var result=bkReadIfdForDate(view, tiffStart, ifd0Offset, getU16, getU32);
+          if(result) return result;
+        }
+        offset+=2+segLen;
+      } else if((marker & 0xFF00)!==0xFF00){
+        break;
+      } else if(marker===0xFFD9 || marker===0xFFDA){
+        break;
+      } else {
+        var len=view.getUint16(offset+2);
+        offset+=2+len;
+      }
+    }
+    return null;
+  }catch(e){ return null; }
+}
+function bkReadIfdForDate(view, tiffStart, ifdOffset, getU16, getU32){
+  var count=getU16(ifdOffset);
+  var dateTimeOriginal=null, dateTime=null, exifSubIfd=null;
+  for(var i=0;i<count;i++){
+    var entryOffset=ifdOffset+2+i*12;
+    var tag=getU16(entryOffset);
+    var valueOffset=entryOffset+8;
+    if(tag===0x9003) dateTimeOriginal=bkReadAsciiValue(view, tiffStart, valueOffset, getU32);
+    else if(tag===0x0132) dateTime=bkReadAsciiValue(view, tiffStart, valueOffset, getU32);
+    else if(tag===0x8769) exifSubIfd=tiffStart+getU32(valueOffset);
+  }
+  if(exifSubIfd){
+    var sub=bkReadIfdForDate(view, tiffStart, exifSubIfd, getU16, getU32);
+    if(sub) return sub;
+  }
+  return dateTimeOriginal || dateTime;
+}
+function bkReadAsciiValue(view, tiffStart, valueOffset, getU32){
+  var dataStart=tiffStart+getU32(valueOffset);
+  var chars=[];
+  for(var j=0;j<19;j++){
+    var c=view.getUint8(dataStart+j);
+    if(c===0) break;
+    chars.push(String.fromCharCode(c));
+  }
+  return chars.join('');
+}
+function bkExifStrToTimestamp(s){
+  // "YYYY:MM:DD HH:MM:SS" -> timestamp ; renvoie null si invalide
+  if(!s) return null;
+  var m=s.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
+  if(!m) return null;
+  var t=new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]).getTime();
+  return isNaN(t) ? null : t;
 }
 function loadImage(src){
   return new Promise(function(resolve,reject){
@@ -834,16 +1177,27 @@ function addFiles(files){
     var msgEl=document.getElementById('upmsg'), barEl=document.getElementById('upbar');
     if(msgEl) msgEl.textContent='Traitement '+(done+1)+' / '+total;
 
-    readFileAsDataURL(imgs[i])
-      .then(function(dataUrl){ return loadImage(dataUrl); })
-      .then(function(img){
-        var full=resizeToDataURL(img, MAX_FULL, 0.82);
-        var thumb=resizeToDataURL(img, MAX_THUMB, 0.62);
+    var file=imgs[i];
+    Promise.all([ readFileAsDataURL(file), readFileAsArrayBuffer(file).catch(function(){ return null; }) ])
+      .then(function(results){
+        var dataUrl=results[0], buf=results[1];
+        var exifStr = buf ? bkParseExifDate(buf) : null;
+        var takenAt = bkExifStrToTimestamp(exifStr);
+        var takenAtSource = 'exif';
+        if(!takenAt){ takenAt = file.lastModified || Date.now(); takenAtSource='file'; }
+        return loadImage(dataUrl).then(function(img){ return {img:img, takenAt:takenAt, takenAtSource:takenAtSource}; });
+      })
+      .then(function(r){
+        var full=resizeToDataURL(r.img, MAX_FULL, 0.82);
+        var thumb=resizeToDataURL(r.img, MAX_THUMB, 0.62);
         var photo={
           id:gid(),
           full:full.dataUrl, w:full.w, h:full.h,
           thumb:thumb.dataUrl,
-          cap:'', liked:false
+          cap:'', liked:false,
+          fileName: file.name,
+          takenAt: r.takenAt,
+          takenAtSource: r.takenAtSource
         };
         a.photos.push(photo);
         savePhoto(a.id, photo); // écrit UNIQUEMENT cette photo, jamais tout l'album
@@ -865,6 +1219,13 @@ function dropFiles(e){ e.preventDefault(); addFiles(e.dataTransfer.files); }
 
 /* ══════════════════ LIGHTBOX ══════════════════ */
 function openLB(id){ curPhoto=id; renderLB(); go('lb'); }
+function bkFormatDate(ts){
+  if(!ts) return '';
+  try{
+    var d=new Date(ts);
+    return d.toLocaleDateString('fr-FR', {day:'numeric', month:'short', year:'numeric'});
+  }catch(e){ return ''; }
+}
 function renderLB(){
   var a=al(curAlbum);
   var i=a.photos.findIndex(function(p){ return p.id===curPhoto; });
@@ -876,6 +1237,14 @@ function renderLB(){
   document.getElementById('lblike').textContent=p.liked?'❤️':'🤍';
   document.getElementById('lbprev').disabled=(i===0);
   document.getElementById('lbnext').disabled=(i===a.photos.length-1);
+  var metaBits=[];
+  if(p.takenAt){
+    var dateStr=bkFormatDate(p.takenAt);
+    var icon = p.takenAtSource==='exif' ? '📷 ' : (p.takenAtSource==='added' ? '➕ ' : '🗓️ ');
+    metaBits.push(icon+dateStr);
+  }
+  if(p.fileName) metaBits.push(esc(p.fileName));
+  document.getElementById('lb-meta').textContent=metaBits.join(' · ');
   var start=Math.max(0,i-12), end=Math.min(a.photos.length,i+12);
   var th='';
   for(var k=start;k<end;k++){
@@ -1425,7 +1794,7 @@ function bkElementInnerHTML(el){
   var borderStyle = (el.border && el.border.width>0) ? ('border:'+el.border.width+'px solid '+el.border.color+';') : '';
   if(el.type==='photo'){
     var ph=bkPhotoById(el.photoId);
-    var src = el.bgRemoved || (ph?ph.full:'');
+    var src = el.mapSnapshot || el.bgRemoved || (ph?ph.full:'');
     var imgStyle;
     if(el.crop){
       var c=el.crop;
@@ -2362,7 +2731,7 @@ function bkRenderPageToCanvas(page, orient){
     var imgMap=new Map();
     var loads=leaves.map(function(el){
       if(el.type==='photo'){
-        var ph=bkPhotoById(el.photoId); var src=el.bgRemoved||(ph?ph.full:null);
+        var ph=bkPhotoById(el.photoId); var src=el.mapSnapshot||el.bgRemoved||(ph?ph.full:null);
         if(!src) return Promise.resolve();
         return bkLoadImg(src).then(function(img){ imgMap.set(el, img); });
       }
@@ -2576,7 +2945,26 @@ initDB(function(){
   dbGetAll('albums', function(albumRows){
     dbGetAll('photos', function(photoRows){
       var photoById={};
-      photoRows.forEach(function(p){ photoById[p.id]=p; });
+      // Rattrapage pour les photos déjà présentes avant l'ajout de la date/recherche :
+      // le nom de fichier d'origine n'a jamais été gardé (impossible à retrouver a
+      // posteriori), mais l'id de chaque photo contient déjà l'horodatage exact de
+      // son ajout dans l'appli — on l'utilise comme date, marquée honnêtement
+      // "ajoutée le" (pas "prise le", puisque ce n'est pas une vraie date EXIF).
+      var backfilled=[];
+      photoRows.forEach(function(p){
+        if(!p.takenAt){
+          var ts=parseInt(String(p.id).split('-')[0], 10);
+          if(!isNaN(ts) && ts>0){
+            p.takenAt=ts;
+            p.takenAtSource='added';
+            backfilled.push(p);
+          }
+        }
+        photoById[p.id]=p;
+      });
+      if(backfilled.length){
+        backfilled.forEach(function(p){ dbPut('photos', p); });
+      }
 
       var migrated=[];
       albums=albumRows.map(function(a){
@@ -2585,7 +2973,13 @@ initDB(function(){
         if(!Array.isArray(a.photoIds) && legacyPhotos){
           // ancien format détecté : on migre chaque photo vers le store "photos"
           ids=legacyPhotos.map(function(p){ return p.id; });
-          legacyPhotos.forEach(function(p){ savePhoto(a.id,p); photoById[p.id]=p; });
+          legacyPhotos.forEach(function(p){
+            if(!p.takenAt){
+              var ts2=parseInt(String(p.id).split('-')[0], 10);
+              if(!isNaN(ts2) && ts2>0){ p.takenAt=ts2; p.takenAtSource='added'; }
+            }
+            savePhoto(a.id,p); photoById[p.id]=p;
+          });
           migrated.push(a.id);
         } else {
           ids=Array.isArray(a.photoIds)?a.photoIds:[];
@@ -2595,7 +2989,7 @@ initDB(function(){
           id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
           createdAt:a.createdAt||0,
           photos:photos,
-          books:a.books, book:a.book
+          books:a.books, book:a.book, places:a.places
         };
       }).sort(function(x,y){ return y.createdAt-x.createdAt; });
 
