@@ -1,4 +1,9 @@
-const CACHE_NAME = 'mes-voyages-v100';
+/* Numéro de version : à incrémenter à CHAQUE mise à jour du site.
+   C'est ce qui force les téléphones à récupérer la nouvelle version
+   au lieu de rester bloqués sur l'ancienne en cache. */
+const APP_VERSION = '1.1.0';
+const CACHE_NAME = 'mes-voyages-' + APP_VERSION;
+
 const ASSETS = [
   './index.html',
   './manifest.json',
@@ -14,21 +19,48 @@ self.addEventListener('install', function(e) {
       return cache.addAll(ASSETS).catch(function(err) { console.warn('SW cache partial fail:', err); });
     })
   );
-  self.skipWaiting();
+  // NE PAS forcer skipWaiting ici : on laisse l'appli demander la mise à jour
+  // elle-même (bandeau "nouvelle version"), pour ne jamais couper l'utilisateur
+  // en pleine édition.
 });
 
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
-      return Promise.all(keys.filter(function(k){return k!==CACHE_NAME;}).map(function(k){return caches.delete(k);}));
+      return Promise.all(keys.filter(function(k){ return k!==CACHE_NAME; }).map(function(k){ return caches.delete(k); }));
     })
   );
   self.clients.claim();
 });
 
+self.addEventListener('message', function(e) {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
   if (e.request.url.startsWith('chrome-extension')) return;
+
+  // Page principale (navigation) : toujours essayer le RÉSEAU d'abord,
+  // pour être sûr d'avoir la dernière version quand il y a du réseau.
+  // Le cache ne sert que si le téléphone est hors-ligne.
+  if (e.request.mode === 'navigate' || (e.request.method==='GET' && e.request.headers.get('accept') && e.request.headers.get('accept').indexOf('text/html')>-1)) {
+    e.respondWith(
+      fetch(e.request).then(function(response) {
+        if (response && response.status === 200) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache){ cache.put(e.request, clone); });
+        }
+        return response;
+      }).catch(function(){
+        return caches.match(e.request).then(function(cached){ return cached || caches.match('./index.html'); });
+      })
+    );
+    return;
+  }
+
+  // Le reste (polices, icônes, jsPDF...) : cache d'abord, réseau en secours
+  // (ces fichiers ne changent presque jamais, pas besoin de revérifier à chaque fois).
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       if (cached) return cached;
