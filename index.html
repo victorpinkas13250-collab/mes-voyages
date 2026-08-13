@@ -269,7 +269,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.4.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.6.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -645,6 +645,16 @@ function dbDeleteMany(store,ids,cb){
     var tx=DB.transaction(store,'readwrite');
     var os=tx.objectStore(store);
     ids.forEach(function(id){ os.delete(id); });
+    tx.oncomplete=function(){ cb&&cb(); };
+    tx.onerror=function(){ cb&&cb(); };
+  }catch(e){ cb&&cb(); }
+}
+function dbPutMany(store,objs,cb){
+  if(!DB || !objs.length) return cb&&cb();
+  try{
+    var tx=DB.transaction(store,'readwrite');
+    var os=tx.objectStore(store);
+    objs.forEach(function(o){ os.put(o); });
     tx.oncomplete=function(){ cb&&cb(); };
     tx.onerror=function(){ cb&&cb(); };
   }catch(e){ cb&&cb(); }
@@ -1085,34 +1095,56 @@ function readFileAsArrayBuffer(file){
 function bkParseExifDate(buf){
   try{
     var view=new DataView(buf);
-    if(view.getUint16(0)!==0xFFD8) return null;
-    var offset=2;
-    while(offset<view.byteLength-4){
-      var marker=view.getUint16(offset);
-      if(marker===0xFFE1){
-        var segLen=view.getUint16(offset+2);
-        var segStart=offset+4;
-        if(view.getUint32(segStart)===0x45786966 && view.getUint16(segStart+4)===0x0000){
-          var tiffStart=segStart+6;
-          var little=view.getUint16(tiffStart)===0x4949;
-          var getU16=function(o){ return view.getUint16(o, little); };
-          var getU32=function(o){ return view.getUint32(o, little); };
-          var ifd0Offset=tiffStart+getU32(tiffStart+4);
-          var result=bkReadIfdForDate(view, tiffStart, ifd0Offset, getU16, getU32);
-          if(result) return result;
-        }
-        offset+=2+segLen;
-      } else if((marker & 0xFF00)!==0xFF00){
-        break;
-      } else if(marker===0xFFD9 || marker===0xFFDA){
-        break;
-      } else {
-        var len=view.getUint16(offset+2);
-        offset+=2+len;
-      }
-    }
+    if(view.byteLength>=2 && view.getUint16(0)===0xFFD8) return bkParseJpegExifDate(view);
+    if(view.byteLength>=12 && view.getUint32(0)===0x52494646 && view.getUint32(8)===0x57454250) return bkParseWebpExifDate(view);
     return null;
   }catch(e){ return null; }
+}
+function bkParseJpegExifDate(view){
+  var offset=2;
+  while(offset<view.byteLength-4){
+    var marker=view.getUint16(offset);
+    if(marker===0xFFE1){
+      var segLen=view.getUint16(offset+2);
+      var segStart=offset+4;
+      if(view.getUint32(segStart)===0x45786966 && view.getUint16(segStart+4)===0x0000){
+        var tiffStart=segStart+6;
+        var result=bkParseTiffExif(view, tiffStart);
+        if(result) return result;
+      }
+      offset+=2+segLen;
+    } else if((marker & 0xFF00)!==0xFF00){
+      break;
+    } else if(marker===0xFFD9 || marker===0xFFDA){
+      break;
+    } else {
+      var len=view.getUint16(offset+2);
+      offset+=2+len;
+    }
+  }
+  return null;
+}
+function bkParseWebpExifDate(view){
+  // "RIFF" .... "WEBP" puis une suite de chunks [FourCC(4) taille(4,LE) données(taille, paddée à pair)]
+  var offset=12;
+  while(offset+8<=view.byteLength){
+    var fourcc=view.getUint32(offset);
+    var size=view.getUint32(offset+4, true); // taille en little-endian dans un WEBP
+    var dataStart=offset+8;
+    if(dataStart+size>view.byteLength) break; // chunk annoncé plus grand que les données restantes
+    if(fourcc===0x45584946){ // "EXIF"
+      return bkParseTiffExif(view, dataStart);
+    }
+    offset=dataStart+size+(size%2);
+  }
+  return null;
+}
+function bkParseTiffExif(view, tiffStart){
+  var little=view.getUint16(tiffStart)===0x4949;
+  var getU16=function(o){ return view.getUint16(o, little); };
+  var getU32=function(o){ return view.getUint32(o, little); };
+  var ifd0Offset=tiffStart+getU32(tiffStart+4);
+  return bkReadIfdForDate(view, tiffStart, ifd0Offset, getU16, getU32);
 }
 function bkReadIfdForDate(view, tiffStart, ifdOffset, getU16, getU32){
   var count=getU16(ifdOffset);
@@ -1168,68 +1200,109 @@ function resizeToDataURL(img,maxSize,quality){
   return {dataUrl:c.toDataURL('image/jpeg',quality), w:tw, h:th};
 }
 
+function decodeImageFast(file){
+  // createImageBitmap décode souvent hors du fil principal et évite le passage
+  // par une chaîne base64 (dataURL) inutile — beaucoup plus rapide sur mobile.
+  // Repli sur <img> classique si l'appareil ne le supporte pas.
+  if(window.createImageBitmap){
+    return createImageBitmap(file, {imageOrientation:'from-image'}).then(function(bitmap){ return {img:bitmap, isBitmap:true}; })
+      .catch(function(){
+        return readFileAsDataURL(file).then(function(dataUrl){ return loadImage(dataUrl); })
+          .then(function(img){ return {img:img, isBitmap:false}; });
+      });
+  }
+  return readFileAsDataURL(file).then(function(dataUrl){ return loadImage(dataUrl); })
+    .then(function(img){ return {img:img, isBitmap:false}; });
+}
+
 function addFiles(files){
   var a=al(curAlbum);
   var imgs=Array.prototype.filter.call(files, function(f){ return f.type && f.type.indexOf('image/')===0; });
   if(!imgs.length){ toast('Aucune image valide sélectionnée'); return; }
   var total=imgs.length, done=0, failed=0;
+  var startTime=Date.now();
   var holder=document.getElementById('upload-progress-holder');
   holder.innerHTML='<div class="upload-progress"><div class="ic">🖼️</div>'
     +'<div class="msg" id="upmsg">Traitement 0 / '+total+'</div>'
     +'<div class="bar-track"><div class="bar-fill" id="upbar" style="width:0%"></div></div></div>';
+  var msgEl=document.getElementById('upmsg'), barEl=document.getElementById('upbar');
 
-  function step(i){
-    if(i>=imgs.length){
-      holder.innerHTML='';
-      saveAlbumMeta(a); // met à jour la liste ordonnée des ids (léger, pas d'images dedans)
-      renderPhotos();
-      refreshAlbumHeader();
-      var msg=failed
-        ? '⚠️ '+(total-failed)+'/'+total+' ajoutées ('+failed+' échec'+(failed>1?'s':'')+')'
-        : '✅ '+total+' photo'+(total>1?'s':'')+' ajoutée'+(total>1?'s':'')+' !';
-      toast(msg);
-      return;
-    }
-    var msgEl=document.getElementById('upmsg'), barEl=document.getElementById('upbar');
-    if(msgEl) msgEl.textContent='Traitement '+(done+1)+' / '+total;
+  var pending=[]; // photos pas encore écrites en base (écriture groupée par lots)
+  function flushPending(){
+    if(!pending.length) return;
+    dbPutMany('photos', pending);
+    pending=[];
+  }
 
-    var file=imgs[i];
-    Promise.all([ readFileAsDataURL(file), readFileAsArrayBuffer(file).catch(function(){ return null; }) ])
+  var resultsByIndex=new Array(imgs.length); // conserve l'ordre de sélection malgré le traitement en parallèle
+  function processOne(file, origIndex){
+    return Promise.all([ decodeImageFast(file), readFileAsArrayBuffer(file).catch(function(){ return null; }) ])
       .then(function(results){
-        var dataUrl=results[0], buf=results[1];
+        var decoded=results[0], buf=results[1];
         var exifStr = buf ? bkParseExifDate(buf) : null;
         var takenAt = bkExifStrToTimestamp(exifStr);
         var takenAtSource = 'exif';
         if(!takenAt){ takenAt = file.lastModified || Date.now(); takenAtSource='file'; }
-        return loadImage(dataUrl).then(function(img){ return {img:img, takenAt:takenAt, takenAtSource:takenAtSource}; });
-      })
-      .then(function(r){
-        var full=resizeToDataURL(r.img, MAX_FULL, 0.82);
-        var thumb=resizeToDataURL(r.img, MAX_THUMB, 0.62);
+        var full=resizeToDataURL(decoded.img, MAX_FULL, 0.82);
+        var thumb=resizeToDataURL(decoded.img, MAX_THUMB, 0.62);
+        if(decoded.isBitmap && decoded.img.close) decoded.img.close(); // libère la mémoire du bitmap décodé
         var photo={
           id:gid(),
           full:full.dataUrl, w:full.w, h:full.h,
           thumb:thumb.dataUrl,
           cap:'', liked:false,
           fileName: file.name,
-          takenAt: r.takenAt,
-          takenAtSource: r.takenAtSource
+          takenAt: takenAt,
+          takenAtSource: takenAtSource
         };
-        a.photos.push(photo);
-        savePhoto(a.id, photo); // écrit UNIQUEMENT cette photo, jamais tout l'album
-        done++;
-        if(barEl) barEl.style.width=Math.round((done/total)*100)+'%';
+        resultsByIndex[origIndex]=photo;
       })
       .catch(function(err){
-        console.warn('Erreur photo', imgs[i].name, err);
-        failed++; done++;
-        if(barEl) barEl.style.width=Math.round((done/total)*100)+'%';
+        console.warn('Erreur photo', file.name, err);
+        failed++;
+        resultsByIndex[origIndex]=null; // marque explicitement "traité mais échoué" pour ne pas bloquer le curseur
       })
       .then(function(){
-        setTimeout(function(){ step(i+1); }, 0);
+        done++;
+        var avgMs=Math.round((Date.now()-startTime)/done);
+        if(msgEl) msgEl.textContent='Traitement '+done+' / '+total+'  ('+avgMs+' ms/photo)';
+        if(barEl) barEl.style.width=Math.round((done/total)*100)+'%';
+        // dès qu'un préfixe contigu de résultats est prêt, on peut le pousser
+        // dans l'album (garde l'ordre de sélection sans attendre TOUT le lot)
+        while(_addFilesFlushCursor<resultsByIndex.length && resultsByIndex[_addFilesFlushCursor]!==undefined){
+          var ph=resultsByIndex[_addFilesFlushCursor];
+          if(ph){ a.photos.push(ph); pending.push(ph); if(pending.length>=20) flushPending(); }
+          _addFilesFlushCursor++;
+        }
       });
   }
-  step(0);
+  var _addFilesFlushCursor=0;
+
+  // traite plusieurs photos EN PARALLÈLE (au lieu d'une par une) : beaucoup
+  // plus rapide sur un gros import, testé et mesuré avant/après.
+  var CONCURRENCY=2; // réduit de 4 à 2 : sur téléphone, décoder plusieurs grandes photos
+                      // en même temps peut saturer la mémoire et RALENTIR au lieu d'accélérer
+  var nextIndex=0;
+  function worker(){
+    if(nextIndex>=imgs.length) return Promise.resolve();
+    var idx=nextIndex++;
+    var file=imgs[idx];
+    return processOne(file, idx).then(worker);
+  }
+  var workers=[];
+  for(var w=0; w<Math.min(CONCURRENCY, imgs.length); w++) workers.push(worker());
+
+  Promise.all(workers).then(function(){
+    flushPending();
+    holder.innerHTML='';
+    saveAlbumMeta(a); // met à jour la liste ordonnée des ids (léger, pas d'images dedans)
+    renderPhotos();
+    refreshAlbumHeader();
+    var msg=failed
+      ? '⚠️ '+(total-failed)+'/'+total+' ajoutées ('+failed+' échec'+(failed>1?'s':'')+')'
+      : '✅ '+total+' photo'+(total>1?'s':'')+' ajoutée'+(total>1?'s':'')+' !';
+    toast(msg);
+  });
 }
 function dropFiles(e){ e.preventDefault(); addFiles(e.dataTransfer.files); }
 
