@@ -1009,6 +1009,78 @@ var BK_LAYOUTS = [
   ]},
   { key:'quote', label:'Citation', slots:[
     {type:'quote', x:50,y:50,w:80,h:40,fontSize:24}
+  ]},
+
+  { key:'float-1', label:'Photo flottante (1 photo)', slots:[
+    {type:'photo', x:52,y:40,w:58,h:52,rot:-6, forceBorder:true, forceShadow:true},
+    {type:'accent', x:82,y:70,w:14,h:14},
+    {type:'title', x:50,y:84,w:78,h:10, fontSize:26}
+  ]},
+  { key:'asym-1', label:'Cadre asymétrique (1 photo)', slots:[
+    {type:'photo', x:40,y:45,w:64,h:66,rot:2},
+    {type:'accent', x:84,y:16,w:16,h:16},
+    {type:'title', x:40,y:85,w:62,h:10,fontSize:24},
+    {type:'subtitle', x:40,y:92,w:55,h:6, fontSize:13}
+  ]},
+  { key:'overlap-2', label:'Duo qui se chevauche (2 photos)', slots:[
+    {type:'photo', x:38,y:42,w:56,h:52,rot:-5, forceBorder:true, forceShadow:true},
+    {type:'photo', x:68,y:64,w:44,h:40,rot:6, forceBorder:true, forceShadow:true}
+  ]},
+  { key:'diag-2', label:'Diagonale dynamique (2 photos)', slots:[
+    {type:'photo', x:28,y:28,w:48,h:42,rot:-8},
+    {type:'photo', x:72,y:70,w:48,h:42,rot:8}
+  ]},
+  { key:'cascade-3', label:'Cascade (3 photos)', slots:[
+    {type:'photo', x:32,y:30,w:46,h:40,rot:-10, forceBorder:true, forceShadow:true},
+    {type:'photo', x:50,y:48,w:46,h:40,rot:0, forceBorder:true, forceShadow:true},
+    {type:'photo', x:68,y:66,w:46,h:40,rot:10, forceBorder:true, forceShadow:true}
+  ]},
+  { key:'triangle-3', label:'Triangle éclaté (3 photos)', slots:[
+    {type:'photo', x:30,y:24,w:38,h:34,rot:-8},
+    {type:'photo', x:70,y:30,w:34,h:30,rot:6},
+    {type:'photo', x:50,y:72,w:42,h:36,rot:-3}
+  ]},
+  { key:'magazine-4', label:'Fenêtres asymétriques (4 photos)', slots:[
+    {type:'photo', x:28,y:26,w:48,h:44,rot:0},
+    {type:'photo', x:76,y:18,w:36,h:28,rot:0},
+    {type:'photo', x:78,y:58,w:36,h:38,rot:0},
+    {type:'photo', x:26,y:76,w:44,h:34,rot:0}
+  ]},
+  { key:'fan-4', label:'Éventail (4 photos)', slots:[
+    {type:'photo', x:38,y:42,w:34,h:46,rot:-15, forceBorder:true, forceShadow:true},
+    {type:'photo', x:46,y:44,w:34,h:46,rot:-5, forceBorder:true, forceShadow:true},
+    {type:'photo', x:54,y:44,w:34,h:46,rot:5, forceBorder:true, forceShadow:true},
+    {type:'photo', x:62,y:42,w:34,h:46,rot:15, forceBorder:true, forceShadow:true}
+  ]},
+  { key:'bouquet-5', label:'Bouquet (5 photos)', slots:[
+    {type:'photo', x:50,y:50,w:38,h:38,rot:0},
+    {type:'photo', x:22,y:26,w:26,h:24,rot:-10},
+    {type:'photo', x:78,y:26,w:26,h:24,rot:10},
+    {type:'photo', x:22,y:76,w:26,h:24,rot:8},
+    {type:'photo', x:78,y:76,w:26,h:24,rot:-8}
+  ]},
+  { key:'stairs-5', label:'Escalier (5 photos)', slots:[
+    {type:'photo', x:15,y:13,w:22,h:18,rot:-4},
+    {type:'photo', x:32,y:29,w:26,h:22,rot:-2},
+    {type:'photo', x:50,y:47,w:30,h:26,rot:0},
+    {type:'photo', x:68,y:66,w:34,h:29,rot:2},
+    {type:'photo', x:84,y:86,w:26,h:20,rot:4}
+  ]},
+  { key:'wall-6', label:'Mur photo (6 photos)', slots:[
+    {type:'photo', x:22,y:20,w:38,h:34,rot:0},
+    {type:'photo', x:64,y:16,w:30,h:26,rot:0},
+    {type:'photo', x:80,y:46,w:34,h:30,rot:0},
+    {type:'photo', x:56,y:56,w:26,h:24,rot:0},
+    {type:'photo', x:24,y:64,w:32,h:28,rot:0},
+    {type:'photo', x:66,y:84,w:40,h:26,rot:0}
+  ]},
+  { key:'broken-grid-6', label:'Grille cassée (6 photos)', slots:[
+    {type:'photo', x:24,y:22,w:42,h:38,rot:-3},
+    {type:'photo', x:75,y:18,w:38,h:32,rot:3},
+    {type:'photo', x:22,y:62,w:38,h:34,rot:2},
+    {type:'photo', x:76,y:64,w:40,h:36,rot:-4},
+    {type:'photo', x:50,y:42,w:22,h:20,rot:8},
+    {type:'photo', x:50,y:90,w:30,h:16,rot:-3}
   ]}
 ];
 var BK_STYLES = [
@@ -1049,6 +1121,9 @@ function bkGenerateTemplates(){
         }
         if(slot.type==='overlay'){
           return {type:'shape', shape:'rect', x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0, color:'rgba(20,14,36,0.55)'};
+        }
+        if(slot.type==='accent'){
+          return {type:'shape', shape:'ellipse', x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0, color:style.accent};
         }
         return null;
       }).filter(Boolean);
