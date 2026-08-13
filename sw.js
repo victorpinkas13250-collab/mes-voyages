@@ -4,7 +4,7 @@ const ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap',
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&family=Caveat:wght@700&family=Bebas+Neue&family=Roboto+Mono:wght@600;700&family=Montserrat:wght@700;800&family=Lobster&family=Oswald:wght@600;700&family=Dancing+Script:wght@700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
