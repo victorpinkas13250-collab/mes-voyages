@@ -269,7 +269,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.7.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.8.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -712,7 +712,7 @@ function renderHome(){
     albums.length+' album'+(albums.length>1?'s':'')+' · '+tot+' photo'+(tot>1?'s':'');
   var h='';
   fil.forEach(function(a){
-    var cover=a.photos[0]?a.photos[0].thumb:null;
+    var cover=a.photos[0]?bkPhotoSrc(a.photos[0],'thumb'):null;
     h+='<div class="album-card" onclick="openAlbum(\''+a.id+'\')">'
       +'<button class="ac-del-btn" onclick="event.stopPropagation();delAlbum(\''+a.id+'\')">🗑️</button>'
       +'<div class="ac-cover">'+(cover?'<img src="'+cover+'" loading="lazy">':'<div class="ac-emoji">'+a.emoji+'</div>')
@@ -985,7 +985,7 @@ function openAlbum(id){
   document.getElementById('ah-title').textContent=a.title;
   document.getElementById('ah-meta').textContent=a.loc+' · '+a.date+' · '+a.photos.length+' photo'+(a.photos.length!==1?'s':'');
   var hi=document.getElementById('ah-img'), he=document.getElementById('ah-emoji');
-  if(a.photos.length){ hi.src=a.photos[0].full; hi.style.display='block'; he.style.display='none'; }
+  if(a.photos.length){ hi.src=bkPhotoSrc(a.photos[0],'full'); hi.style.display='block'; he.style.display='none'; }
   else { hi.style.display='none'; he.style.display='flex'; he.textContent=a.emoji; }
   document.getElementById('upload-progress-holder').innerHTML='';
   document.getElementById('photo-search').value='';
@@ -996,7 +996,7 @@ function refreshAlbumHeader(){
   var a=al(curAlbum);
   document.getElementById('ah-meta').textContent=a.loc+' · '+a.date+' · '+a.photos.length+' photo'+(a.photos.length!==1?'s':'');
   var hi=document.getElementById('ah-img'), he=document.getElementById('ah-emoji');
-  if(a.photos.length){ hi.src=a.photos[0].full; hi.style.display='block'; he.style.display='none'; }
+  if(a.photos.length){ hi.src=bkPhotoSrc(a.photos[0],'full'); hi.style.display='block'; he.style.display='none'; }
   else { hi.style.display='none'; he.style.display='flex'; }
 }
 /* Rendu progressif de la grille : le 1er lot s'affiche immédiatement, le reste
@@ -1027,7 +1027,7 @@ function renderPhotos(){
   var i=0;
   function photoHTML(p){
     return '<div class="pi">'
-      +'<img src="'+p.thumb+'" loading="lazy" onclick="openLB(\''+p.id+'\')">'
+      +'<img src="'+bkPhotoSrc(p,'thumb')+'" loading="lazy" onclick="openLB(\''+p.id+'\')">'
       +'<button class="pi-del" onclick="event.stopPropagation();quickDelPhoto(\''+p.id+'\')">🗑️</button>'
       +(p.liked?'<div class="pi-like">❤️</div>':'')
       +(p.cap?'<div class="pi-cap">'+esc(p.cap)+'</div>':'')
@@ -1047,6 +1047,8 @@ function renderPhotos(){
 }
 function quickDelPhoto(id){
   var a=al(curAlbum);
+  var removed=a.photos.find(function(p){ return p.id===id; });
+  if(removed) bkRevokePhotoUrls(removed);
   a.photos=a.photos.filter(function(p){ return p.id!==id; });
   dbDelete('photos', id);
   saveAlbumMeta(a);
@@ -1060,6 +1062,7 @@ function deleteAllPhotos(){
   var n=a.photos.length;
   if(!confirm('Supprimer les '+n+' photo'+(n>1?'s':'')+' de cet album ? Cette action est définitive.')) return;
   var ids=a.photos.map(function(p){ return p.id; });
+  a.photos.forEach(bkRevokePhotoUrls);
   a.photos=[];
   dbDeleteMany('photos', ids);
   saveAlbumMeta(a);
@@ -1087,6 +1090,14 @@ function readFileAsArrayBuffer(file){
     r.onerror=function(){ reject(new Error('read error')); };
     r.readAsArrayBuffer(file);
   });
+}
+function readFilePrefixAsArrayBuffer(file, maxBytes){
+  // Pour la date EXIF, pas besoin de lire TOUTE la photo (qui peut faire plusieurs
+  // Mo) : les données EXIF sont toujours près du début du fichier. Lire un préfixe
+  // suffit et évite de charger inutilement des Mo entiers en mémoire pour chaque
+  // photo. bkParseExifDate gère déjà proprement un buffer tronqué (testé).
+  var slice = file.slice(0, maxBytes);
+  return readFileAsArrayBuffer(slice);
 }
 /* ── Lecture de la date de prise de vue (EXIF DateTimeOriginal, sinon DateTime) ──
    Maths/parsing binaire validés séparément (endianness, sous-IFD Exif, cas
@@ -1199,6 +1210,21 @@ function resizeToDataURL(img,maxSize,quality){
   ctx.drawImage(img,0,0,tw,th);
   return {dataUrl:c.toDataURL('image/jpeg',quality), w:tw, h:th};
 }
+function resizeToBlob(img,maxSize,quality){
+  // Équivalent binaire de resizeToDataURL, utilisé quand les Workers ne sont
+  // pas disponibles (repli), pour produire le même format (Blob) que le
+  // chemin principal plutôt qu'un mélange incohérent des deux.
+  return new Promise(function(resolve){
+    var w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+    var scale=Math.min(1, maxSize/Math.max(w,h));
+    var tw=Math.max(1,Math.round(w*scale)), th=Math.max(1,Math.round(h*scale));
+    var c=document.createElement('canvas');
+    c.width=tw; c.height=th;
+    var ctx=c.getContext('2d');
+    ctx.drawImage(img,0,0,tw,th);
+    c.toBlob(function(blob){ resolve({blob:blob, w:tw, h:th}); }, 'image/jpeg', quality);
+  });
+}
 
 /* ── Vrai parallélisme via Web Workers ──
    Contrairement à un simple Promise.all (qui reste sur UN SEUL fil d'exécution
@@ -1237,7 +1263,10 @@ function bkInitWorkerPool(){
   try{
     var blob=new Blob([BK_WORKER_CODE], {type:'application/javascript'});
     var url=URL.createObjectURL(blob);
-    var n=Math.min(navigator.hardwareConcurrency||2, 4);
+    // Chaque worker a sa propre mémoire (contrairement à l'ancien système de
+    // "concurrence" sur un seul fil) : moins de risque de saturation qu'avant,
+    // donc plafond relevé de 4 à 6 pour profiter des téléphones à plusieurs cœurs.
+    var n=Math.min(navigator.hardwareConcurrency||2, 6);
     n=Math.max(n,2);
     var workers=[];
     for(var i=0;i<n;i++) workers.push(new Worker(url));
@@ -1279,6 +1308,31 @@ function blobToDataURL(blob){
   });
 }
 
+/* ── Accès unifié aux images de photo (Blob natif OU dataURL texte pour les
+   photos importées avant ce changement) ── Le format binaire (Blob) est plus
+   léger à stocker (~25% de moins) et plus rapide à produire, mais TOUTES les
+   photos déjà présentes restent lisibles telles quelles : rien n'est reconverti
+   de force, les deux formats cohabitent et s'affichent pareil. */
+function bkPhotoSrc(photo, field){
+  var v=photo[field];
+  if(!v) return '';
+  if(typeof v==='string') return v; // déjà une dataURL (ancien format ou bgRemoved/mapSnapshot)
+  var cacheKey='_objUrl_'+field;
+  if(!photo[cacheKey]) photo[cacheKey]=URL.createObjectURL(v);
+  return photo[cacheKey];
+}
+function bkPhotoSrcAsDataURL(photo, field){
+  var v=photo[field];
+  if(!v) return Promise.resolve('');
+  if(typeof v==='string') return Promise.resolve(v); // déjà une dataURL
+  return blobToDataURL(v); // Blob -> dataURL (nécessaire pour jsPDF, qui ne lit pas les Blob directement)
+}
+function bkRevokePhotoUrls(photo){
+  ['_objUrl_full','_objUrl_thumb'].forEach(function(k){
+    if(photo[k]){ URL.revokeObjectURL(photo[k]); delete photo[k]; }
+  });
+}
+
 function decodeImageFast(file){
   // createImageBitmap décode souvent hors du fil principal et évite le passage
   // par une chaîne base64 (dataURL) inutile — beaucoup plus rapide sur mobile.
@@ -1315,32 +1369,31 @@ function addFiles(files){
 
   var resultsByIndex=new Array(imgs.length); // conserve l'ordre de sélection malgré le traitement en parallèle
   function processOne(file, origIndex){
-    var exifPromise=readFileAsArrayBuffer(file).catch(function(){ return null; });
+    var exifPromise=readFilePrefixAsArrayBuffer(file, 524288).catch(function(){ return null; }); // 512 Ko suffisent, pas besoin du fichier entier
     var viaWorker=bkResizeViaWorker(file, MAX_FULL, 0.82, MAX_THUMB, 0.62);
 
     var resizePromise;
     if(viaWorker){
       resizePromise=viaWorker.then(function(data){
-        return Promise.all([ blobToDataURL(data.full.blob), blobToDataURL(data.thumb.blob) ])
-          .then(function(urls){
-            return { fullUrl:urls[0], fullW:data.full.w, fullH:data.full.h, thumbUrl:urls[1] };
-          });
+        return { fullBlob:data.full.blob, fullW:data.full.w, fullH:data.full.h, thumbBlob:data.thumb.blob };
       }).catch(function(){
         // le worker a échoué pour CETTE photo précise (rare) : repli sur le traitement classique
         return decodeImageFast(file).then(function(decoded){
-          var full=resizeToDataURL(decoded.img, MAX_FULL, 0.82);
-          var thumb=resizeToDataURL(decoded.img, MAX_THUMB, 0.62);
-          if(decoded.isBitmap && decoded.img.close) decoded.img.close();
-          return { fullUrl:full.dataUrl, fullW:full.w, fullH:full.h, thumbUrl:thumb.dataUrl };
+          return Promise.all([ resizeToBlob(decoded.img, MAX_FULL, 0.82), resizeToBlob(decoded.img, MAX_THUMB, 0.62) ])
+            .then(function(r){
+              if(decoded.isBitmap && decoded.img.close) decoded.img.close();
+              return { fullBlob:r[0].blob, fullW:r[0].w, fullH:r[0].h, thumbBlob:r[1].blob };
+            });
         });
       });
     } else {
       // pas de support Worker/OffscreenCanvas sur cet appareil : traitement classique sur le fil principal
       resizePromise=decodeImageFast(file).then(function(decoded){
-        var full=resizeToDataURL(decoded.img, MAX_FULL, 0.82);
-        var thumb=resizeToDataURL(decoded.img, MAX_THUMB, 0.62);
-        if(decoded.isBitmap && decoded.img.close) decoded.img.close();
-        return { fullUrl:full.dataUrl, fullW:full.w, fullH:full.h, thumbUrl:thumb.dataUrl };
+        return Promise.all([ resizeToBlob(decoded.img, MAX_FULL, 0.82), resizeToBlob(decoded.img, MAX_THUMB, 0.62) ])
+          .then(function(r){
+            if(decoded.isBitmap && decoded.img.close) decoded.img.close();
+            return { fullBlob:r[0].blob, fullW:r[0].w, fullH:r[0].h, thumbBlob:r[1].blob };
+          });
       });
     }
 
@@ -1353,8 +1406,8 @@ function addFiles(files){
         if(!takenAt){ takenAt = file.lastModified || Date.now(); takenAtSource='file'; }
         var photo={
           id:gid(),
-          full:sizes.fullUrl, w:sizes.fullW, h:sizes.fullH,
-          thumb:sizes.thumbUrl,
+          full:sizes.fullBlob, w:sizes.fullW, h:sizes.fullH,
+          thumb:sizes.thumbBlob,
           cap:'', liked:false,
           fileName: file.name,
           takenAt: takenAt,
@@ -1426,7 +1479,7 @@ function renderLB(){
   var i=a.photos.findIndex(function(p){ return p.id===curPhoto; });
   var p=a.photos[i];
   if(!p){ go('album'); return; }
-  document.getElementById('lbimg').src=p.full;
+  document.getElementById('lbimg').src=bkPhotoSrc(p,'full');
   document.getElementById('lbctr').textContent=(i+1)+'/'+a.photos.length;
   document.getElementById('lbcap').value=p.cap||'';
   document.getElementById('lblike').textContent=p.liked?'❤️':'🤍';
@@ -1444,7 +1497,7 @@ function renderLB(){
   var th='';
   for(var k=start;k<end;k++){
     var ph=a.photos[k];
-    th+='<div class="lb-thumb '+(ph.id===curPhoto?'on':'')+'" onclick="openLB(\''+ph.id+'\')"><img src="'+ph.thumb+'" loading="lazy"></div>';
+    th+='<div class="lb-thumb '+(ph.id===curPhoto?'on':'')+'" onclick="openLB(\''+ph.id+'\')"><img src="'+bkPhotoSrc(ph,'thumb')+'" loading="lazy"></div>';
   }
   document.getElementById('lbthumbs').innerHTML=th;
   setTimeout(function(){
@@ -1989,7 +2042,7 @@ function bkElementInnerHTML(el){
   var borderStyle = (el.border && el.border.width>0) ? ('border:'+el.border.width+'px solid '+el.border.color+';') : '';
   if(el.type==='photo'){
     var ph=bkPhotoById(el.photoId);
-    var src = el.mapSnapshot || el.bgRemoved || (ph?ph.full:'');
+    var src = el.mapSnapshot || el.bgRemoved || (ph?bkPhotoSrc(ph,'full'):'');
     var imgStyle;
     if(el.crop){
       var c=el.crop;
@@ -2143,7 +2196,7 @@ function bkRunBgRemove(){
     document.getElementById('bk-bg-pct').textContent=Math.round(removed/(w*h)*100)+'% de l\'image rendue transparente';
     bkBgPreviewResult=dataUrl;
   };
-  img.src=ph.full;
+  img.src=bkPhotoSrc(ph,'full');
 }
 var bkBgPreviewResult=null;
 function bkApplyBgRemove(){
@@ -2219,7 +2272,7 @@ function bkAddText(){
 function openPhotoPicker(){
   var h='';
   bkAlbum.photos.forEach(function(p){
-    h+='<img src="'+p.thumb+'" onclick="bkPickPhoto(\''+p.id+'\')">';
+    h+='<img src="'+bkPhotoSrc(p,'thumb')+'" onclick="bkPickPhoto(\''+p.id+'\')">';
   });
   if(!bkAlbum.photos.length) h='<p style="grid-column:1/-1;color:var(--ink-soft);text-align:center;padding:20px">Aucune photo dans cet album</p>';
   document.getElementById('bk-photo-grid').innerHTML=h;
@@ -2310,7 +2363,7 @@ function openCropSheet(){
     bkCropState={base:base, zoom:zoom, panX:panX, panY:panY, naturalW:img.naturalWidth, naturalH:img.naturalHeight};
     bkUpdateCropView();
   };
-  img.src=ph.full;
+  img.src=bkPhotoSrc(ph,'full');
   document.getElementById('bk-crop-sheet').classList.add('on');
 }
 function bkUpdateCropView(){
@@ -2926,7 +2979,7 @@ function bkRenderPageToCanvas(page, orient){
     var imgMap=new Map();
     var loads=leaves.map(function(el){
       if(el.type==='photo'){
-        var ph=bkPhotoById(el.photoId); var src=el.mapSnapshot||el.bgRemoved||(ph?ph.full:null);
+        var ph=bkPhotoById(el.photoId); var src=el.mapSnapshot||el.bgRemoved||(ph?bkPhotoSrc(ph,'full'):null);
         if(!src) return Promise.resolve();
         return bkLoadImg(src).then(function(img){ imgMap.set(el, img); });
       }
@@ -3027,7 +3080,24 @@ function generatePDF(){
   wrap.classList.add('on');
   var msgEl=document.getElementById('pdf-progress-msg');
   var barEl=document.getElementById('pdf-progress-bar');
+  msgEl.textContent='Préparation des photos…';
 
+  // jsPDF ne sait pas lire un Blob directement (contrairement au canvas utilisé
+  // pour le livre) : on résout donc TOUTES les photos en dataURL une seule fois,
+  // avant de construire le PDF, plutôt qu'à chaque page.
+  var fullById={};
+  Promise.all(photos.map(function(p){
+    return bkPhotoSrcAsDataURL(p,'full').then(function(url){ fullById[p.id]=url; });
+  })).then(function(){
+    generatePDFBody(a, photos, fullById, goBtn, wrap, msgEl, barEl);
+  }).catch(function(err){
+    console.error('Erreur préparation PDF', err);
+    wrap.classList.remove('on');
+    goBtn.style.display='block';
+    toast('❌ Erreur pendant la préparation du PDF');
+  });
+}
+function generatePDFBody(a, photos, fullById, goBtn, wrap, msgEl, barEl){
   try{
     var jsPDFCtor=(window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
     if(!jsPDFCtor){ throw new Error('jsPDF indisponible'); }
@@ -3086,7 +3156,7 @@ function generatePDF(){
       var iw=p.w*ratio, ih=p.h*ratio;
       var ix=x+(boxW-iw)/2, iy=y+(imgBoxH-ih)/2;
       try{
-        doc.addImage(p.full, 'JPEG', ix, iy, iw, ih, undefined, 'FAST');
+        doc.addImage(fullById[p.id], 'JPEG', ix, iy, iw, ih, undefined, 'FAST');
       }catch(e){ console.warn('addImage failed', e); }
       if(withCaption && p.cap){
         doc.setTextColor(90,80,110);
