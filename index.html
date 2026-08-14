@@ -269,7 +269,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.6.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.7.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1200,6 +1200,85 @@ function resizeToDataURL(img,maxSize,quality){
   return {dataUrl:c.toDataURL('image/jpeg',quality), w:tw, h:th};
 }
 
+/* ── Vrai parallélisme via Web Workers ──
+   Contrairement à un simple Promise.all (qui reste sur UN SEUL fil d'exécution
+   JS malgré les apparences), de vrais Workers tournent sur des cœurs séparés.
+   Chaque worker décode + redimensionne + compresse une photo de bout en bout,
+   indépendamment des autres. Repli automatique sur le traitement classique
+   (main thread) si le navigateur ne supporte pas Worker/OffscreenCanvas. */
+var bkWorkerPool=null, _bkWorkerMsgId=0;
+var BK_WORKER_CODE = [
+  "self.onmessage = function(e){",
+  "  var id=e.data.id, file=e.data.file;",
+  "  var fullSize=e.data.fullSize, fullQ=e.data.fullQ, thumbSize=e.data.thumbSize, thumbQ=e.data.thumbQ;",
+  "  createImageBitmap(file, {imageOrientation:'from-image'}).then(function(bitmap){",
+  "    function make(maxSize, quality){",
+  "      var w=bitmap.width, h=bitmap.height;",
+  "      var scale=Math.min(1, maxSize/Math.max(w,h));",
+  "      var tw=Math.max(1,Math.round(w*scale)), th=Math.max(1,Math.round(h*scale));",
+  "      var c=new OffscreenCanvas(tw,th);",
+  "      var ctx=c.getContext('2d');",
+  "      ctx.drawImage(bitmap,0,0,tw,th);",
+  "      return c.convertToBlob({type:'image/jpeg', quality:quality}).then(function(blob){ return {blob:blob, w:tw, h:th}; });",
+  "    }",
+  "    return Promise.all([make(fullSize,fullQ), make(thumbSize,thumbQ)]).then(function(r){",
+  "      bitmap.close();",
+  "      self.postMessage({id:id, ok:true, full:r[0], thumb:r[1]});",
+  "    });",
+  "  }).catch(function(err){",
+  "    self.postMessage({id:id, ok:false, error:String(err&&err.message||err)});",
+  "  });",
+  "};"
+].join('\n');
+
+function bkInitWorkerPool(){
+  if(bkWorkerPool!==null) return bkWorkerPool; // déjà tenté (réussite OU échec constaté)
+  if(!window.Worker || typeof OffscreenCanvas==='undefined'){ bkWorkerPool=false; return false; }
+  try{
+    var blob=new Blob([BK_WORKER_CODE], {type:'application/javascript'});
+    var url=URL.createObjectURL(blob);
+    var n=Math.min(navigator.hardwareConcurrency||2, 4);
+    n=Math.max(n,2);
+    var workers=[];
+    for(var i=0;i<n;i++) workers.push(new Worker(url));
+    var pool={ workers:workers, nextWorker:0, pending:{} };
+    workers.forEach(function(w){
+      w.onmessage=function(e){
+        var id=e.data.id;
+        var cb=pool.pending[id];
+        delete pool.pending[id];
+        if(cb) cb(e.data);
+      };
+      w.onerror=function(){ /* une erreur worker ponctuelle ne doit pas casser tout le pool */ };
+    });
+    bkWorkerPool=pool;
+  }catch(e){ bkWorkerPool=false; }
+  return bkWorkerPool;
+}
+function bkResizeViaWorker(file, fullSize, fullQ, thumbSize, thumbQ){
+  var pool=bkInitWorkerPool();
+  if(!pool) return null;
+  return new Promise(function(resolve, reject){
+    var id='w'+(_bkWorkerMsgId++);
+    var w=pool.workers[pool.nextWorker];
+    pool.nextWorker=(pool.nextWorker+1)%pool.workers.length;
+    pool.pending[id]=function(data){
+      if(data.ok) resolve(data);
+      else reject(new Error(data.error||'échec worker'));
+    };
+    try{ w.postMessage({id:id, file:file, fullSize:fullSize, fullQ:fullQ, thumbSize:thumbSize, thumbQ:thumbQ}); }
+    catch(e){ delete pool.pending[id]; reject(e); }
+  });
+}
+function blobToDataURL(blob){
+  return new Promise(function(resolve,reject){
+    var r=new FileReader();
+    r.onload=function(){ resolve(r.result); };
+    r.onerror=function(){ reject(new Error('read error')); };
+    r.readAsDataURL(blob);
+  });
+}
+
 function decodeImageFast(file){
   // createImageBitmap décode souvent hors du fil principal et évite le passage
   // par une chaîne base64 (dataURL) inutile — beaucoup plus rapide sur mobile.
@@ -1236,20 +1315,46 @@ function addFiles(files){
 
   var resultsByIndex=new Array(imgs.length); // conserve l'ordre de sélection malgré le traitement en parallèle
   function processOne(file, origIndex){
-    return Promise.all([ decodeImageFast(file), readFileAsArrayBuffer(file).catch(function(){ return null; }) ])
+    var exifPromise=readFileAsArrayBuffer(file).catch(function(){ return null; });
+    var viaWorker=bkResizeViaWorker(file, MAX_FULL, 0.82, MAX_THUMB, 0.62);
+
+    var resizePromise;
+    if(viaWorker){
+      resizePromise=viaWorker.then(function(data){
+        return Promise.all([ blobToDataURL(data.full.blob), blobToDataURL(data.thumb.blob) ])
+          .then(function(urls){
+            return { fullUrl:urls[0], fullW:data.full.w, fullH:data.full.h, thumbUrl:urls[1] };
+          });
+      }).catch(function(){
+        // le worker a échoué pour CETTE photo précise (rare) : repli sur le traitement classique
+        return decodeImageFast(file).then(function(decoded){
+          var full=resizeToDataURL(decoded.img, MAX_FULL, 0.82);
+          var thumb=resizeToDataURL(decoded.img, MAX_THUMB, 0.62);
+          if(decoded.isBitmap && decoded.img.close) decoded.img.close();
+          return { fullUrl:full.dataUrl, fullW:full.w, fullH:full.h, thumbUrl:thumb.dataUrl };
+        });
+      });
+    } else {
+      // pas de support Worker/OffscreenCanvas sur cet appareil : traitement classique sur le fil principal
+      resizePromise=decodeImageFast(file).then(function(decoded){
+        var full=resizeToDataURL(decoded.img, MAX_FULL, 0.82);
+        var thumb=resizeToDataURL(decoded.img, MAX_THUMB, 0.62);
+        if(decoded.isBitmap && decoded.img.close) decoded.img.close();
+        return { fullUrl:full.dataUrl, fullW:full.w, fullH:full.h, thumbUrl:thumb.dataUrl };
+      });
+    }
+
+    return Promise.all([ resizePromise, exifPromise ])
       .then(function(results){
-        var decoded=results[0], buf=results[1];
+        var sizes=results[0], buf=results[1];
         var exifStr = buf ? bkParseExifDate(buf) : null;
         var takenAt = bkExifStrToTimestamp(exifStr);
         var takenAtSource = 'exif';
         if(!takenAt){ takenAt = file.lastModified || Date.now(); takenAtSource='file'; }
-        var full=resizeToDataURL(decoded.img, MAX_FULL, 0.82);
-        var thumb=resizeToDataURL(decoded.img, MAX_THUMB, 0.62);
-        if(decoded.isBitmap && decoded.img.close) decoded.img.close(); // libère la mémoire du bitmap décodé
         var photo={
           id:gid(),
-          full:full.dataUrl, w:full.w, h:full.h,
-          thumb:thumb.dataUrl,
+          full:sizes.fullUrl, w:sizes.fullW, h:sizes.fullH,
+          thumb:sizes.thumbUrl,
           cap:'', liked:false,
           fileName: file.name,
           takenAt: takenAt,
@@ -1278,10 +1383,11 @@ function addFiles(files){
   }
   var _addFilesFlushCursor=0;
 
-  // traite plusieurs photos EN PARALLÈLE (au lieu d'une par une) : beaucoup
-  // plus rapide sur un gros import, testé et mesuré avant/après.
-  var CONCURRENCY=2; // réduit de 4 à 2 : sur téléphone, décoder plusieurs grandes photos
-                      // en même temps peut saturer la mémoire et RALENTIR au lieu d'accélérer
+  // Avec de vrais Workers, chaque photo tourne déjà sur son propre cœur CPU :
+  // pas besoin d'un pool séparé de "concurrence" JS par-dessus, on lance tout
+  // le lot d'un coup et les Workers eux-mêmes régulent la charge.
+  var pool=bkInitWorkerPool();
+  var CONCURRENCY = pool ? pool.workers.length : 2;
   var nextIndex=0;
   function worker(){
     if(nextIndex>=imgs.length) return Promise.resolve();
