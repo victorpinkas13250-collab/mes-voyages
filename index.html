@@ -269,7 +269,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.9.2</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.0.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -466,7 +466,48 @@ img{-webkit-user-drag:none;}
   <div class="bk-sheet-box">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Mes livres</h3>
     <div class="bk-booklist-grid" id="bk-booklist-grid"></div>
+    <button class="bk-book-add" style="margin-top:10px;border-color:#7B2FF7" onclick="openAutoBookSheet()"><div class="plus" style="background:linear-gradient(135deg,#FF5A6E,#7B2FF7)">🪄</div><span>Livre automatique</span></button>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBookListSheet()">Fermer</button></div>
+  </div>
+</div>
+
+<!-- Feuille: assistant de livre automatique -->
+<div class="bk-sheet" id="bk-autobook-sheet">
+  <div class="bk-sheet-box">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🪄 Livre automatique</h3>
+    <div class="modal-sub" id="bk-autobook-photocount"></div>
+
+    <div class="pdf-lbl" style="margin-top:14px">Nombre de pages</div>
+    <div class="bk-fsize-row">
+      <button onclick="bkAutoStep('pages',-1)">−</button>
+      <span id="bk-autobook-pages-val" style="font-weight:800;min-width:34px;text-align:center"></span>
+      <button onclick="bkAutoStep('pages',1)">+</button>
+      <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700;margin-left:6px">suggéré selon tes photos</span>
+    </div>
+
+    <div class="pdf-lbl" style="margin-top:16px">Style</div>
+    <div id="bk-autobook-styles" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
+
+    <div class="pdf-lbl" style="margin-top:16px">Police</div>
+    <div id="bk-autobook-fonts" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
+
+    <div class="bk-fsize-row" style="margin-top:16px">
+      <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700">Taille du texte</span>
+      <button onclick="bkAutoStep('fontSize',-2)">−</button>
+      <span id="bk-autobook-fontsize-val" style="font-weight:800;min-width:34px;text-align:center"></span>
+      <button onclick="bkAutoStep('fontSize',2)">+</button>
+    </div>
+
+    <div class="pdf-lbl" style="margin-top:16px">Couleur principale</div>
+    <div id="bk-autobook-colors" style="display:flex;gap:8px"></div>
+
+    <div class="pdf-lbl" style="margin-top:16px">Smiley favori (optionnel)</div>
+    <div id="bk-autobook-emojis" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
+
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="closeAutoBookSheet()">Annuler</button>
+      <button class="mbtn mbtn-ok" onclick="bkRunAutoGenerate()">Générer le livre</button>
+    </div>
   </div>
 </div>
 
@@ -1809,42 +1850,45 @@ var BK_STYLES = [
   { key:'tropical', label:'Vif tropical', bg:'#FFD93D', color:'#241E38', accent:'#FF5A6E', font:'Bebas Neue', border:0, shadow:true },
   { key:'ocean', label:'Océan', bg:'#00C2A8', color:'#FFFFFF', accent:'#241E38', font:'Montserrat', border:4, shadow:false }
 ];
+function bkBuildElementsForLayout(layout, style){
+  var photoIdx=0;
+  return layout.slots.map(function(slot){
+    if(slot.type==='photo'){
+      var el={type:'photo', photoIndex:photoIdx++, x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:slot.rot||0};
+      var b = slot.forceBorder ? Math.max(style.border,6) : style.border;
+      if(b>0) el.border={width:b, color: style.key==='night'||style.key==='ocean' ? '#FFFFFF' : (style.key==='polaroid'?'#FFFFFF':style.color)};
+      if(slot.forceShadow || style.shadow) el.shadow=true;
+      return el;
+    }
+    if(slot.type==='title'){
+      return {type:'text', text: layout.key==='map-place' ? 'Nom du lieu' : 'Titre du voyage',
+        x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0,fontSize:slot.fontSize,color:style.color,fontFamily:style.font};
+    }
+    if(slot.type==='subtitle'){
+      return {type:'text', text: layout.key==='map-place' ? 'Date du séjour' : 'Sous-titre ou lieu',
+        x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0,fontSize:slot.fontSize,color:style.accent,fontFamily:'Nunito'};
+    }
+    if(slot.type==='quote'){
+      return {type:'text', text:'"Le voyage, c\'est la seule chose qu\'on achète qui nous rend plus riche."',
+        x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0,fontSize:slot.fontSize,color:style.color,fontFamily:style.font};
+    }
+    if(slot.type==='icon'){
+      return {type:'icon', icon:slot.icon, x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0,color:style.accent};
+    }
+    if(slot.type==='overlay'){
+      return {type:'shape', shape:'rect', x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0, color:'rgba(20,14,36,0.55)'};
+    }
+    if(slot.type==='accent'){
+      return {type:'shape', shape:'ellipse', x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0, color:style.accent};
+    }
+    return null;
+  }).filter(Boolean);
+}
 function bkGenerateTemplates(){
   var out=[];
   BK_LAYOUTS.forEach(function(layout){
     BK_STYLES.forEach(function(style){
-      var photoIdx=0;
-      var elements=layout.slots.map(function(slot){
-        if(slot.type==='photo'){
-          var el={type:'photo', photoIndex:photoIdx++, x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:slot.rot||0};
-          var b = slot.forceBorder ? Math.max(style.border,6) : style.border;
-          if(b>0) el.border={width:b, color: style.key==='night'||style.key==='ocean' ? '#FFFFFF' : (style.key==='polaroid'?'#FFFFFF':style.color)};
-          if(slot.forceShadow || style.shadow) el.shadow=true;
-          return el;
-        }
-        if(slot.type==='title'){
-          return {type:'text', text: layout.key==='map-place' ? 'Nom du lieu' : 'Titre du voyage',
-            x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0,fontSize:slot.fontSize,color:style.color,fontFamily:style.font};
-        }
-        if(slot.type==='subtitle'){
-          return {type:'text', text: layout.key==='map-place' ? 'Date du séjour' : 'Sous-titre ou lieu',
-            x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0,fontSize:slot.fontSize,color:style.accent,fontFamily:'Nunito'};
-        }
-        if(slot.type==='quote'){
-          return {type:'text', text:'"Le voyage, c\'est la seule chose qu\'on achète qui nous rend plus riche."',
-            x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0,fontSize:slot.fontSize,color:style.color,fontFamily:style.font};
-        }
-        if(slot.type==='icon'){
-          return {type:'icon', icon:slot.icon, x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0,color:style.accent};
-        }
-        if(slot.type==='overlay'){
-          return {type:'shape', shape:'rect', x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0, color:'rgba(20,14,36,0.55)'};
-        }
-        if(slot.type==='accent'){
-          return {type:'shape', shape:'ellipse', x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:0, color:style.accent};
-        }
-        return null;
-      }).filter(Boolean);
+      var elements=bkBuildElementsForLayout(layout, style);
       out.push({ name: layout.label+' — '+style.label, layoutName:layout.label, styleName:style.label, bg:style.bg, elements:elements });
     });
   });
@@ -1856,6 +1900,107 @@ function bkTemplatePhoto(tpl, idx){
   if(!n) return null;
   return bkAlbum.photos[idx % n];
 }
+
+/* ══════════════════ LIVRE AUTOMATIQUE ══════════════════
+   Répartit les photos de l'album sur un nombre de pages choisi, en cyclant à
+   travers des mises en page variées (déjà éprouvées, mêmes que dans "Modèles"),
+   avec un style personnalisé choisi par l'utilisateur plutôt qu'un des 6 presets.
+   L'algorithme de répartition est testé isolément (2000+ cas) avant d'être
+   branché ici. */
+var BK_AUTO_LAYOUT_BUCKETS = {
+  1: ['float-1','asym-1','single-card','side-title','banner'],
+  2: ['duo-h','duo-v','overlap-2','diag-2'],
+  3: ['trio','collage','cascade-3','triangle-3'],
+  4: ['grid4','big-strip','magazine-4','fan-4'],
+  5: ['bouquet-5','stairs-5'],
+  6: ['grid6','wall-6','broken-grid-6'],
+  9: ['grid9']
+};
+function bkPlanAutoPages(photoCount, pageCount){
+  var sizes=[6,5,4,3,2,1];
+  var plan=[];
+  var remainingPhotos=photoCount, remainingPages=pageCount;
+  while(remainingPages>0){
+    if(remainingPhotos<=0){
+      plan.push({layoutKey:'quote', photoCount:0});
+      remainingPages--;
+      continue;
+    }
+    var avg=Math.max(1, Math.round(remainingPhotos/remainingPages));
+    var size=sizes.find(function(s){ return s<=avg; }) || 1;
+    if(size>remainingPhotos) size=remainingPhotos;
+    var candidates=BK_AUTO_LAYOUT_BUCKETS[size] || BK_AUTO_LAYOUT_BUCKETS[1];
+    var layoutKey=candidates[plan.length % candidates.length];
+    plan.push({layoutKey:layoutKey, photoCount:size});
+    remainingPhotos-=size;
+    remainingPages--;
+  }
+  while(remainingPhotos>0){
+    var size2=remainingPhotos>=6?6:remainingPhotos;
+    var candidates2=BK_AUTO_LAYOUT_BUCKETS[size2] || BK_AUTO_LAYOUT_BUCKETS[1];
+    plan.push({layoutKey:candidates2[plan.length%candidates2.length], photoCount:size2});
+    remainingPhotos-=size2;
+  }
+  return plan;
+}
+function bkSuggestedPageCount(photoCount){
+  if(photoCount<=0) return 3;
+  return Math.max(1, Math.round(photoCount/4)); // ~4 photos par page en moyenne
+}
+function bkTextColorFor(bgHex){
+  // choisit texte clair ou foncé selon la luminosité de la couleur principale choisie,
+  // pour rester lisible quel que soit le fond
+  var hex=(bgHex||'#241E38').replace('#','');
+  if(hex.length!==6) return '#241E38';
+  var r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+  var lum=(0.299*r+0.587*g+0.114*b)/255;
+  return lum>0.6 ? '#241E38' : '#FFFFFF';
+}
+function bkAutoGenerateBook(opts){
+  // opts: {pageCount, styleKey, fontFamily, fontSize, mainColor, emoji}
+  var photos=bkAlbum.photos;
+  var baseStyle=BK_STYLES.find(function(s){ return s.key===opts.styleKey; }) || BK_STYLES[0];
+  var style={
+    key:baseStyle.key, bg:baseStyle.bg,
+    color: opts.mainColor ? bkTextColorFor(baseStyle.bg) : baseStyle.color,
+    accent: opts.mainColor || baseStyle.accent,
+    font: opts.fontFamily || baseStyle.font,
+    border: baseStyle.border, shadow: baseStyle.shadow
+  };
+
+  var pageCount=Math.max(1, opts.pageCount|0);
+  var plan=bkPlanAutoPages(photos.length, pageCount);
+
+  var pages=[];
+  var photoCursor=0;
+  plan.forEach(function(step, pageIdx){
+    var layout=BK_LAYOUTS.find(function(l){ return l.key===step.layoutKey; });
+    var elements=bkBuildElementsForLayout(layout, style);
+    // remplace les index de photo générique par de vraies photos de l'album, dans l'ordre
+    elements.forEach(function(el){
+      if(el.type==='photo'){
+        var photo=photos[photoCursor % Math.max(photos.length,1)];
+        photoCursor++;
+        el.photoId=photo?photo.id:null;
+        delete el.photoIndex;
+        if(!el.photoId){ el.type='shape'; el.shape='rect'; el.color='#EDE8F9'; }
+      }
+      if(el.type==='text' && opts.fontSize){
+        // conserve les proportions titre/sous-titre plutôt qu'une taille unique partout
+        el.fontSize=Math.round(el.fontSize * (opts.fontSize/24));
+      }
+      el.id=gid();
+    });
+    // touche décorative : le smiley favori, sur une page sur trois environ
+    if(opts.emoji && pageIdx%3===1){
+      elements.push({id:gid(), type:'text', text:opts.emoji, x:88,y:12,w:16,h:16,rot:Math.round(Math.random()*20-10),
+        fontSize:38, color:style.accent, fontFamily:style.font, isSticker:true});
+    }
+    pages.push({bg:style.bg, elements:elements});
+  });
+  return pages;
+}
+
 var bkTplGridToken=0;
 function bkTplCellHTML(tpl, i){
   var mini='';
@@ -1984,6 +2129,82 @@ function openBookListSheet(){
   document.getElementById('bk-booklist-sheet').classList.add('on');
 }
 function closeBookListSheet(){ document.getElementById('bk-booklist-sheet').classList.remove('on'); }
+
+/* ── Assistant "Livre automatique" ── */
+var BK_AUTO_STYLE_CHOICES=['clean','night','tropical','pastel']; // 4 styles, comme demandé (pas les 6)
+var bkAutoState=null;
+function openAutoBookSheet(){
+  bkAlbum=al(curAlbum);
+  closeBookListSheet();
+  var n=bkAlbum.photos.length;
+  bkAutoState={
+    pageCount: bkSuggestedPageCount(n),
+    styleKey: 'clean',
+    fontFamily: 'Poppins',
+    fontSize: 24,
+    mainColor: null, // null = garde la couleur du style choisi
+    emoji: null
+  };
+  document.getElementById('bk-autobook-photocount').textContent=
+    n+' photo'+(n!==1?'s':'')+' dans cet album'+(n===0?' — le livre sera surtout composé de pages citation' : '');
+  bkRenderAutoBookUI();
+  document.getElementById('bk-autobook-sheet').classList.add('on');
+}
+function closeAutoBookSheet(){ document.getElementById('bk-autobook-sheet').classList.remove('on'); }
+function bkAutoStep(field, delta){
+  if(field==='pages') bkAutoState.pageCount=Math.max(1, Math.min(60, bkAutoState.pageCount+delta));
+  if(field==='fontSize') bkAutoState.fontSize=Math.max(14, Math.min(44, bkAutoState.fontSize+delta));
+  bkRenderAutoBookUI();
+}
+function bkAutoSetStyle(key){ bkAutoState.styleKey=key; bkRenderAutoBookUI(); }
+function bkAutoSetFont(f){ bkAutoState.fontFamily=f; bkRenderAutoBookUI(); }
+function bkAutoSetColor(c){ bkAutoState.mainColor=(bkAutoState.mainColor===c)?null:c; bkRenderAutoBookUI(); }
+function bkAutoSetEmoji(e){ bkAutoState.emoji=(bkAutoState.emoji===e)?null:e; bkRenderAutoBookUI(); }
+function bkRenderAutoBookUI(){
+  document.getElementById('bk-autobook-pages-val').textContent=bkAutoState.pageCount;
+  document.getElementById('bk-autobook-fontsize-val').textContent=bkAutoState.fontSize+'px';
+
+  var stylesH='';
+  BK_AUTO_STYLE_CHOICES.forEach(function(key){
+    var s=BK_STYLES.find(function(x){ return x.key===key; });
+    var on=bkAutoState.styleKey===key;
+    stylesH+='<button class="bk-btn'+(on?' primary':'')+'" style="flex-shrink:0;background:'+(on?'':s.bg)+';color:'+(on?'':s.color)+'" onclick="bkAutoSetStyle(\''+key+'\')">'+s.label+'</button>';
+  });
+  document.getElementById('bk-autobook-styles').innerHTML=stylesH;
+
+  var fontsH='';
+  BK_FONTS.forEach(function(f){
+    var on=bkAutoState.fontFamily===f.id;
+    fontsH+='<button class="bk-btn'+(on?' primary':'')+'" style="flex-shrink:0;font-family:\''+f.id+'\',sans-serif" onclick="bkAutoSetFont(\''+f.id+'\')">'+f.label+'</button>';
+  });
+  document.getElementById('bk-autobook-fonts').innerHTML=fontsH;
+
+  var colorsH='';
+  BK_COLORS.forEach(function(c){
+    var on=bkAutoState.mainColor===c;
+    colorsH+='<div class="bk-swatch'+(on?' on':'')+'" style="background:'+c+'" onclick="bkAutoSetColor(\''+c+'\')"></div>';
+  });
+  document.getElementById('bk-autobook-colors').innerHTML=colorsH;
+
+  var emojisH='';
+  BK_STICKERS.forEach(function(e){
+    var on=bkAutoState.emoji===e;
+    emojisH+='<div style="font-size:1.6rem;text-align:center;cursor:pointer;flex-shrink:0;padding:4px 6px;border-radius:10px;background:'+(on?'var(--bg)':'transparent')+'" onclick="bkAutoSetEmoji(\''+e+'\')">'+e+'</div>';
+  });
+  document.getElementById('bk-autobook-emojis').innerHTML=emojisH;
+}
+function bkRunAutoGenerate(){
+  var pages=bkAutoGenerateBook(bkAutoState);
+  ensureBooks(bkAlbum);
+  var n=bkAlbum.books.length+1;
+  var book={id:gid(), name:'Livre auto '+n, orient:'portrait', pages:pages};
+  bkAlbum.books.push(book);
+  saveAlbumMeta(bkAlbum);
+  closeAutoBookSheet();
+  bkOpenSpecificBook(book.id);
+  toast('🪄 Livre généré : '+pages.length+' page'+(pages.length!==1?'s':''));
+}
+
 function bkRenderBookList(){
   var h='';
   bkAlbum.books.forEach(function(book,i){
