@@ -269,7 +269,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.9.1</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.9.2</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -973,14 +973,45 @@ function bkGenerateMapSnapshot(places, pxW, pxH){
     Promise.race([ Promise.all(loads), safetyTimeout ]).then(function(){
       places.forEach(function(p){
         var px=bkLon2x(p.lon,zoom)*256-originX, py=bkLat2y(p.lat,zoom)*256-originY;
+        // Pin plus grand et avec une ombre portée, pour bien ressortir même sur
+        // un fond de carte chargé (rues, icônes OpenStreetMap, etc.)
+        ctx.save();
+        ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=6; ctx.shadowOffsetY=2;
         ctx.beginPath();
-        ctx.arc(px,py-7,9,0,Math.PI*2);
+        ctx.arc(px,py-9,12,0,Math.PI*2);
         ctx.fillStyle='#FF5A6E';
         ctx.fill();
-        ctx.strokeStyle='#FFFFFF'; ctx.lineWidth=3; ctx.stroke();
+        ctx.strokeStyle='#FFFFFF'; ctx.lineWidth=4; ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(px-7,py-2); ctx.lineTo(px+7,py-2); ctx.lineTo(px,py+12); ctx.closePath();
+        ctx.moveTo(px-9,py-1); ctx.lineTo(px+9,py-1); ctx.lineTo(px,py+16); ctx.closePath();
         ctx.fillStyle='#FF5A6E'; ctx.fill();
+        ctx.restore();
+
+        // Nom du lieu affiché juste en dessous, sur une étiquette blanche pour
+        // rester lisible quelle que soit la couleur de la carte à cet endroit.
+        if(p.name){
+          ctx.font='700 20px Poppins, sans-serif';
+          var textW=ctx.measureText(p.name).width;
+          var padX=10, boxW=textW+padX*2, boxH=28;
+          var boxX=Math.max(4, Math.min(pxW-boxW-4, px-boxW/2));
+          var boxY=py+20;
+          ctx.save();
+          ctx.shadowColor='rgba(0,0,0,.25)'; ctx.shadowBlur=4; ctx.shadowOffsetY=1;
+          ctx.fillStyle='rgba(255,255,255,0.95)';
+          var r=8;
+          ctx.beginPath();
+          ctx.moveTo(boxX+r, boxY);
+          ctx.arcTo(boxX+boxW, boxY, boxX+boxW, boxY+boxH, r);
+          ctx.arcTo(boxX+boxW, boxY+boxH, boxX, boxY+boxH, r);
+          ctx.arcTo(boxX, boxY+boxH, boxX, boxY, r);
+          ctx.arcTo(boxX, boxY, boxX+boxW, boxY, r);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+          ctx.fillStyle='#241E38';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(p.name, boxX+boxW/2, boxY+boxH/2);
+        }
       });
       // Filet de sécurité final : si l'export du canevas échoue pour une raison
       // quelconque (canevas "souillé" par une image sans autorisation adéquate,
