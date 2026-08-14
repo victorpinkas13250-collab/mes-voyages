@@ -269,7 +269,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.8.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.8.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1265,8 +1265,8 @@ function bkInitWorkerPool(){
     var url=URL.createObjectURL(blob);
     // Chaque worker a sa propre mémoire (contrairement à l'ancien système de
     // "concurrence" sur un seul fil) : moins de risque de saturation qu'avant,
-    // donc plafond relevé de 4 à 6 pour profiter des téléphones à plusieurs cœurs.
-    var n=Math.min(navigator.hardwareConcurrency||2, 6);
+    // plafond relevé à 8 pour les téléphones à beaucoup de cœurs.
+    var n=Math.min(navigator.hardwareConcurrency||2, 8);
     n=Math.max(n,2);
     var workers=[];
     for(var i=0;i<n;i++) workers.push(new Worker(url));
