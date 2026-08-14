@@ -269,7 +269,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.8.1</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v1.9.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -912,6 +912,24 @@ function bkComputeFitZoom(places, pxW, pxH, padding){
   }
   return 1;
 }
+function bkLoadImgWithTimeout(src, timeoutMs){
+  // Comme bkLoadImg, mais abandonne après un délai si le réseau ne répond jamais
+  // (chargement qui ne déclenche ni onload ni onerror) — sans ça, une seule tuile
+  // de carte bloquée en réseau mobile capricieux peut geler toute la génération
+  // indéfiniment, sans jamais afficher d'erreur ni terminer.
+  return new Promise(function(resolve){
+    var done=false;
+    var img=new Image();
+    var timer=setTimeout(function(){
+      if(done) return;
+      done=true;
+      resolve(null);
+    }, timeoutMs);
+    img.onload=function(){ if(done) return; done=true; clearTimeout(timer); resolve(img); };
+    img.onerror=function(){ if(done) return; done=true; clearTimeout(timer); resolve(null); };
+    img.src=src;
+  });
+}
 function bkGenerateMapSnapshot(places, pxW, pxH){
   return new Promise(function(resolve, reject){
     if(!places.length){ reject(new Error('aucun lieu')); return; }
@@ -939,13 +957,17 @@ function bkGenerateMapSnapshot(places, pxW, pxH){
           var wrappedX=((tx%nTiles)+nTiles)%nTiles;
           if(ty<0||ty>=nTiles) return;
           var url='https://tile.openstreetmap.org/'+zoom+'/'+wrappedX+'/'+ty+'.png';
-          loads.push(bkLoadImg(url).then(function(img){
-            ctx.drawImage(img, tx*256-originX, ty*256-originY, 256, 256);
-          }).catch(function(){ /* tuile manquante : on laisse le fond uni */ }));
+          loads.push(bkLoadImgWithTimeout(url, 6000).then(function(img){
+            if(img) ctx.drawImage(img, tx*256-originX, ty*256-originY, 256, 256);
+            // sinon : tuile manquante ou trop lente, on laisse le fond uni pour cette zone
+          }));
         })(tx,ty);
       }
     }
-    Promise.all(loads).then(function(){
+    // Filet de sécurité supplémentaire : même si (par un bug futur) une promesse
+    // de tuile ne se réglait jamais, on ne bloque jamais la génération plus de 12s.
+    var safetyTimeout=new Promise(function(res){ setTimeout(res, 12000); });
+    Promise.race([ Promise.all(loads), safetyTimeout ]).then(function(){
       places.forEach(function(p){
         var px=bkLon2x(p.lon,zoom)*256-originX, py=bkLat2y(p.lat,zoom)*256-originY;
         ctx.beginPath();
@@ -961,10 +983,13 @@ function bkGenerateMapSnapshot(places, pxW, pxH){
     });
   });
 }
+var bkMapGenInProgress=false;
 function bkAddMapElement(){
   ensurePlaces(bkAlbum);
   if(!bkAlbum.places.length){ toast('Ajoute au moins un lieu sur la carte avant (bouton 🗺️ Carte depuis l\'album)'); return; }
-  toast('Génération de la carte…');
+  if(bkMapGenInProgress){ toast('Génération déjà en cours…'); return; }
+  bkMapGenInProgress=true;
+  toast('Génération de la carte… (jusqu\'à 12s si le réseau est lent)');
   bkGenerateMapSnapshot(bkAlbum.places, 1000, 1000).then(function(dataUrl){
     bkSnapshot();
     var page=bkBook.pages[bkPageIdx];
@@ -976,6 +1001,8 @@ function bkAddMapElement(){
   }).catch(function(err){
     console.error('Erreur génération carte', err);
     toast('❌ Erreur pendant la génération de la carte');
+  }).then(function(){
+    bkMapGenInProgress=false;
   });
 }
 
