@@ -260,7 +260,7 @@ img{-webkit-user-drag:none;}
 .bk-book-add{display:flex;align-items:center;gap:10px;justify-content:center;border:2px dashed #D9CCF7;border-radius:14px;padding:14px;cursor:pointer;}
 .bk-book-add .plus{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;}
 .bk-book-add span{font-size:.8rem;font-weight:800;color:var(--primary-dark);}
-.bk-autolayout-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:220px;overflow-y:auto;}
+.bk-autolayout-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;padding:8px;}
 .bk-autolayout-cell{position:relative;aspect-ratio:210/297;border-radius:8px;overflow:hidden;background:#F7F5FC;border:2px solid var(--border);cursor:pointer;}
 .bk-autolayout-cell.on{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary);}
 .bk-autolayout-cell .box{position:absolute;background:#B9A6EE;border-radius:1px;}
@@ -299,7 +299,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.4.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.5.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -516,7 +516,7 @@ img{-webkit-user-drag:none;}
 
     <div class="pdf-lbl" style="margin-top:14px">Nombre de pages</div>
     <div class="bk-fsize-row">
-      <input type="number" id="bk-autobook-pages-input" min="1" max="80" inputmode="numeric"
+      <input type="number" id="bk-autobook-pages-input" min="1" max="300" inputmode="numeric"
         style="width:70px;border:2px solid var(--border);border-radius:10px;padding:8px;font-weight:800;font-size:1rem;text-align:center"
         oninput="bkAutoSetPages(this.value)">
       <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700;margin-left:6px" id="bk-autobook-suggestion-hint"></span>
@@ -526,7 +526,7 @@ img{-webkit-user-drag:none;}
     <div id="bk-autobook-styles" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Mises en page préférées (optionnel, jusqu'à 4)</div>
-    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem">Aucune sélection = l'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l'ordre).</div>
+    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem">⬇️ Fais défiler pour tout voir (37 mises en page, dont des rondes et hexagonales tout en bas). Aucune sélection = l'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l'ordre).</div>
     <div id="bk-autobook-layouts" class="bk-autolayout-grid"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Police</div>
@@ -2023,6 +2023,16 @@ var BK_LAYOUTS = [
     {type:'photo', x:65,y:32,w:38,h:38,rot:10, forceBorder:true, forceShadow:true},
     {type:'photo', x:35,y:68,w:38,h:38,rot:10, forceBorder:true, forceShadow:true},
     {type:'photo', x:65,y:68,w:38,h:38,rot:-10, forceBorder:true, forceShadow:true}
+  ]},
+  { key:'hex-1', label:'Photo hexagonale (1 photo)', slots:[
+    {type:'photo', x:50,y:40,w:79,h:56,rot:0, hex:true, forceShadow:true},
+    {type:'accent', x:83,y:70,w:12,h:12},
+    {type:'title', x:50,y:82,w:76,h:10, fontSize:26}
+  ]},
+  { key:'hex-trio', label:'Nid d\'abeilles (3 photos)', slots:[
+    {type:'photo', x:50,y:30,w:37,h:26,rot:0, hex:true, forceShadow:true},
+    {type:'photo', x:28,y:58,w:37,h:26,rot:0, hex:true, forceShadow:true},
+    {type:'photo', x:72,y:58,w:37,h:26,rot:0, hex:true, forceShadow:true}
   ]}
 ];
 var BK_STYLES = [
@@ -2042,6 +2052,7 @@ function bkBuildElementsForLayout(layout, style){
       if(b>0) el.border={width:b, color: style.key==='night'||style.key==='ocean' ? '#FFFFFF' : (style.key==='polaroid'?'#FFFFFF':style.color)};
       if(slot.forceShadow || style.shadow) el.shadow=true;
       if(slot.round) el.round=true;
+      if(slot.hex) el.hex=true;
       return el;
     }
     if(slot.type==='title'){
@@ -2092,9 +2103,9 @@ function bkTemplatePhoto(tpl, idx){
    L'algorithme de répartition est testé isolément (2000+ cas) avant d'être
    branché ici. */
 var BK_AUTO_LAYOUT_BUCKETS = {
-  1: ['float-1','asym-1','single-card','side-title','banner','circle-1'],
+  1: ['float-1','asym-1','single-card','side-title','banner','circle-1','hex-1'],
   2: ['duo-h','duo-v','overlap-2','diag-2','circle-duo'],
-  3: ['trio','collage','cascade-3','triangle-3','polaroid-pile','giant-plus-two','vertical-triptych-3'],
+  3: ['trio','collage','cascade-3','triangle-3','polaroid-pile','giant-plus-two','vertical-triptych-3','hex-trio'],
   4: ['grid4','big-strip','magazine-4','fan-4','photobooth-4','zigzag-4','spiral-4'],
   5: ['bouquet-5','stairs-5','filmstrip-5'],
   6: ['grid6','wall-6','broken-grid-6','confetti-6'],
@@ -2421,7 +2432,9 @@ function bkAutoResetToSuggestion(){
 function bkAutoSetPages(val){
   var n=parseInt(val,10);
   if(isNaN(n)) return; // laisse taper sans forcer une valeur tant que ce n'est pas un nombre valide
-  bkAutoState.pageCount=Math.max(1, Math.min(80, n));
+  var clamped=Math.max(1, Math.min(300, n));
+  if(clamped!==n) toast('Nombre de pages limité à '+clamped); // prévient au lieu de couper en silence
+  bkAutoState.pageCount=clamped;
 }
 function bkAutoStep(field, delta){
   if(field==='fontSize') bkAutoState.fontSize=Math.max(14, Math.min(44, bkAutoState.fontSize+delta));
@@ -2652,13 +2665,14 @@ function bkFilterCSS(f){
 function bkElementInnerHTML(el){
   var borderStyle = (el.border && el.border.width>0) ? ('border:'+el.border.width+'px solid '+el.border.color+';') : '';
   var radiusStyle = el.round ? 'border-radius:50%;' : '';
+  var clipStyle = el.hex ? 'clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);' : '';
   if(el.type==='photo'){
     var ph=bkPhotoById(el.photoId);
     var src = el.mapSnapshot || el.bgRemoved || (ph?bkPhotoSrc(ph,'full'):'');
     if(!src){
       // cadre intentionnellement vide (livre "structure vide") : invite claire à
       // ajouter une photo plutôt qu'une icône d'image cassée
-      return '<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#F3EEFB;border:2px dashed #C9B8F0;box-sizing:border-box;'+(radiusStyle||'border-radius:4px;')+'color:#9B87C4;font-weight:800;font-size:.75rem;text-align:center;padding:6px">'
+      return '<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#F3EEFB;border:2px dashed #C9B8F0;box-sizing:border-box;'+(radiusStyle||clipStyle||'border-radius:4px;')+'color:#9B87C4;font-weight:800;font-size:.75rem;text-align:center;padding:6px">'
         +'<span style="font-size:1.8rem">🖼️</span><span>Ajouter<br>une photo</span></div>';
     }
     var imgStyle;
@@ -2668,7 +2682,7 @@ function bkElementInnerHTML(el){
     } else {
       imgStyle='width:100%;height:100%;object-fit:cover;filter:'+bkFilterCSS(el.filter);
     }
-    return '<div style="width:100%;height:100%;overflow:hidden;position:relative;'+borderStyle+radiusStyle+'box-sizing:border-box"><img src="'+src+'" style="'+imgStyle+'"></div>';
+    return '<div style="width:100%;height:100%;overflow:hidden;position:relative;'+borderStyle+radiusStyle+clipStyle+'box-sizing:border-box"><img src="'+src+'" style="'+imgStyle+'"></div>';
   } else if(el.type==='icon'){
     return '<svg viewBox="0 0 24 24" fill="none" stroke="'+el.color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%">'+(BK_ICONS[el.icon]||'')+'</svg>';
   } else if(el.type==='shape'){
@@ -3503,6 +3517,16 @@ function bkCollectLeafElements(elements, out){
   });
   return out;
 }
+function bkHexPath(ctx, w, h){
+  ctx.beginPath();
+  ctx.moveTo(-0.25*w,-0.5*h);
+  ctx.lineTo(0.25*w,-0.5*h);
+  ctx.lineTo(0.5*w,0);
+  ctx.lineTo(0.25*w,0.5*h);
+  ctx.lineTo(-0.25*w,0.5*h);
+  ctx.lineTo(-0.5*w,0);
+  ctx.closePath();
+}
 function bkDrawSingleElement(ctx, el, w, h, PXW, imgMap){
   if(el.shadow){ ctx.shadowColor='rgba(0,0,0,.4)'; ctx.shadowBlur=PXW*0.012; ctx.shadowOffsetY=PXW*0.005; }
   if(el.type==='photo'){
@@ -3522,15 +3546,20 @@ function bkDrawSingleElement(ctx, el, w, h, PXW, imgMap){
         ctx.beginPath();
         ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);
         ctx.clip();
+      } else if(el.hex){
+        ctx.save();
+        bkHexPath(ctx, w, h);
+        ctx.clip();
       }
       if(el.filter) ctx.filter='brightness('+el.filter.brightness+'%) contrast('+el.filter.contrast+'%) saturate('+el.filter.saturate+'%) grayscale('+el.filter.grayscale+'%)';
       ctx.drawImage(img, sx,sy,sw,sh, -w/2,-h/2,w,h);
       ctx.filter='none';
-      if(el.round) ctx.restore();
+      if(el.round || el.hex) ctx.restore();
       if(el.border && el.border.width>0){
         ctx.shadowColor='transparent';
         ctx.strokeStyle=el.border.color; ctx.lineWidth=el.border.width*(PXW/1000);
         if(el.round){ ctx.beginPath(); ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2); ctx.stroke(); }
+        else if(el.hex){ bkHexPath(ctx, w, h); ctx.stroke(); }
         else ctx.strokeRect(-w/2,-h/2,w,h);
       }
     }
