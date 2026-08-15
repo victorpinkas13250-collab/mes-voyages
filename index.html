@@ -63,6 +63,18 @@ img{-webkit-user-drag:none;}
 #pg-home{padding-bottom:36px;}
 .hdr{padding:22px 20px 30px;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-2) 60%,#B98CFF 100%);border-radius:0 0 32px 32px;box-shadow:0 10px 30px rgba(123,47,247,.25);}
 .hdr-top{display:flex;align-items:center;gap:10px;color:#fff;}
+.hdr-help-btn{margin-left:auto;flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.22);border:none;color:#fff;font-size:1.05rem;font-weight:800;}
+.help-item{border-bottom:1px solid var(--border);}
+.help-item:last-child{border-bottom:none;}
+.help-q{display:flex;align-items:center;gap:10px;padding:14px 2px;cursor:pointer;}
+.help-q .ic{font-size:1.3rem;flex-shrink:0;}
+.help-q .t{flex:1;font-weight:800;font-size:.88rem;}
+.help-q .chev{color:var(--ink-soft);font-size:.8rem;transition:transform .15s;flex-shrink:0;}
+.help-item.open .help-q .chev{transform:rotate(180deg);}
+.help-a{display:none;padding:0 2px 16px 42px;color:var(--ink-soft);font-size:.82rem;line-height:1.55;}
+.help-a ul{margin:0;padding-left:18px;}
+.help-a li{margin-bottom:6px;}
+.help-item.open .help-a{display:block;}
 .hdr-top img{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.18);object-fit:contain;padding:4px;}
 .hdr-top .t{font-size:1.15rem;font-weight:800;}
 .hdr-stats{color:rgba(255,255,255,.85);font-size:.8rem;font-weight:700;margin-top:2px;}
@@ -248,10 +260,27 @@ img{-webkit-user-drag:none;}
 .bk-book-add{display:flex;align-items:center;gap:10px;justify-content:center;border:2px dashed #D9CCF7;border-radius:14px;padding:14px;cursor:pointer;}
 .bk-book-add .plus{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;}
 .bk-book-add span{font-size:.8rem;font-weight:800;color:var(--primary-dark);}
+.bk-autolayout-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:220px;overflow-y:auto;}
+.bk-autolayout-cell{position:relative;aspect-ratio:210/297;border-radius:8px;overflow:hidden;background:#F7F5FC;border:2px solid var(--border);cursor:pointer;}
+.bk-autolayout-cell.on{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary);}
+.bk-autolayout-cell .box{position:absolute;background:#B9A6EE;border-radius:1px;}
+.bk-autolayout-check{position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--primary);color:#fff;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:900;}
+.bk-emoji-chip{font-size:1.6rem;text-align:center;cursor:pointer;flex-shrink:0;padding:4px 6px;border-radius:10px;position:relative;}
+.bk-emoji-chip.on{background:var(--bg);box-shadow:0 0 0 2px var(--primary);}
 .bk-photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;}
 </style>
 </head>
 <body>
+
+<!-- ══════════ AIDE ══════════ -->
+<div class="bk-sheet" id="help-sheet">
+  <div class="bk-sheet-box" style="max-height:80vh;overflow-y:auto">
+    <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:4px">❔ Comment ça marche</h3>
+    <div class="modal-sub">Touche une section pour la déplier</div>
+    <div id="help-accordion"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-ok" style="width:100%" onclick="closeHelpSheet()">J'ai compris, fermer</button></div>
+  </div>
+</div>
 
 <!-- ══════════ HOME ══════════ -->
 <div class="page on" id="pg-home">
@@ -262,6 +291,7 @@ img{-webkit-user-drag:none;}
         <div class="t">Mes Voyages</div>
         <div class="hdr-stats" id="hstats">0 album · 0 photo</div>
       </div>
+      <button class="hdr-help-btn" onclick="openHelpSheet()">❔</button>
     </div>
     <div class="search-wrap">
       <span class="si">🔍</span>
@@ -269,7 +299,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.0.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.3.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -477,16 +507,27 @@ img{-webkit-user-drag:none;}
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🪄 Livre automatique</h3>
     <div class="modal-sub" id="bk-autobook-photocount"></div>
 
+    <div class="pdf-lbl" style="margin-top:14px">Mode</div>
+    <div style="display:flex;gap:8px">
+      <button class="bk-btn" id="bk-autobook-mode-full" style="flex:1" onclick="bkAutoSetMode('full')">🖼️ Avec mes photos</button>
+      <button class="bk-btn" id="bk-autobook-mode-empty" style="flex:1" onclick="bkAutoSetMode('empty')">📐 Structure vide</button>
+    </div>
+    <div class="modal-sub" id="bk-autobook-mode-hint" style="margin-top:6px;margin-bottom:0;font-size:.72rem"></div>
+
     <div class="pdf-lbl" style="margin-top:14px">Nombre de pages</div>
     <div class="bk-fsize-row">
-      <button onclick="bkAutoStep('pages',-1)">−</button>
-      <span id="bk-autobook-pages-val" style="font-weight:800;min-width:34px;text-align:center"></span>
-      <button onclick="bkAutoStep('pages',1)">+</button>
-      <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700;margin-left:6px">suggéré selon tes photos</span>
+      <input type="number" id="bk-autobook-pages-input" min="1" max="80" inputmode="numeric"
+        style="width:70px;border:2px solid var(--border);border-radius:10px;padding:8px;font-weight:800;font-size:1rem;text-align:center"
+        oninput="bkAutoSetPages(this.value)">
+      <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700;margin-left:6px" id="bk-autobook-suggestion-hint"></span>
     </div>
 
     <div class="pdf-lbl" style="margin-top:16px">Style</div>
     <div id="bk-autobook-styles" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
+
+    <div class="pdf-lbl" style="margin-top:16px">Mises en page préférées (optionnel, jusqu'à 4)</div>
+    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem">Aucune sélection = l'appli varie automatiquement</div>
+    <div id="bk-autobook-layouts" class="bk-autolayout-grid"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Police</div>
     <div id="bk-autobook-fonts" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
@@ -501,7 +542,7 @@ img{-webkit-user-drag:none;}
     <div class="pdf-lbl" style="margin-top:16px">Couleur principale</div>
     <div id="bk-autobook-colors" style="display:flex;gap:8px"></div>
 
-    <div class="pdf-lbl" style="margin-top:16px">Smiley favori (optionnel)</div>
+    <div class="pdf-lbl" style="margin-top:16px">Smileys favoris (optionnel, plusieurs possibles)</div>
     <div id="bk-autobook-emojis" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
 
     <div class="modal-btns">
@@ -1097,6 +1138,88 @@ function bkAddMapElement(){
     clearTimeout(watchdog);
     bkMapGenInProgress=false;
   });
+}
+
+/* ══════════════════ AIDE ══════════════════ */
+var HELP_SECTIONS=[
+  { icon:'📸', title:'Ajouter et gérer tes photos', body:
+    '<ul>'
+    +'<li><b>Ajouter :</b> touche la zone en pointillés dans un album, ou glisse-dépose tes photos directement.</li>'
+    +'<li><b>Rechercher :</b> tape un nom de fichier ou une date dans la barre de recherche de l\'album.</li>'
+    +'<li><b>Date automatique :</b> l\'appli lit la vraie date de prise de vue dans la photo quand elle existe (icône 📷 dans la visionneuse) ; sinon elle utilise une date de repli (🗓️ ou ➕).</li>'
+    +'<li><b>Tout supprimer :</b> bouton 🗑️ à côté de la recherche, avec confirmation.</li>'
+    +'<li><b>Légende et favori :</b> ouvre une photo (visionneuse) pour ajouter une légende ou la mettre en favori (❤️).</li>'
+    +'</ul>' },
+  { icon:'🗂️', title:'Plusieurs livres par album', body:
+    '<ul>'
+    +'<li>Bouton <b>🎨 Mes livres</b> depuis un album : tu peux créer, renommer, dupliquer ou supprimer autant de livres que tu veux pour le même album.</li>'
+    +'<li>Depuis l\'intérieur d\'un livre, le bouton 📚 en haut permet de changer de livre sans repasser par l\'album.</li>'
+    +'</ul>' },
+  { icon:'✏️', title:'L\'éditeur de livre', body:
+    '<ul>'
+    +'<li><b>Texte, Photo, Forme, Sticker, Icône :</b> touche l\'outil puis place l\'élément sur la page, déplace-le et redimensionne-le avec les poignées.</li>'
+    +'<li><b>Modèle :</b> 90 mises en page toutes prêtes (styles + agencements variés), avec recherche.</li>'
+    +'<li><b>Carte :</b> insère une image de carte avec tes lieux visités (voir section carte plus bas).</li>'
+    +'<li><b>Grouper :</b> sélectionne plusieurs éléments pour les déplacer ensemble.</li>'
+    +'<li><b>Annuler / Rétablir :</b> en haut de l\'éditeur, pour revenir en arrière à tout moment.</li>'
+    +'<li>Sur un élément sélectionné : filtres, recadrage, suppression de fond, bordure, ombre, dégradé, dupliquer, verrouiller — selon le type d\'élément.</li>'
+    +'</ul>' },
+  { icon:'🪄', title:'Livre automatique', body:
+    '<ul>'
+    +'<li>Depuis "Mes livres", bouton <b>🪄 Livre automatique</b> : choisis le nombre de pages, un style, une police, une couleur, des smileys favoris et jusqu\'à 4 mises en page préférées.</li>'
+    +'<li>L\'appli répartit toutes tes photos automatiquement sur les pages, avec des mises en page variées.</li>'
+    +'<li><b>Mode "Structure vide" :</b> génère toutes les pages avec leurs cadres, mais sans aucune photo dedans — pratique pour préparer le livre avant même d\'avoir importé tes photos, ou pour choisir toi-même quelle photo va où.</li>'
+    +'</ul>' },
+  { icon:'✂️', title:'Retoucher une photo', body:
+    '<ul>'
+    +'<li><b>Recadrer :</b> zoom et déplace pour choisir la partie visible de la photo.</li>'
+    +'<li><b>Filtres :</b> luminosité, contraste, saturation, noir et blanc.</li>'
+    +'<li><b>Supprimer le fond :</b> basique, par couleur — marche bien sur un fond uni, moins bien sur un fond complexe.</li>'
+    +'<li><b>Bordure, ombre, dégradé :</b> disponibles sur les photos et les formes.</li>'
+    +'</ul>' },
+  { icon:'🗺️', title:'Carte des lieux visités', body:
+    '<ul>'
+    +'<li>Depuis un album, bouton <b>🗺️ Carte</b> : cherche un lieu par son nom, ou touche directement la carte pour poser un point et lui donner un nom.</li>'
+    +'<li>Depuis l\'éditeur de livre, l\'outil <b>Carte</b> insère une image de la carte avec tous tes points, comme n\'importe quelle photo (déplaçable, redimensionnable).</li>'
+    +'<li>Nécessite une connexion internet pour charger les rues ; sans réseau, la carte garde un fond uni.</li>'
+    +'</ul>' },
+  { icon:'📕', title:'Exporter en PDF', body:
+    '<ul>'
+    +'<li><b>Depuis l\'éditeur de livre :</b> bouton "Exporter PDF" en haut, exporte le livre tel que tu l\'as construit page par page.</li>'
+    +'<li><b>Depuis un album :</b> bouton "Export PDF" pour une grille rapide de toutes tes photos, sans passer par l\'éditeur.</li>'
+    +'</ul>' },
+  { icon:'💾', title:'Où sont tes données ?', body:
+    '<ul>'
+    +'<li>Tout est stocké <b>uniquement sur ton téléphone</b> (dans le navigateur) — pas de compte, pas de cloud, rien n\'est envoyé ailleurs.</li>'
+    +'<li>Un PDF exporté part dans le dossier Téléchargements normal de ton téléphone, comme n\'importe quel fichier téléchargé.</li>'
+    +'<li>Si tu changes de téléphone ou effaces les données du site, tes albums ne se transfèrent pas automatiquement : pense à exporter ce qui compte avant.</li>'
+    +'</ul>' }
+];
+function bkRenderHelpAccordion(){
+  var h='';
+  HELP_SECTIONS.forEach(function(s,i){
+    h+='<div class="help-item" id="help-item-'+i+'">'
+      +'<div class="help-q" onclick="toggleHelpItem('+i+')"><span class="ic">'+s.icon+'</span><span class="t">'+s.title+'</span><span class="chev">▼</span></div>'
+      +'<div class="help-a">'+s.body+'</div>'
+      +'</div>';
+  });
+  document.getElementById('help-accordion').innerHTML=h;
+}
+function toggleHelpItem(i){
+  document.getElementById('help-item-'+i).classList.toggle('open');
+}
+function openHelpSheet(){
+  bkRenderHelpAccordion();
+  document.getElementById('help-sheet').classList.add('on');
+}
+function closeHelpSheet(){
+  document.getElementById('help-sheet').classList.remove('on');
+  try{ localStorage.setItem('mv_help_seen','1'); }catch(e){}
+}
+function bkMaybeShowHelpOnFirstLaunch(){
+  var seen=false;
+  try{ seen=localStorage.getItem('mv_help_seen')==='1'; }catch(e){}
+  if(!seen) openHelpSheet();
 }
 
 function openAlbum(id){
@@ -1916,10 +2039,22 @@ var BK_AUTO_LAYOUT_BUCKETS = {
   6: ['grid6','wall-6','broken-grid-6'],
   9: ['grid9']
 };
-function bkPlanAutoPages(photoCount, pageCount){
+function bkPlanAutoPages(photoCount, pageCount, preferredLayouts){
   var sizes=[6,5,4,3,2,1];
   var plan=[];
   var remainingPhotos=photoCount, remainingPages=pageCount;
+  function candidatesFor(size){
+    if(preferredLayouts && preferredLayouts.length){
+      var matching=preferredLayouts.filter(function(k){
+        var l=BK_LAYOUTS.find(function(x){ return x.key===k; });
+        if(!l) return false;
+        var pc=l.slots.filter(function(s){ return s.type==='photo'; }).length;
+        return pc===size;
+      });
+      if(matching.length) return matching;
+    }
+    return BK_AUTO_LAYOUT_BUCKETS[size] || BK_AUTO_LAYOUT_BUCKETS[1];
+  }
   while(remainingPages>0){
     if(remainingPhotos<=0){
       plan.push({layoutKey:'quote', photoCount:0});
@@ -1929,7 +2064,7 @@ function bkPlanAutoPages(photoCount, pageCount){
     var avg=Math.max(1, Math.round(remainingPhotos/remainingPages));
     var size=sizes.find(function(s){ return s<=avg; }) || 1;
     if(size>remainingPhotos) size=remainingPhotos;
-    var candidates=BK_AUTO_LAYOUT_BUCKETS[size] || BK_AUTO_LAYOUT_BUCKETS[1];
+    var candidates=candidatesFor(size);
     var layoutKey=candidates[plan.length % candidates.length];
     plan.push({layoutKey:layoutKey, photoCount:size});
     remainingPhotos-=size;
@@ -1937,7 +2072,7 @@ function bkPlanAutoPages(photoCount, pageCount){
   }
   while(remainingPhotos>0){
     var size2=remainingPhotos>=6?6:remainingPhotos;
-    var candidates2=BK_AUTO_LAYOUT_BUCKETS[size2] || BK_AUTO_LAYOUT_BUCKETS[1];
+    var candidates2=candidatesFor(size2);
     plan.push({layoutKey:candidates2[plan.length%candidates2.length], photoCount:size2});
     remainingPhotos-=size2;
   }
@@ -1956,9 +2091,34 @@ function bkTextColorFor(bgHex){
   var lum=(0.299*r+0.587*g+0.114*b)/255;
   return lum>0.6 ? '#241E38' : '#FFFFFF';
 }
+function bkPlanAutoPagesEmpty(pageCount, preferredLayouts){
+  // Mode "structure vide" : pas de contrainte de nombre de photos réel (il peut
+  // même n'y en avoir aucune dans l'album) — on varie juste les tailles de cadre
+  // pour un rendu vivant plutôt qu'une seule mise en page répétée.
+  var sizeCycle=[4,3,2,5,1,6,3,4,2];
+  var plan=[];
+  for(var i=0;i<pageCount;i++){
+    var size=sizeCycle[i%sizeCycle.length];
+    var candidates;
+    if(preferredLayouts && preferredLayouts.length){
+      candidates=preferredLayouts.filter(function(k){
+        var l=BK_LAYOUTS.find(function(x){ return x.key===k; });
+        if(!l) return false;
+        var pc=l.slots.filter(function(s){ return s.type==='photo'; }).length;
+        return pc===size;
+      });
+      if(!candidates.length) candidates=BK_AUTO_LAYOUT_BUCKETS[size] || BK_AUTO_LAYOUT_BUCKETS[1];
+    } else {
+      candidates=BK_AUTO_LAYOUT_BUCKETS[size] || BK_AUTO_LAYOUT_BUCKETS[1];
+    }
+    plan.push({layoutKey:candidates[i%candidates.length], photoCount:size});
+  }
+  return plan;
+}
 function bkAutoGenerateBook(opts){
-  // opts: {pageCount, styleKey, fontFamily, fontSize, mainColor, emoji}
+  // opts: {mode, pageCount, styleKey, fontFamily, fontSize, mainColor, emojis, preferredLayouts}
   var photos=bkAlbum.photos;
+  var isEmpty=opts.mode==='empty';
   var baseStyle=BK_STYLES.find(function(s){ return s.key===opts.styleKey; }) || BK_STYLES[0];
   var style={
     key:baseStyle.key, bg:baseStyle.bg,
@@ -1969,21 +2129,29 @@ function bkAutoGenerateBook(opts){
   };
 
   var pageCount=Math.max(1, opts.pageCount|0);
-  var plan=bkPlanAutoPages(photos.length, pageCount);
+  var plan = isEmpty
+    ? bkPlanAutoPagesEmpty(pageCount, opts.preferredLayouts)
+    : bkPlanAutoPages(photos.length, pageCount, opts.preferredLayouts);
 
   var pages=[];
   var photoCursor=0;
+  var emojis=(opts.emojis||[]).filter(Boolean);
   plan.forEach(function(step, pageIdx){
     var layout=BK_LAYOUTS.find(function(l){ return l.key===step.layoutKey; });
     var elements=bkBuildElementsForLayout(layout, style);
     // remplace les index de photo générique par de vraies photos de l'album, dans l'ordre
+    // (ou laisse le cadre intentionnellement vide en mode "structure vide")
     elements.forEach(function(el){
       if(el.type==='photo'){
-        var photo=photos[photoCursor % Math.max(photos.length,1)];
-        photoCursor++;
-        el.photoId=photo?photo.id:null;
+        if(isEmpty){
+          el.photoId=null; // cadre vide voulu : l'utilisateur le remplira lui-même
+        } else {
+          var photo=photos[photoCursor % Math.max(photos.length,1)];
+          photoCursor++;
+          el.photoId=photo?photo.id:null;
+          if(!el.photoId){ el.type='shape'; el.shape='rect'; el.color='#EDE8F9'; }
+        }
         delete el.photoIndex;
-        if(!el.photoId){ el.type='shape'; el.shape='rect'; el.color='#EDE8F9'; }
       }
       if(el.type==='text' && opts.fontSize){
         // conserve les proportions titre/sous-titre plutôt qu'une taille unique partout
@@ -1991,9 +2159,11 @@ function bkAutoGenerateBook(opts){
       }
       el.id=gid();
     });
-    // touche décorative : le smiley favori, sur une page sur trois environ
-    if(opts.emoji && pageIdx%3===1){
-      elements.push({id:gid(), type:'text', text:opts.emoji, x:88,y:12,w:16,h:16,rot:Math.round(Math.random()*20-10),
+    // touche décorative : un des smileys favoris, sur une page sur trois environ
+    // (choisi au hasard parmi ceux sélectionnés, pour varier)
+    if(emojis.length && pageIdx%3===1){
+      var chosen=emojis[Math.floor(Math.random()*emojis.length)];
+      elements.push({id:gid(), type:'text', text:chosen, x:88,y:12,w:16,h:16,rot:Math.round(Math.random()*20-10),
         fontSize:38, color:style.accent, fontFamily:style.font, isSticker:true});
     }
     pages.push({bg:style.bg, elements:elements});
@@ -2138,31 +2308,76 @@ function openAutoBookSheet(){
   closeBookListSheet();
   var n=bkAlbum.photos.length;
   bkAutoState={
+    mode: 'full', // 'full' = avec les vraies photos de l'album, 'empty' = cadres vides à remplir soi-même
     pageCount: bkSuggestedPageCount(n),
+    suggestedPageCount: bkSuggestedPageCount(n),
     styleKey: 'clean',
     fontFamily: 'Poppins',
     fontSize: 24,
     mainColor: null, // null = garde la couleur du style choisi
-    emoji: null
+    emojis: [], // plusieurs smileys possibles désormais
+    preferredLayouts: [] // jusqu'à 4 mises en page choisies ; vide = auto
   };
   document.getElementById('bk-autobook-photocount').textContent=
-    n+' photo'+(n!==1?'s':'')+' dans cet album'+(n===0?' — le livre sera surtout composé de pages citation' : '');
+    n+' photo'+(n!==1?'s':'')+' dans cet album'+(n===0?' — utilise le mode "Structure vide" pour préparer le livre avant d\'avoir tes photos' : '');
   bkRenderAutoBookUI();
   document.getElementById('bk-autobook-sheet').classList.add('on');
 }
 function closeAutoBookSheet(){ document.getElementById('bk-autobook-sheet').classList.remove('on'); }
+function bkAutoSetMode(mode){
+  bkAutoState.mode=mode;
+  if(mode==='empty' && bkAlbum.photos.length===0){
+    // sans photo dans l'album, la suggestion "photos/4" ne veut rien dire : valeur de départ raisonnable
+    bkAutoState.suggestedPageCount=10;
+    bkAutoState.pageCount=10;
+  }
+  bkRenderAutoBookUI();
+}
+function bkAutoResetToSuggestion(){
+  bkAutoState.pageCount=bkAutoState.suggestedPageCount;
+  bkRenderAutoBookUI();
+}
+function bkAutoSetPages(val){
+  var n=parseInt(val,10);
+  if(isNaN(n)) return; // laisse taper sans forcer une valeur tant que ce n'est pas un nombre valide
+  bkAutoState.pageCount=Math.max(1, Math.min(80, n));
+}
 function bkAutoStep(field, delta){
-  if(field==='pages') bkAutoState.pageCount=Math.max(1, Math.min(60, bkAutoState.pageCount+delta));
   if(field==='fontSize') bkAutoState.fontSize=Math.max(14, Math.min(44, bkAutoState.fontSize+delta));
   bkRenderAutoBookUI();
 }
 function bkAutoSetStyle(key){ bkAutoState.styleKey=key; bkRenderAutoBookUI(); }
 function bkAutoSetFont(f){ bkAutoState.fontFamily=f; bkRenderAutoBookUI(); }
 function bkAutoSetColor(c){ bkAutoState.mainColor=(bkAutoState.mainColor===c)?null:c; bkRenderAutoBookUI(); }
-function bkAutoSetEmoji(e){ bkAutoState.emoji=(bkAutoState.emoji===e)?null:e; bkRenderAutoBookUI(); }
+function bkAutoToggleEmoji(e){
+  var i=bkAutoState.emojis.indexOf(e);
+  if(i>-1) bkAutoState.emojis.splice(i,1);
+  else bkAutoState.emojis.push(e);
+  bkRenderAutoBookUI();
+}
+function bkAutoToggleLayout(key){
+  var i=bkAutoState.preferredLayouts.indexOf(key);
+  if(i>-1){ bkAutoState.preferredLayouts.splice(i,1); }
+  else {
+    if(bkAutoState.preferredLayouts.length>=4){ toast('Maximum 4 mises en page'); return; }
+    bkAutoState.preferredLayouts.push(key);
+  }
+  bkRenderAutoBookUI();
+}
 function bkRenderAutoBookUI(){
-  document.getElementById('bk-autobook-pages-val').textContent=bkAutoState.pageCount;
+  var pagesInput=document.getElementById('bk-autobook-pages-input');
+  if(document.activeElement!==pagesInput) pagesInput.value=bkAutoState.pageCount; // ne coupe pas la frappe en cours
   document.getElementById('bk-autobook-fontsize-val').textContent=bkAutoState.fontSize+'px';
+
+  document.getElementById('bk-autobook-mode-full').classList.toggle('primary', bkAutoState.mode==='full');
+  document.getElementById('bk-autobook-mode-empty').classList.toggle('primary', bkAutoState.mode==='empty');
+  document.getElementById('bk-autobook-mode-hint').textContent = bkAutoState.mode==='empty'
+    ? '📐 Toutes les pages et cadres sont créés, sans aucune photo dedans — tu les places toi-même ensuite, à ton rythme.'
+    : '🖼️ Tes photos sont placées automatiquement, dans l\'ordre, sur toutes les pages.';
+
+  document.getElementById('bk-autobook-suggestion-hint').innerHTML =
+    'suggestion : <a href="#" onclick="event.preventDefault();bkAutoResetToSuggestion()" style="color:var(--primary);font-weight:800;text-decoration:underline">'
+    + bkAutoState.suggestedPageCount + ' page' + (bkAutoState.suggestedPageCount!==1?'s':'') + '</a>';
 
   var stylesH='';
   BK_AUTO_STYLE_CHOICES.forEach(function(key){
@@ -2171,6 +2386,19 @@ function bkRenderAutoBookUI(){
     stylesH+='<button class="bk-btn'+(on?' primary':'')+'" style="flex-shrink:0;background:'+(on?'':s.bg)+';color:'+(on?'':s.color)+'" onclick="bkAutoSetStyle(\''+key+'\')">'+s.label+'</button>';
   });
   document.getElementById('bk-autobook-styles').innerHTML=stylesH;
+
+  var layoutsH='';
+  BK_LAYOUTS.forEach(function(l){
+    if(l.key==='quote') return; // pas pertinent comme préférence (pas de photo)
+    var on=bkAutoState.preferredLayouts.indexOf(l.key)>-1;
+    var mini='';
+    l.slots.forEach(function(s){
+      var isPhoto=s.type==='photo';
+      mini+='<div class="box" style="left:'+(s.x-s.w/2)+'%;top:'+(s.y-s.h/2)+'%;width:'+s.w+'%;height:'+s.h+'%;background:'+(isPhoto?'#B9A6EE':'transparent')+';transform:rotate('+(s.rot||0)+'deg)"></div>';
+    });
+    layoutsH+='<div class="bk-autolayout-cell'+(on?' on':'')+'" onclick="bkAutoToggleLayout(\''+l.key+'\')">'+mini+(on?'<div class="bk-autolayout-check">✓</div>':'')+'</div>';
+  });
+  document.getElementById('bk-autobook-layouts').innerHTML=layoutsH;
 
   var fontsH='';
   BK_FONTS.forEach(function(f){
@@ -2188,12 +2416,14 @@ function bkRenderAutoBookUI(){
 
   var emojisH='';
   BK_STICKERS.forEach(function(e){
-    var on=bkAutoState.emoji===e;
-    emojisH+='<div style="font-size:1.6rem;text-align:center;cursor:pointer;flex-shrink:0;padding:4px 6px;border-radius:10px;background:'+(on?'var(--bg)':'transparent')+'" onclick="bkAutoSetEmoji(\''+e+'\')">'+e+'</div>';
+    var on=bkAutoState.emojis.indexOf(e)>-1;
+    emojisH+='<div class="bk-emoji-chip'+(on?' on':'')+'" onclick="bkAutoToggleEmoji(\''+e+'\')">'+e+'</div>';
   });
   document.getElementById('bk-autobook-emojis').innerHTML=emojisH;
 }
 function bkRunAutoGenerate(){
+  var pagesInput=document.getElementById('bk-autobook-pages-input');
+  bkAutoSetPages(pagesInput.value); // récupère la dernière valeur tapée, même sans avoir quitté le champ
   var pages=bkAutoGenerateBook(bkAutoState);
   ensureBooks(bkAlbum);
   var n=bkAlbum.books.length+1;
@@ -2343,6 +2573,12 @@ function bkElementInnerHTML(el){
   if(el.type==='photo'){
     var ph=bkPhotoById(el.photoId);
     var src = el.mapSnapshot || el.bgRemoved || (ph?bkPhotoSrc(ph,'full'):'');
+    if(!src){
+      // cadre intentionnellement vide (livre "structure vide") : invite claire à
+      // ajouter une photo plutôt qu'une icône d'image cassée
+      return '<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#F3EEFB;border:2px dashed #C9B8F0;box-sizing:border-box;border-radius:4px;color:#9B87C4;font-weight:800;font-size:.75rem;text-align:center;padding:6px">'
+        +'<span style="font-size:1.8rem">🖼️</span><span>Ajouter<br>une photo</span></div>';
+    }
     var imgStyle;
     if(el.crop){
       var c=el.crop;
@@ -3562,6 +3798,7 @@ initDB(function(){
       migrated.forEach(function(id){ saveAlbumMeta(al(id)); });
 
       renderHome();
+      bkMaybeShowHelpOnFirstLaunch();
     });
   });
 });
