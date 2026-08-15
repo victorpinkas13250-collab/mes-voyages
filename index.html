@@ -328,7 +328,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.1.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.1.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1338,8 +1338,8 @@ function ensureFolders(a){ if(!Array.isArray(a.folders)) a.folders=[]; }
 function renderFolderStrip(){
   var a=al(curAlbum);
   ensureFolders(a);
-  var total=a.photos.length;
-  var h='<div class="folder-chip'+(bkCurrentFolderId===null?' on':'')+'" onclick="selectFolder(null)">Toutes ('+total+')</div>';
+  var unassigned=a.photos.filter(function(p){ return !p.folderId; }).length;
+  var h='<div class="folder-chip'+(bkCurrentFolderId===null?' on':'')+'" onclick="selectFolder(null)">Non rangées ('+unassigned+')</div>';
   a.folders.forEach(function(f){
     var n=a.photos.filter(function(p){ return p.folderId===f.id; }).length;
     h+='<div class="folder-chip'+(bkCurrentFolderId===f.id?' on':'')+'" onclick="selectFolder(\''+f.id+'\')">📁 '+esc(f.name)+' ('+n+')</div>';
@@ -1482,6 +1482,10 @@ function renderPhotos(){
   var list=query ? a.photos.filter(function(p){ return bkPhotoMatchesSearch(p, query); }) : a.photos;
   if(bkCurrentFolderId!==null){
     list=list.filter(function(p){ return p.folderId===bkCurrentFolderId; });
+  } else {
+    // "Toutes" = les photos pas encore rangées dans un dossier ; une fois mise
+    // dans un dossier, une photo n'apparaît plus que là (rangement à l'ancienne)
+    list=list.filter(function(p){ return !p.folderId; });
   }
   var myToken=++_renderPhotosToken; // annule les rendus précédents si on change d'album vite
   var CHUNK=24;
