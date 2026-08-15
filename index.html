@@ -139,6 +139,9 @@ img{-webkit-user-drag:none;}
 .folder-manage-row .n{flex:1;font-weight:800;font-size:.85rem;}
 .folder-manage-row .c{color:var(--ink-soft);font-size:.72rem;font-weight:700;}
 .folder-manage-row button{background:none;border:none;font-size:1rem;padding:4px;}
+.folder-manage-row button:disabled{opacity:.25;}
+.folder-reorder{display:flex;flex-direction:column;gap:0;flex-shrink:0;}
+.folder-reorder button{font-size:.8rem;padding:1px;line-height:1;}
 .folder-move-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--border);cursor:pointer;}
 .folder-move-row .n{flex:1;font-weight:800;font-size:.88rem;}
 .folder-move-row .c{color:var(--ink-soft);font-size:.72rem;font-weight:700;}
@@ -328,7 +331,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.1.1</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.2.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1408,13 +1411,28 @@ function renderFolderManageList(){
   var a=al(curAlbum);
   var h='';
   if(!a.folders.length){ h='<div class="modal-sub">Aucun dossier pour l\'instant.</div>'; }
-  a.folders.forEach(function(f){
+  a.folders.forEach(function(f,i){
     var n=a.photos.filter(function(p){ return p.folderId===f.id; }).length;
-    h+='<div class="folder-manage-row"><span class="n">📁 '+esc(f.name)+'</span><span class="c">'+n+' photo'+(n!==1?'s':'')+'</span>'
+    h+='<div class="folder-manage-row">'
+      +'<span class="folder-reorder">'
+      +'<button onclick="moveFolder(\''+f.id+'\',-1)" '+(i===0?'disabled':'')+'>⬆️</button>'
+      +'<button onclick="moveFolder(\''+f.id+'\',1)" '+(i===a.folders.length-1?'disabled':'')+'>⬇️</button>'
+      +'</span>'
+      +'<span class="n">📁 '+esc(f.name)+'</span><span class="c">'+n+' photo'+(n!==1?'s':'')+'</span>'
       +'<button onclick="renameFolderPrompt(\''+f.id+'\')">✏️</button>'
       +'<button onclick="deleteFolderConfirm(\''+f.id+'\')">🗑️</button></div>';
   });
   document.getElementById('folder-manage-list').innerHTML=h;
+}
+function moveFolder(id, delta){
+  var a=al(curAlbum);
+  var i=a.folders.findIndex(function(f){ return f.id===id; });
+  var j=i+delta;
+  if(i<0 || j<0 || j>=a.folders.length) return;
+  var tmp=a.folders[i]; a.folders[i]=a.folders[j]; a.folders[j]=tmp;
+  saveAlbumMeta(a);
+  renderFolderManageList();
+  renderFolderStrip();
 }
 function openMoveToFolderSheet(){
   if(!photoSelected.length) return;
