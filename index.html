@@ -299,7 +299,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.5.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.6.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -526,7 +526,7 @@ img{-webkit-user-drag:none;}
     <div id="bk-autobook-styles" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Mises en page préférées (optionnel, jusqu'à 4)</div>
-    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem">⬇️ Fais défiler pour tout voir (37 mises en page, dont des rondes et hexagonales tout en bas). Aucune sélection = l'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l'ordre).</div>
+    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem">⬇️ Fais défiler pour tout voir (39 mises en page, dont des rondes et hexagonales tout en bas). Aucune sélection = l'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l'ordre).</div>
     <div id="bk-autobook-layouts" class="bk-autolayout-grid"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Police</div>
@@ -2041,7 +2041,14 @@ var BK_STYLES = [
   { key:'pastel', label:'Pastel doux', bg:'#F7F5FC', color:'#241E38', accent:'#00C2A8', font:'Nunito', border:0, shadow:false },
   { key:'polaroid', label:'Polaroid', bg:'#F3EEFB', color:'#241E38', accent:'#7B2FF7', font:'Caveat', border:8, shadow:true },
   { key:'tropical', label:'Vif tropical', bg:'#FFD93D', color:'#241E38', accent:'#FF5A6E', font:'Bebas Neue', border:0, shadow:true },
-  { key:'ocean', label:'Océan', bg:'#00C2A8', color:'#FFFFFF', accent:'#241E38', font:'Montserrat', border:4, shadow:false }
+  { key:'ocean', label:'Océan', bg:'#00C2A8', color:'#FFFFFF', accent:'#241E38', font:'Montserrat', border:4, shadow:false },
+  { key:'sunset', label:'Coucher de soleil', bg:'#FF8C69', color:'#2B1810', accent:'#FFD93D', font:'Oswald', border:0, shadow:true },
+  { key:'mono', label:'Noir intense', bg:'#1A1A1A', color:'#FFFFFF', accent:'#CCCCCC', font:'Roboto Mono', border:2, shadow:false },
+  { key:'rose', label:'Rose romantique', bg:'#FFE4E9', color:'#5C2A3A', accent:'#FF5A6E', font:'Dancing Script', border:0, shadow:false },
+  { key:'forest', label:'Forêt profonde', bg:'#1B4332', color:'#FFFFFF', accent:'#95D5B2', font:'Montserrat', border:4, shadow:true },
+  { key:'sand', label:'Sable du désert', bg:'#EDE0D4', color:'#5C4A3A', accent:'#D4A373', font:'Lobster', border:0, shadow:false },
+  { key:'midnight', label:'Bleu minuit', bg:'#0B1D3A', color:'#FFFFFF', accent:'#5B8DEF', font:'Playfair Display', border:6, shadow:true },
+  { key:'coral', label:'Corail vif', bg:'#FF6B6B', color:'#FFFFFF', accent:'#FFE66D', font:'Bebas Neue', border:0, shadow:true }
 ];
 function bkBuildElementsForLayout(layout, style){
   var photoIdx=0;
@@ -2269,7 +2276,9 @@ function bkTplCellHTML(tpl, i){
   tpl.elements.forEach(function(e){
     var bg = e.type==='text' ? 'transparent' : (e.type==='shape' ? e.color : (e.type==='icon' ? 'transparent' : '#B9A6EE'));
     var brd = (e.type==='text' || e.type==='icon') ? 'none' : '1px solid rgba(0,0,0,.08)';
-    mini+='<div style="position:absolute;left:'+(e.x-e.w/2)+'%;top:'+(e.y-e.h/2)+'%;width:'+e.w+'%;height:'+e.h+'%;background:'+bg+';border:'+brd+';border-radius:2px;transform:rotate('+(e.rot||0)+'deg)"></div>';
+    var radius = e.round ? '50%' : '2px';
+    var clip = e.hex ? 'clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);' : '';
+    mini+='<div style="position:absolute;left:'+(e.x-e.w/2)+'%;top:'+(e.y-e.h/2)+'%;width:'+e.w+'%;height:'+e.h+'%;background:'+bg+';border:'+brd+';border-radius:'+radius+';'+clip+'transform:rotate('+(e.rot||0)+'deg)"></div>';
   });
   return '<div class="bk-tpl-cell" onclick="bkApplyTemplate('+i+')">'
     +'<div class="bk-tpl-preview" style="background:'+tpl.bg+'">'+mini+'</div>'
@@ -2393,7 +2402,7 @@ function openBookListSheet(){
 function closeBookListSheet(){ document.getElementById('bk-booklist-sheet').classList.remove('on'); }
 
 /* ── Assistant "Livre automatique" ── */
-var BK_AUTO_STYLE_CHOICES=['clean','night','tropical','pastel']; // 4 styles, comme demandé (pas les 6)
+var BK_AUTO_STYLE_CHOICES=BK_STYLES.map(function(s){ return s.key; }); // tous les styles disponibles (13)
 var bkAutoState=null;
 function openAutoBookSheet(){
   bkAlbum=al(curAlbum);
@@ -2488,7 +2497,8 @@ function bkRenderAutoBookUI(){
     var mini='';
     l.slots.forEach(function(s){
       var isPhoto=s.type==='photo';
-      mini+='<div class="box" style="left:'+(s.x-s.w/2)+'%;top:'+(s.y-s.h/2)+'%;width:'+s.w+'%;height:'+s.h+'%;background:'+(isPhoto?'#B9A6EE':'transparent')+';transform:rotate('+(s.rot||0)+'deg)"></div>';
+      var shapeStyle = s.round ? 'border-radius:50%;' : (s.hex ? 'clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);' : '');
+      mini+='<div class="box" style="left:'+(s.x-s.w/2)+'%;top:'+(s.y-s.h/2)+'%;width:'+s.w+'%;height:'+s.h+'%;background:'+(isPhoto?'#B9A6EE':'transparent')+';transform:rotate('+(s.rot||0)+'deg);'+shapeStyle+'"></div>';
     });
     layoutsH+='<div class="bk-autolayout-cell'+(on?' on':'')+'" onclick="bkAutoToggleLayout(\''+l.key+'\')">'+mini+(on?'<div class="bk-autolayout-check">✓</div>':'')+'</div>';
   });
