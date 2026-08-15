@@ -331,7 +331,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.2.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.3.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -2593,9 +2593,29 @@ function bkPlanAutoPagesStrict(pageCount, preferredLayouts){
   }
   return plan;
 }
+function bkPhotosInFolderOrder(a){
+  // Respecte l'ordre visuel des dossiers (celui que tu peux réarranger avec les
+  // flèches ⬆️⬇️) : d'abord les photos non rangées, puis chaque dossier dans
+  // l'ordre où il apparaît dans la bande — au lieu de l'ordre d'ajout brut.
+  ensureFolders(a);
+  var byFolder={}, unassigned=[];
+  a.photos.forEach(function(p){
+    if(p.folderId){
+      if(!byFolder[p.folderId]) byFolder[p.folderId]=[];
+      byFolder[p.folderId].push(p);
+    } else {
+      unassigned.push(p);
+    }
+  });
+  var ordered=unassigned.slice();
+  a.folders.forEach(function(f){
+    if(byFolder[f.id]) ordered=ordered.concat(byFolder[f.id]);
+  });
+  return ordered;
+}
 function bkAutoGenerateBook(opts){
   // opts: {mode, pageCount, styleKey, fontFamily, fontSize, mainColor, emojis, preferredLayouts}
-  var photos=bkAlbum.photos;
+  var photos=bkPhotosInFolderOrder(bkAlbum);
   var isEmpty=opts.mode==='empty';
   var hasPreferred=opts.preferredLayouts && opts.preferredLayouts.length>0;
   var baseStyle=BK_STYLES.find(function(s){ return s.key===opts.styleKey; }) || BK_STYLES[0];
