@@ -125,6 +125,25 @@ img{-webkit-user-drag:none;}
 .photo-multi-actionbar #photo-multi-count{flex:1;font-weight:800;font-size:.82rem;color:var(--ink-soft);}
 .pi.selectable{cursor:pointer;}
 .pi-selcheck{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.85);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:transparent;z-index:3;}
+#pgrid.grouped{display:block;padding:0;columns:unset;}
+.photo-day-section{margin-bottom:6px;}
+.photo-day-header{display:flex;align-items:baseline;gap:8px;padding:14px 14px 8px;cursor:pointer;user-select:none;}
+.photo-day-header .t{font-weight:800;font-size:.9rem;color:var(--ink);text-transform:capitalize;}
+.photo-day-header .n{color:var(--ink-soft);font-size:.75rem;font-weight:700;}
+.photo-day-header .chev{margin-left:auto;color:var(--ink-soft);font-size:.75rem;transition:transform .15s;}
+.folder-strip-row{display:flex;gap:8px;align-items:center;margin:0 16px 10px;}
+.folder-strip{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+.folder-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--border);border-radius:50px;padding:8px 14px;font-size:.78rem;font-weight:800;color:var(--ink-soft);white-space:nowrap;}
+.folder-chip.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+.folder-manage-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);}
+.folder-manage-row .n{flex:1;font-weight:800;font-size:.85rem;}
+.folder-manage-row .c{color:var(--ink-soft);font-size:.72rem;font-weight:700;}
+.folder-manage-row button{background:none;border:none;font-size:1rem;padding:4px;}
+.folder-move-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--border);cursor:pointer;}
+.folder-move-row .n{flex:1;font-weight:800;font-size:.88rem;}
+.folder-move-row .c{color:var(--ink-soft);font-size:.72rem;font-weight:700;}
+.photo-day-section.collapsed .chev{transform:rotate(-90deg);}
+.photo-day-section.collapsed .photos-grid{display:none;}
 .pi.selected .pi-selcheck{background:var(--primary);border-color:var(--primary);color:#fff;}
 .pi.selected{outline:3px solid var(--primary);outline-offset:-3px;}
 .photo-search-row input:focus{outline:none;border-color:var(--primary-2);}
@@ -309,7 +328,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.9.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.1.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -334,8 +353,13 @@ img{-webkit-user-drag:none;}
     <input type="file" id="fup" multiple accept="image/*" style="display:none" onchange="addFiles(this.files)">
   </div>
   <div id="upload-progress-holder"></div>
+  <div class="folder-strip-row">
+    <div class="folder-strip" id="folder-strip"></div>
+    <button class="photo-delall-btn" onclick="openFolderManageSheet()" title="Gérer les dossiers">📁</button>
+  </div>
   <div class="photo-search-row">
     <input type="text" id="photo-search" placeholder="Rechercher par nom de fichier ou date..." oninput="renderPhotos()">
+    <button class="photo-delall-btn" id="photo-group-btn" onclick="togglePhotoGroupByDay()" title="Ranger par jour">📅</button>
     <button class="photo-delall-btn" id="photo-select-btn" onclick="togglePhotoSelectMode()" title="Sélectionner">☑️</button>
     <button class="photo-delall-btn" onclick="deleteAllPhotos()" title="Tout supprimer">🗑️</button>
   </div>
@@ -343,6 +367,7 @@ img{-webkit-user-drag:none;}
   <div class="photo-multi-actionbar" id="photo-multi-actionbar">
     <span id="photo-multi-count">0 sélectionnée(s)</span>
     <button class="mbtn mbtn-cancel" onclick="togglePhotoSelectMode()">Annuler</button>
+    <button class="mbtn mbtn-ok" id="photo-multi-move-btn" onclick="openMoveToFolderSheet()" disabled>📁 Dossier</button>
     <button class="mbtn mbtn-danger" id="photo-multi-del-btn" onclick="deleteSelectedPhotos()" disabled>🗑️ Supprimer</button>
   </div>
 </div>
@@ -568,6 +593,26 @@ img{-webkit-user-drag:none;}
   </div>
 </div>
 
+<!-- Feuille: gestion des dossiers -->
+<div class="bk-sheet" id="folder-manage-sheet">
+  <div class="bk-sheet-box">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">📁 Mes dossiers</h3>
+    <div id="folder-manage-list"></div>
+    <div class="bk-book-add" onclick="createFolderPrompt()"><div class="plus">+</div><span>Nouveau dossier</span></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeFolderManageSheet()">Fermer</button></div>
+  </div>
+</div>
+
+<!-- Feuille: déplacer les photos sélectionnées vers un dossier -->
+<div class="bk-sheet" id="folder-move-sheet">
+  <div class="bk-sheet-box">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">📁 Déplacer vers…</h3>
+    <div id="folder-move-list"></div>
+    <div class="bk-book-add" onclick="createFolderPrompt(true)"><div class="plus">+</div><span>Nouveau dossier</span></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeMoveToFolderSheet()">Annuler</button></div>
+  </div>
+</div>
+
 <!-- Feuille: recadrage libre -->
 <div class="bk-sheet" id="bk-crop-sheet">
   <div class="bk-sheet-box">
@@ -772,14 +817,14 @@ function saveAlbumMeta(a){
   dbPut('albums', {
     id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
     createdAt:a.createdAt, photoIds:a.photos.map(function(p){ return p.id; }),
-    books:a.books, book:a.book, places:a.places
+    books:a.books, book:a.book, places:a.places, folders:a.folders
   });
 }
 // Sauvegarde UNIQUEMENT une photo (léger même si l'album a 1000 photos)
 function savePhoto(albumId, p){
   dbPut('photos', {
     id:p.id, albumId:albumId, full:p.full, thumb:p.thumb, w:p.w, h:p.h, cap:p.cap, liked:p.liked,
-    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource
+    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource, folderId:p.folderId
   });
 }
 function toast(msg){
@@ -1241,6 +1286,7 @@ function bkMaybeShowHelpOnFirstLaunch(){
 function openAlbum(id){
   curAlbum=id;
   var a=al(id);
+  ensureFolders(a);
   document.getElementById('ah-title').textContent=a.title;
   document.getElementById('ah-meta').textContent=a.loc+' · '+a.date+' · '+a.photos.length+' photo'+(a.photos.length!==1?'s':'');
   var hi=document.getElementById('ah-img'), he=document.getElementById('ah-emoji');
@@ -1249,9 +1295,11 @@ function openAlbum(id){
   document.getElementById('upload-progress-holder').innerHTML='';
   document.getElementById('photo-search').value='';
   photoSelectMode=false; photoSelected=[];
+  bkCurrentFolderId=null;
   document.getElementById('photo-select-btn').classList.remove('active');
   document.getElementById('photo-multi-actionbar').classList.remove('on');
   document.getElementById('pg-album').style.paddingBottom='';
+  renderFolderStrip();
   renderPhotos();
   go('album');
 }
@@ -1279,15 +1327,164 @@ function bkPhotoMatchesSearch(p, query){
   }
   return false;
 }
+/* ══════════════════ DOSSIERS PERSONNALISÉS DANS UN ALBUM ══════════════════
+   Un dossier a juste un nom (choisi par l'utilisateur) ; chaque photo peut
+   appartenir à au plus un dossier (photo.folderId). "Toutes" (folderId=null
+   dans bkCurrentFolderId) montre TOUJOURS toutes les photos, dossiers ou pas —
+   les dossiers sont une vue filtrée pratique, pas un rangement exclusif qui
+   ferait disparaître des photos de la vue principale. */
+var bkCurrentFolderId=null;
+function ensureFolders(a){ if(!Array.isArray(a.folders)) a.folders=[]; }
+function renderFolderStrip(){
+  var a=al(curAlbum);
+  ensureFolders(a);
+  var total=a.photos.length;
+  var h='<div class="folder-chip'+(bkCurrentFolderId===null?' on':'')+'" onclick="selectFolder(null)">Toutes ('+total+')</div>';
+  a.folders.forEach(function(f){
+    var n=a.photos.filter(function(p){ return p.folderId===f.id; }).length;
+    h+='<div class="folder-chip'+(bkCurrentFolderId===f.id?' on':'')+'" onclick="selectFolder(\''+f.id+'\')">📁 '+esc(f.name)+' ('+n+')</div>';
+  });
+  document.getElementById('folder-strip').innerHTML=h;
+}
+function selectFolder(id){
+  bkCurrentFolderId=id;
+  renderFolderStrip();
+  renderPhotos();
+}
+function createFolderPrompt(forMove){
+  var name=prompt('Nom du nouveau dossier ?','');
+  if(name===null) return;
+  name=name.trim();
+  if(!name){ toast('Nom vide, dossier non créé'); return; }
+  var a=al(curAlbum);
+  ensureFolders(a);
+  var folder={id:gid(), name:name};
+  a.folders.push(folder);
+  saveAlbumMeta(a);
+  if(forMove){
+    moveSelectedPhotosToFolder(folder.id);
+  } else {
+    renderFolderManageList();
+    renderFolderStrip();
+    toast('📁 Dossier "'+name+'" créé');
+  }
+}
+function renameFolderPrompt(id){
+  var a=al(curAlbum);
+  var f=a.folders.find(function(x){ return x.id===id; });
+  if(!f) return;
+  var name=prompt('Renommer le dossier', f.name);
+  if(name===null) return;
+  name=name.trim();
+  if(!name) return;
+  f.name=name;
+  saveAlbumMeta(a);
+  renderFolderManageList();
+  renderFolderStrip();
+}
+function deleteFolderConfirm(id){
+  var a=al(curAlbum);
+  var f=a.folders.find(function(x){ return x.id===id; });
+  if(!f) return;
+  var n=a.photos.filter(function(p){ return p.folderId===id; }).length;
+  if(!confirm('Supprimer le dossier "'+f.name+'" ? '+(n>0?'Les '+n+' photo'+(n>1?'s':'')+' à l\'intérieur ne seront PAS supprimées, juste sorties du dossier.':'')))return;
+  a.photos.forEach(function(p){ if(p.folderId===id){ p.folderId=null; savePhoto(a.id,p); } });
+  a.folders=a.folders.filter(function(x){ return x.id!==id; });
+  saveAlbumMeta(a);
+  if(bkCurrentFolderId===id) bkCurrentFolderId=null;
+  renderFolderManageList();
+  renderFolderStrip();
+  renderPhotos();
+  toast('Dossier supprimé (photos conservées)');
+}
+function openFolderManageSheet(){
+  var a=al(curAlbum);
+  ensureFolders(a);
+  renderFolderManageList();
+  document.getElementById('folder-manage-sheet').classList.add('on');
+}
+function closeFolderManageSheet(){ document.getElementById('folder-manage-sheet').classList.remove('on'); }
+function renderFolderManageList(){
+  var a=al(curAlbum);
+  var h='';
+  if(!a.folders.length){ h='<div class="modal-sub">Aucun dossier pour l\'instant.</div>'; }
+  a.folders.forEach(function(f){
+    var n=a.photos.filter(function(p){ return p.folderId===f.id; }).length;
+    h+='<div class="folder-manage-row"><span class="n">📁 '+esc(f.name)+'</span><span class="c">'+n+' photo'+(n!==1?'s':'')+'</span>'
+      +'<button onclick="renameFolderPrompt(\''+f.id+'\')">✏️</button>'
+      +'<button onclick="deleteFolderConfirm(\''+f.id+'\')">🗑️</button></div>';
+  });
+  document.getElementById('folder-manage-list').innerHTML=h;
+}
+function openMoveToFolderSheet(){
+  if(!photoSelected.length) return;
+  var a=al(curAlbum);
+  ensureFolders(a);
+  var h='<div class="folder-move-row" onclick="moveSelectedPhotosToFolder(null)"><span class="n">🚫 Aucun dossier (retirer)</span></div>';
+  a.folders.forEach(function(f){
+    h+='<div class="folder-move-row" onclick="moveSelectedPhotosToFolder(\''+f.id+'\')"><span class="n">📁 '+esc(f.name)+'</span></div>';
+  });
+  document.getElementById('folder-move-list').innerHTML=h;
+  document.getElementById('folder-move-sheet').classList.add('on');
+}
+function closeMoveToFolderSheet(){ document.getElementById('folder-move-sheet').classList.remove('on'); }
+function moveSelectedPhotosToFolder(folderId){
+  var a=al(curAlbum);
+  var idsSet={}; photoSelected.forEach(function(id){ idsSet[id]=true; });
+  var moved=0;
+  a.photos.forEach(function(p){ if(idsSet[p.id]){ p.folderId=folderId; savePhoto(a.id,p); moved++; } });
+  closeMoveToFolderSheet();
+  photoSelectMode=false; photoSelected=[];
+  document.getElementById('photo-select-btn').classList.remove('active');
+  document.getElementById('photo-multi-actionbar').classList.remove('on');
+  document.getElementById('pg-album').style.paddingBottom='';
+  renderFolderStrip();
+  renderPhotos();
+  toast(folderId ? ('📁 '+moved+' photo'+(moved>1?'s':'')+' déplacée'+(moved>1?'s':'')) : (moved+' photo'+(moved>1?'s':'')+' retirée'+(moved>1?'s':'')+' du dossier'));
+}
+
+var photoGroupByDay=false, photoCollapsedDays={};
+function togglePhotoGroupByDay(){
+  photoGroupByDay=!photoGroupByDay;
+  document.getElementById('photo-group-btn').classList.toggle('active', photoGroupByDay);
+  document.getElementById('pgrid').classList.toggle('grouped', photoGroupByDay);
+  renderPhotos();
+}
+function bkDayKeyFor(p){
+  if(!p.takenAt) return 'inconnu';
+  var d=new Date(p.takenAt);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function bkGroupPhotosByDay(list){
+  var groups=[], byKey={};
+  list.forEach(function(p){
+    var key=bkDayKeyFor(p);
+    if(!byKey[key]){
+      var label = p.takenAt ? bkFormatDate(p.takenAt) : 'Date inconnue';
+      byKey[key]={ key:key, label:label, sortVal: p.takenAt||-1, photos:[] };
+      groups.push(byKey[key]);
+    }
+    byKey[key].photos.push(p);
+  });
+  groups.sort(function(a,b){ return b.sortVal-a.sortVal; }); // le plus récent en premier
+  return groups;
+}
+function togglePhotoDaySection(key){
+  photoCollapsedDays[key]=!photoCollapsedDays[key];
+  var el=document.querySelector('.photo-day-section[data-key="'+key+'"]');
+  if(el) el.classList.toggle('collapsed', photoCollapsedDays[key]);
+}
 function renderPhotos(){
   var a=al(curAlbum);
   var grid=document.getElementById('pgrid');
   grid.innerHTML='';
   var query=(document.getElementById('photo-search').value||'').trim().toLowerCase();
   var list=query ? a.photos.filter(function(p){ return bkPhotoMatchesSearch(p, query); }) : a.photos;
+  if(bkCurrentFolderId!==null){
+    list=list.filter(function(p){ return p.folderId===bkCurrentFolderId; });
+  }
   var myToken=++_renderPhotosToken; // annule les rendus précédents si on change d'album vite
   var CHUNK=24;
-  var i=0;
   function photoHTML(p){
     if(photoSelectMode){
       var sel=photoSelected.indexOf(p.id)>-1;
@@ -1305,6 +1502,41 @@ function renderPhotos(){
       +(p.cap?'<div class="pi-cap">'+esc(p.cap)+'</div>':'')
       +'</div>';
   }
+
+  if(photoGroupByDay){
+    var groups=bkGroupPhotosByDay(list);
+    var gi=0, pi=0;
+    function stepGrouped(){
+      if(myToken!==_renderPhotosToken) return;
+      var processed=0;
+      while(gi<groups.length && processed<CHUNK){
+        var g=groups[gi];
+        if(pi===0){
+          var collapsed=!!photoCollapsedDays[g.key];
+          var sectionH='<div class="photo-day-section'+(collapsed?' collapsed':'')+'" data-key="'+g.key+'">'
+            +'<div class="photo-day-header" onclick="togglePhotoDaySection(\''+g.key+'\')">'
+            +'<span class="t">'+esc(g.label)+'</span><span class="n">'+g.photos.length+' photo'+(g.photos.length!==1?'s':'')+'</span>'
+            +'<span class="chev">▼</span></div>'
+            +'<div class="photos-grid"></div></div>';
+          grid.insertAdjacentHTML('beforeend', sectionH);
+        }
+        var sectionEl=grid.querySelector('.photo-day-section[data-key="'+g.key+'"] .photos-grid');
+        var end=Math.min(pi+(CHUNK-processed), g.photos.length);
+        var h='';
+        for(;pi<end;pi++) h+=photoHTML(g.photos[pi]);
+        sectionEl.insertAdjacentHTML('beforeend', h);
+        processed=CHUNK; // un groupe entier traité par frame suffit, simple et robuste
+        if(pi>=g.photos.length){ gi++; pi=0; }
+      }
+      if(gi<groups.length){
+        (window.requestAnimationFrame||setTimeout)(stepGrouped);
+      }
+    }
+    stepGrouped();
+    return;
+  }
+
+  var i=0;
   function step(){
     if(myToken!==_renderPhotosToken) return; // un rendu plus récent a pris le relais
     var end=Math.min(i+CHUNK, list.length);
@@ -1341,6 +1573,7 @@ function updatePhotoMultiBar(){
   var n=photoSelected.length;
   document.getElementById('photo-multi-count').textContent=n+' sélectionnée'+(n!==1?'s':'');
   document.getElementById('photo-multi-del-btn').disabled=(n===0);
+  document.getElementById('photo-multi-move-btn').disabled=(n===0);
 }
 function deleteSelectedPhotos(){
   var n=photoSelected.length;
@@ -1357,6 +1590,7 @@ function deleteSelectedPhotos(){
   document.getElementById('photo-select-btn').classList.remove('active');
   document.getElementById('photo-multi-actionbar').classList.remove('on');
   document.getElementById('pg-album').style.paddingBottom='';
+  renderFolderStrip();
   renderPhotos();
   refreshAlbumHeader();
   toast('🗑️ '+n+' photo'+(n>1?'s':'')+' supprimée'+(n>1?'s':''));
@@ -1368,6 +1602,7 @@ function quickDelPhoto(id){
   a.photos=a.photos.filter(function(p){ return p.id!==id; });
   dbDelete('photos', id);
   saveAlbumMeta(a);
+  renderFolderStrip();
   renderPhotos();
   refreshAlbumHeader();
   toast('Photo supprimée');
@@ -1383,6 +1618,8 @@ function deleteAllPhotos(){
   dbDeleteMany('photos', ids);
   saveAlbumMeta(a);
   document.getElementById('photo-search').value='';
+  bkCurrentFolderId=null;
+  renderFolderStrip();
   renderPhotos();
   refreshAlbumHeader();
   toast('🗑️ '+n+' photo'+(n>1?'s':'')+' supprimée'+(n>1?'s':''));
@@ -1771,6 +2008,7 @@ function addFiles(files){
     flushPending();
     holder.innerHTML='';
     saveAlbumMeta(a); // met à jour la liste ordonnée des ids (léger, pas d'images dedans)
+    renderFolderStrip();
     renderPhotos();
     refreshAlbumHeader();
     var msg=failed
@@ -4079,7 +4317,7 @@ initDB(function(){
           id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
           createdAt:a.createdAt||0,
           photos:photos,
-          books:a.books, book:a.book, places:a.places
+          books:a.books, book:a.book, places:a.places, folders:a.folders
         };
       }).sort(function(x,y){ return y.createdAt-x.createdAt; });
 
