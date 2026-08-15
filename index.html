@@ -299,7 +299,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.6.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.8.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -526,7 +526,7 @@ img{-webkit-user-drag:none;}
     <div id="bk-autobook-styles" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Mises en page préférées (optionnel, jusqu'à 4)</div>
-    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem">⬇️ Fais défiler pour tout voir (39 mises en page, dont des rondes et hexagonales tout en bas). Aucune sélection = l'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l'ordre).</div>
+    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem">⬇️ Fais défiler pour tout voir (49 mises en page : carrées, rondes, hexagonales, étoile, triangle, décagonale...). Aucune sélection = l'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l'ordre).</div>
     <div id="bk-autobook-layouts" class="bk-autolayout-grid"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Police</div>
@@ -2033,6 +2033,55 @@ var BK_LAYOUTS = [
     {type:'photo', x:50,y:30,w:37,h:26,rot:0, hex:true, forceShadow:true},
     {type:'photo', x:28,y:58,w:37,h:26,rot:0, hex:true, forceShadow:true},
     {type:'photo', x:72,y:58,w:37,h:26,rot:0, hex:true, forceShadow:true}
+  ]},
+  { key:'star-1', label:'Photo étoile (1 photo)', slots:[
+    {type:'photo', x:50,y:40,w:79,h:56,rot:0, star:true, forceShadow:true},
+    {type:'accent', x:83,y:70,w:12,h:12},
+    {type:'title', x:50,y:82,w:76,h:10, fontSize:26}
+  ]},
+  { key:'triangle-1', label:'Photo triangle (1 photo)', slots:[
+    {type:'photo', x:50,y:38,w:79,h:56,rot:0, triangle:true, forceShadow:true},
+    {type:'accent', x:83,y:68,w:12,h:12},
+    {type:'title', x:50,y:80,w:76,h:10, fontSize:26}
+  ]},
+  { key:'decagon-1', label:'Photo décagonale (1 photo)', slots:[
+    {type:'photo', x:50,y:40,w:79,h:56,rot:0, decagon:true, forceShadow:true},
+    {type:'accent', x:83,y:70,w:12,h:12},
+    {type:'title', x:50,y:82,w:76,h:10, fontSize:26}
+  ]},
+  { key:'shape-mix-3', label:'Trio de formes (3 photos)', slots:[
+    {type:'photo', x:28,y:28,w:38,h:27,rot:0, round:true, forceShadow:true},
+    {type:'photo', x:72,y:30,w:38,h:27,rot:0, star:true, forceShadow:true},
+    {type:'photo', x:50,y:68,w:38,h:27,rot:0, hex:true, forceShadow:true}
+  ]},
+  { key:'star-duo', label:'Duo étoile (2 photos)', slots:[
+    {type:'photo', x:26,y:38,w:42,h:30,rot:0, star:true, forceShadow:true},
+    {type:'photo', x:74,y:56,w:42,h:30,rot:0, star:true, forceShadow:true}
+  ]},
+  { key:'star-trio', label:'Trio étoile (3 photos)', slots:[
+    {type:'photo', x:50,y:30,w:37,h:26,rot:0, star:true, forceShadow:true},
+    {type:'photo', x:28,y:58,w:37,h:26,rot:0, star:true, forceShadow:true},
+    {type:'photo', x:72,y:58,w:37,h:26,rot:0, star:true, forceShadow:true}
+  ]},
+  { key:'triangle-duo', label:'Duo triangle (2 photos)', slots:[
+    {type:'photo', x:26,y:38,w:42,h:30,rot:0, triangle:true, forceShadow:true},
+    {type:'photo', x:74,y:56,w:42,h:30,rot:180, triangle:true, forceShadow:true}
+  ]},
+  { key:'triangle-quad', label:'Quatuor triangle (4 photos)', slots:[
+    {type:'photo', x:30,y:26,w:31,h:22,rot:0, triangle:true, forceShadow:true},
+    {type:'photo', x:70,y:26,w:31,h:22,rot:180, triangle:true, forceShadow:true},
+    {type:'photo', x:30,y:66,w:31,h:22,rot:180, triangle:true, forceShadow:true},
+    {type:'photo', x:70,y:66,w:31,h:22,rot:0, triangle:true, forceShadow:true}
+  ]},
+  { key:'decagon-duo', label:'Duo décagonale (2 photos)', slots:[
+    {type:'photo', x:26,y:38,w:42,h:30,rot:0, decagon:true, forceShadow:true},
+    {type:'photo', x:74,y:56,w:42,h:30,rot:0, decagon:true, forceShadow:true}
+  ]},
+  { key:'shape-mix-4', label:'Quatuor de formes (4 photos)', slots:[
+    {type:'photo', x:28,y:26,w:37,h:26,rot:0, round:true, forceShadow:true},
+    {type:'photo', x:72,y:26,w:37,h:26,rot:0, hex:true, forceShadow:true},
+    {type:'photo', x:28,y:68,w:37,h:26,rot:0, star:true, forceShadow:true},
+    {type:'photo', x:72,y:68,w:37,h:26,rot:0, triangle:true, forceShadow:true}
   ]}
 ];
 var BK_STYLES = [
@@ -2060,6 +2109,9 @@ function bkBuildElementsForLayout(layout, style){
       if(slot.forceShadow || style.shadow) el.shadow=true;
       if(slot.round) el.round=true;
       if(slot.hex) el.hex=true;
+      if(slot.star) el.star=true;
+      if(slot.triangle) el.triangle=true;
+      if(slot.decagon) el.decagon=true;
       return el;
     }
     if(slot.type==='title'){
@@ -2110,10 +2162,10 @@ function bkTemplatePhoto(tpl, idx){
    L'algorithme de répartition est testé isolément (2000+ cas) avant d'être
    branché ici. */
 var BK_AUTO_LAYOUT_BUCKETS = {
-  1: ['float-1','asym-1','single-card','side-title','banner','circle-1','hex-1'],
-  2: ['duo-h','duo-v','overlap-2','diag-2','circle-duo'],
-  3: ['trio','collage','cascade-3','triangle-3','polaroid-pile','giant-plus-two','vertical-triptych-3','hex-trio'],
-  4: ['grid4','big-strip','magazine-4','fan-4','photobooth-4','zigzag-4','spiral-4'],
+  1: ['float-1','asym-1','single-card','side-title','banner','circle-1','hex-1','star-1','triangle-1','decagon-1'],
+  2: ['duo-h','duo-v','overlap-2','diag-2','circle-duo','star-duo','triangle-duo','decagon-duo'],
+  3: ['trio','collage','cascade-3','triangle-3','polaroid-pile','giant-plus-two','vertical-triptych-3','hex-trio','shape-mix-3','star-trio'],
+  4: ['grid4','big-strip','magazine-4','fan-4','photobooth-4','zigzag-4','spiral-4','triangle-quad','shape-mix-4'],
   5: ['bouquet-5','stairs-5','filmstrip-5'],
   6: ['grid6','wall-6','broken-grid-6','confetti-6'],
   9: ['grid9']
@@ -2277,7 +2329,11 @@ function bkTplCellHTML(tpl, i){
     var bg = e.type==='text' ? 'transparent' : (e.type==='shape' ? e.color : (e.type==='icon' ? 'transparent' : '#B9A6EE'));
     var brd = (e.type==='text' || e.type==='icon') ? 'none' : '1px solid rgba(0,0,0,.08)';
     var radius = e.round ? '50%' : '2px';
-    var clip = e.hex ? 'clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);' : '';
+    var clip = '';
+    if(e.hex) clip='clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);';
+    else if(e.star) clip='clip-path:'+bkShapeClipPath('star')+';';
+    else if(e.triangle) clip='clip-path:'+bkShapeClipPath('triangle')+';';
+    else if(e.decagon) clip='clip-path:'+bkShapeClipPath('decagon')+';';
     mini+='<div style="position:absolute;left:'+(e.x-e.w/2)+'%;top:'+(e.y-e.h/2)+'%;width:'+e.w+'%;height:'+e.h+'%;background:'+bg+';border:'+brd+';border-radius:'+radius+';'+clip+'transform:rotate('+(e.rot||0)+'deg)"></div>';
   });
   return '<div class="bk-tpl-cell" onclick="bkApplyTemplate('+i+')">'
@@ -2497,7 +2553,12 @@ function bkRenderAutoBookUI(){
     var mini='';
     l.slots.forEach(function(s){
       var isPhoto=s.type==='photo';
-      var shapeStyle = s.round ? 'border-radius:50%;' : (s.hex ? 'clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);' : '');
+      var shapeStyle = '';
+      if(s.round) shapeStyle='border-radius:50%;';
+      else if(s.hex) shapeStyle='clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);';
+      else if(s.star) shapeStyle='clip-path:'+bkShapeClipPath('star')+';';
+      else if(s.triangle) shapeStyle='clip-path:'+bkShapeClipPath('triangle')+';';
+      else if(s.decagon) shapeStyle='clip-path:'+bkShapeClipPath('decagon')+';';
       mini+='<div class="box" style="left:'+(s.x-s.w/2)+'%;top:'+(s.y-s.h/2)+'%;width:'+s.w+'%;height:'+s.h+'%;background:'+(isPhoto?'#B9A6EE':'transparent')+';transform:rotate('+(s.rot||0)+'deg);'+shapeStyle+'"></div>';
     });
     layoutsH+='<div class="bk-autolayout-cell'+(on?' on':'')+'" onclick="bkAutoToggleLayout(\''+l.key+'\')">'+mini+(on?'<div class="bk-autolayout-check">✓</div>':'')+'</div>';
@@ -2666,6 +2727,7 @@ function bkPhotoById(id){
 function bkShapeClipPath(shape){
   if(shape==='triangle') return 'polygon(50% 0%, 0% 100%, 100% 100%)';
   if(shape==='star') return 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+  if(shape==='decagon') return 'polygon(50.00% 0.00%, 79.39% 9.55%, 97.55% 34.55%, 97.55% 65.45%, 79.39% 90.45%, 50.00% 100.00%, 20.61% 90.45%, 2.45% 65.45%, 2.45% 34.55%, 20.61% 9.55%)';
   return 'none';
 }
 function bkFilterCSS(f){
@@ -2675,7 +2737,12 @@ function bkFilterCSS(f){
 function bkElementInnerHTML(el){
   var borderStyle = (el.border && el.border.width>0) ? ('border:'+el.border.width+'px solid '+el.border.color+';') : '';
   var radiusStyle = el.round ? 'border-radius:50%;' : '';
-  var clipStyle = el.hex ? 'clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);' : '';
+  var HEX_CLIP='polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)';
+  var clipStyle='';
+  if(el.hex) clipStyle='clip-path:'+HEX_CLIP+';';
+  else if(el.star) clipStyle='clip-path:'+bkShapeClipPath('star')+';';
+  else if(el.triangle) clipStyle='clip-path:'+bkShapeClipPath('triangle')+';';
+  else if(el.decagon) clipStyle='clip-path:'+bkShapeClipPath('decagon')+';';
   if(el.type==='photo'){
     var ph=bkPhotoById(el.photoId);
     var src = el.mapSnapshot || el.bgRemoved || (ph?bkPhotoSrc(ph,'full'):'');
@@ -3537,6 +3604,31 @@ function bkHexPath(ctx, w, h){
   ctx.lineTo(-0.5*w,0);
   ctx.closePath();
 }
+function bkDecagonPath(ctx, w, h){
+  var N=10;
+  ctx.beginPath();
+  for(var i=0;i<N;i++){
+    var angle=(-90 + i*(360/N)) * Math.PI/180;
+    var x=Math.cos(angle)*w/2, y=Math.sin(angle)*h/2;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+}
+function bkPhotoClipShape(el){
+  if(el.round) return 'round';
+  if(el.hex) return 'hex';
+  if(el.star) return 'star';
+  if(el.triangle) return 'triangle';
+  if(el.decagon) return 'decagon';
+  return null;
+}
+function bkApplyPhotoClip(ctx, shape, w, h){
+  if(shape==='round'){ ctx.beginPath(); ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2); }
+  else if(shape==='hex'){ bkHexPath(ctx, w, h); }
+  else if(shape==='star'){ bkShapePath(ctx, 'star', w, h); }
+  else if(shape==='triangle'){ bkShapePath(ctx, 'triangle', w, h); }
+  else if(shape==='decagon'){ bkDecagonPath(ctx, w, h); }
+}
 function bkDrawSingleElement(ctx, el, w, h, PXW, imgMap){
   if(el.shadow){ ctx.shadowColor='rgba(0,0,0,.4)'; ctx.shadowBlur=PXW*0.012; ctx.shadowOffsetY=PXW*0.005; }
   if(el.type==='photo'){
@@ -3551,25 +3643,20 @@ function bkDrawSingleElement(ctx, el, w, h, PXW, imgMap){
         if(srcRatio>dstRatio){ sh=img.height; sw=sh*dstRatio; sx=(img.width-sw)/2; sy=0; }
         else { sw=img.width; sh=sw/dstRatio; sx=0; sy=(img.height-sh)/2; }
       }
-      if(el.round){
+      var clipShape=bkPhotoClipShape(el);
+      if(clipShape){
         ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);
-        ctx.clip();
-      } else if(el.hex){
-        ctx.save();
-        bkHexPath(ctx, w, h);
+        bkApplyPhotoClip(ctx, clipShape, w, h);
         ctx.clip();
       }
       if(el.filter) ctx.filter='brightness('+el.filter.brightness+'%) contrast('+el.filter.contrast+'%) saturate('+el.filter.saturate+'%) grayscale('+el.filter.grayscale+'%)';
       ctx.drawImage(img, sx,sy,sw,sh, -w/2,-h/2,w,h);
       ctx.filter='none';
-      if(el.round || el.hex) ctx.restore();
+      if(clipShape) ctx.restore();
       if(el.border && el.border.width>0){
         ctx.shadowColor='transparent';
         ctx.strokeStyle=el.border.color; ctx.lineWidth=el.border.width*(PXW/1000);
-        if(el.round){ ctx.beginPath(); ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2); ctx.stroke(); }
-        else if(el.hex){ bkHexPath(ctx, w, h); ctx.stroke(); }
+        if(clipShape){ bkApplyPhotoClip(ctx, clipShape, w, h); ctx.stroke(); }
         else ctx.strokeRect(-w/2,-h/2,w,h);
       }
     }
