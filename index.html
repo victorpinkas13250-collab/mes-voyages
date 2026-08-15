@@ -57,6 +57,8 @@ img{-webkit-user-drag:none;}
 .modal-btns{display:flex;gap:10px;margin-top:22px;}
 .mbtn{flex:1;padding:14px;border:none;border-radius:50px;font-weight:800;font-size:.95rem;}
 .mbtn-ok{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 6px 18px rgba(123,47,247,.35);}
+.mbtn-danger{background:#FF5A6E;color:#fff;}
+.mbtn-danger:disabled{opacity:.4;}
 .mbtn-cancel{background:var(--bg);color:var(--ink-soft);}
 
 /* ── HOME ── */
@@ -117,6 +119,14 @@ img{-webkit-user-drag:none;}
 .photo-search-row{margin:0 16px 14px;display:flex;gap:8px;}
 .photo-search-row input{flex:1;min-width:0;border:2px solid var(--border);border-radius:50px;padding:11px 16px;font-size:.85rem;font-weight:700;box-sizing:border-box;background:var(--surface);}
 .photo-delall-btn{flex-shrink:0;background:var(--surface);border:2px solid var(--border);border-radius:50%;width:44px;height:44px;font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+.photo-delall-btn.active{background:var(--primary);border-color:var(--primary);}
+.photo-multi-actionbar{position:fixed;left:12px;right:12px;bottom:16px;background:var(--surface);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:12px 14px;display:none;align-items:center;gap:10px;z-index:50;}
+.photo-multi-actionbar.on{display:flex;}
+.photo-multi-actionbar #photo-multi-count{flex:1;font-weight:800;font-size:.82rem;color:var(--ink-soft);}
+.pi.selectable{cursor:pointer;}
+.pi-selcheck{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.85);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:transparent;z-index:3;}
+.pi.selected .pi-selcheck{background:var(--primary);border-color:var(--primary);color:#fff;}
+.pi.selected{outline:3px solid var(--primary);outline-offset:-3px;}
 .photo-search-row input:focus{outline:none;border-color:var(--primary-2);}
 .upload-z .cam{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:1.3rem;}
 .upload-z p{color:var(--ink);font-weight:800;font-size:.88rem;}
@@ -299,7 +309,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.8.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v2.9.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -326,9 +336,15 @@ img{-webkit-user-drag:none;}
   <div id="upload-progress-holder"></div>
   <div class="photo-search-row">
     <input type="text" id="photo-search" placeholder="Rechercher par nom de fichier ou date..." oninput="renderPhotos()">
+    <button class="photo-delall-btn" id="photo-select-btn" onclick="togglePhotoSelectMode()" title="Sélectionner">☑️</button>
     <button class="photo-delall-btn" onclick="deleteAllPhotos()" title="Tout supprimer">🗑️</button>
   </div>
   <div class="photos-grid" id="pgrid"></div>
+  <div class="photo-multi-actionbar" id="photo-multi-actionbar">
+    <span id="photo-multi-count">0 sélectionnée(s)</span>
+    <button class="mbtn mbtn-cancel" onclick="togglePhotoSelectMode()">Annuler</button>
+    <button class="mbtn mbtn-danger" id="photo-multi-del-btn" onclick="deleteSelectedPhotos()" disabled>🗑️ Supprimer</button>
+  </div>
 </div>
 
 <!-- ══════════ LIGHTBOX ══════════ -->
@@ -1232,6 +1248,10 @@ function openAlbum(id){
   else { hi.style.display='none'; he.style.display='flex'; he.textContent=a.emoji; }
   document.getElementById('upload-progress-holder').innerHTML='';
   document.getElementById('photo-search').value='';
+  photoSelectMode=false; photoSelected=[];
+  document.getElementById('photo-select-btn').classList.remove('active');
+  document.getElementById('photo-multi-actionbar').classList.remove('on');
+  document.getElementById('pg-album').style.paddingBottom='';
   renderPhotos();
   go('album');
 }
@@ -1269,6 +1289,15 @@ function renderPhotos(){
   var CHUNK=24;
   var i=0;
   function photoHTML(p){
+    if(photoSelectMode){
+      var sel=photoSelected.indexOf(p.id)>-1;
+      return '<div class="pi selectable'+(sel?' selected':'')+'" onclick="togglePhotoSelected(\''+p.id+'\')">'
+        +'<img src="'+bkPhotoSrc(p,'thumb')+'" loading="lazy">'
+        +'<div class="pi-selcheck">✓</div>'
+        +(p.liked?'<div class="pi-like">❤️</div>':'')
+        +(p.cap?'<div class="pi-cap">'+esc(p.cap)+'</div>':'')
+        +'</div>';
+    }
     return '<div class="pi">'
       +'<img src="'+bkPhotoSrc(p,'thumb')+'" loading="lazy" onclick="openLB(\''+p.id+'\')">'
       +'<button class="pi-del" onclick="event.stopPropagation();quickDelPhoto(\''+p.id+'\')">🗑️</button>'
@@ -1287,6 +1316,50 @@ function renderPhotos(){
     }
   }
   step();
+}
+var photoSelectMode=false, photoSelected=[];
+function togglePhotoSelectMode(){
+  photoSelectMode=!photoSelectMode;
+  photoSelected=[];
+  document.getElementById('photo-select-btn').classList.toggle('active', photoSelectMode);
+  document.getElementById('photo-multi-actionbar').classList.toggle('on', photoSelectMode);
+  // pousse TOUTE la page (pas juste la fin de la grille) : la barre fixe peut
+  // recouvrir des photos déjà visibles à l'écran (pas seulement celles "plus bas"),
+  // il faut donc décaler le contenu entier, pas juste ajouter de l'espace après.
+  document.getElementById('pg-album').style.paddingBottom = photoSelectMode ? '90px' : '';
+  updatePhotoMultiBar();
+  renderPhotos();
+}
+function togglePhotoSelected(id){
+  var i=photoSelected.indexOf(id);
+  if(i>-1) photoSelected.splice(i,1);
+  else photoSelected.push(id);
+  updatePhotoMultiBar();
+  renderPhotos();
+}
+function updatePhotoMultiBar(){
+  var n=photoSelected.length;
+  document.getElementById('photo-multi-count').textContent=n+' sélectionnée'+(n!==1?'s':'');
+  document.getElementById('photo-multi-del-btn').disabled=(n===0);
+}
+function deleteSelectedPhotos(){
+  var n=photoSelected.length;
+  if(!n) return;
+  if(!confirm('Supprimer '+n+' photo'+(n>1?'s':'')+' sélectionnée'+(n>1?'s':'')+' ? Cette action est définitive.')) return;
+  var a=al(curAlbum);
+  var idsSet={}; photoSelected.forEach(function(id){ idsSet[id]=true; });
+  a.photos.forEach(function(p){ if(idsSet[p.id]) bkRevokePhotoUrls(p); });
+  a.photos=a.photos.filter(function(p){ return !idsSet[p.id]; });
+  dbDeleteMany('photos', photoSelected);
+  saveAlbumMeta(a);
+  photoSelectMode=false;
+  photoSelected=[];
+  document.getElementById('photo-select-btn').classList.remove('active');
+  document.getElementById('photo-multi-actionbar').classList.remove('on');
+  document.getElementById('pg-album').style.paddingBottom='';
+  renderPhotos();
+  refreshAlbumHeader();
+  toast('🗑️ '+n+' photo'+(n>1?'s':'')+' supprimée'+(n>1?'s':''));
 }
 function quickDelPhoto(id){
   var a=al(curAlbum);
