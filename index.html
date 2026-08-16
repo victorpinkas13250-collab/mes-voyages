@@ -236,6 +236,10 @@ img{-webkit-user-drag:none;}
 .bk-tool.active{background:var(--primary);color:#fff;}
 .bk-tool .ic{font-size:1.15rem;}
 .bk-swatch{width:26px;height:26px;border-radius:50%;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--border);}
+.bk-swatch.on{box-shadow:0 0 0 3px var(--primary);}
+.bk-bgphoto-btn{width:26px;height:26px;border-radius:50%;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:.85rem;position:relative;}
+.bk-bgphoto-btn.on{box-shadow:0 0 0 3px var(--primary);}
+.bk-bgphoto-x{position:absolute;top:-6px;right:-6px;width:15px;height:15px;border-radius:50%;background:#E53935;color:#fff;font-size:.5rem;display:flex;align-items:center;justify-content:center;font-weight:900;}
 .bk-swatch.on{box-shadow:0 0 0 2px var(--primary);}
 
 .bk-stage-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden;min-height:0;}
@@ -341,7 +345,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.3.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.4.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -2392,7 +2396,7 @@ document.getElementById('pg-lb').addEventListener('touchend',function(e){
    Chaque élément : {id, type:'photo'|'text', x, y, w, h (tout en % du cadre, x/y = CENTRE), rot (deg),
                      photoId? (pour type photo), text?, fontSize?, color? (pour type texte)} */
 var BK_COLORS=['#241E38','#7B2FF7','#FF5A6E','#00C2A8','#FFFFFF','#FFD93D','#000000','#FF8FA3','#1E88E5','#FB8C00','#2D8659','#9E9E9E'];
-var BK_BGS=['#FFFFFF','#F7F5FC','#241E38','#FFD93D','#7B2FF7','#00C2A8'];
+var BK_BGS=['#FFFFFF','#F7F5FC','#241E38','#FFD93D','#7B2FF7','#00C2A8','#000000','#FF8FA3','#1E88E5','#FB8C00','#2D8659','#EDE0D4'];
 var BK_FONTS=[
   {id:'Poppins', label:'Poppins'},
   {id:'Nunito', label:'Nunito'},
@@ -3385,15 +3389,58 @@ function bkToggleOrient(){
   bkRenderPage();
 }
 function renderBkSwatches(){
+  var page=bkBook.pages[bkPageIdx];
   var h='';
   BK_BGS.forEach(function(c){
-    h+='<div class="bk-swatch" style="background:'+c+'" onclick="bkSetBg(\''+c+'\')"></div>';
+    h+='<div class="bk-swatch'+(!page.bgPhotoId&&page.bg===c?' on':'')+'" style="background:'+c+'" onclick="bkSetBg(\''+c+'\')"></div>';
   });
+  if(page.bgPhotoId){
+    var ph=bkPhotoById(page.bgPhotoId);
+    h+='<div class="bk-bgphoto-btn on" style="background-image:url(\''+(ph?bkPhotoSrc(ph,'thumb'):'')+'\')" onclick="openBgPhotoPicker()">'
+      +'<span class="bk-bgphoto-x" onclick="event.stopPropagation();bkRemoveBgPhoto()">✕</span></div>'
+      +'<button class="bk-btn" style="padding:4px 8px;font-size:.7rem" onclick="bkAdjustBgDim(-10)">🔆</button>'
+      +'<button class="bk-btn" style="padding:4px 8px;font-size:.7rem" onclick="bkAdjustBgDim(10)">🔅</button>';
+  } else {
+    h+='<div class="bk-bgphoto-btn" onclick="openBgPhotoPicker()">🖼️</div>';
+  }
   document.getElementById('bk-bgswatches').innerHTML=h;
 }
 function bkSetBg(c){
   bkSnapshot();
-  bkBook.pages[bkPageIdx].bg=c;
+  var page=bkBook.pages[bkPageIdx];
+  page.bg=c;
+  page.bgPhotoId=null; // une couleur choisie retire toute photo de fond éventuelle
+  bkRenderPage();
+  renderBkSwatches();
+}
+function openBgPhotoPicker(){
+  var h='';
+  bkAlbum.photos.forEach(function(p){
+    h+='<img src="'+bkPhotoSrc(p,'thumb')+'" onclick="bkSetBgPhoto(\''+p.id+'\')">';
+  });
+  if(!bkAlbum.photos.length) h='<p style="grid-column:1/-1;color:var(--ink-soft);text-align:center;padding:20px">Aucune photo dans cet album</p>';
+  document.getElementById('bk-photo-grid').innerHTML=h;
+  document.getElementById('bk-photo-sheet').classList.add('on');
+}
+function bkSetBgPhoto(photoId){
+  bkSnapshot();
+  var page=bkBook.pages[bkPageIdx];
+  page.bgPhotoId=photoId;
+  if(page.bgPhotoDim===undefined) page.bgPhotoDim=35; // voile sombre par défaut, pour garder le texte lisible
+  closeBkPhotoSheet();
+  bkRenderPage();
+  renderBkSwatches();
+}
+function bkRemoveBgPhoto(){
+  bkSnapshot();
+  var page=bkBook.pages[bkPageIdx];
+  page.bgPhotoId=null;
+  bkRenderPage();
+  renderBkSwatches();
+}
+function bkAdjustBgDim(delta){
+  var page=bkBook.pages[bkPageIdx];
+  page.bgPhotoDim=Math.max(0,Math.min(80,(page.bgPhotoDim!==undefined?page.bgPhotoDim:35)+delta));
   bkRenderPage();
 }
 
@@ -3402,7 +3449,20 @@ function bkRenderPage(){
   var canvas=document.getElementById('bk-canvas');
   var page=bkBook.pages[bkPageIdx];
   canvas.className=bkBook.orient;
-  canvas.style.background=page.bg;
+  if(page.bgPhotoId){
+    var ph=bkPhotoById(page.bgPhotoId);
+    var src=ph?bkPhotoSrc(ph,'full'):null;
+    canvas.style.background=page.bg; // couleur en secours si la photo n'a pas pu charger
+    if(src){
+      var dim=page.bgPhotoDim!==undefined?page.bgPhotoDim:35;
+      canvas.style.backgroundImage='linear-gradient(rgba(0,0,0,'+(dim/100)+'),rgba(0,0,0,'+(dim/100)+')),url(\''+src+'\')';
+      canvas.style.backgroundSize='cover';
+      canvas.style.backgroundPosition='center';
+    }
+  } else {
+    canvas.style.background=page.bg;
+    canvas.style.backgroundImage='none';
+  }
   canvas.innerHTML='';
   page.elements.forEach(function(el){ canvas.appendChild(bkBuildElNode(el)); });
   canvas.appendChild(bkGuideNode('v')); canvas.appendChild(bkGuideNode('h'));
@@ -4532,6 +4592,18 @@ function bkRenderPageToCanvas(page, orient){
     var c=document.createElement('canvas'); c.width=PXW; c.height=PXH;
     var ctx=c.getContext('2d');
     ctx.fillStyle=page.bg; ctx.fillRect(0,0,PXW,PXH);
+    var bgPhoto=page.bgPhotoId?bkPhotoById(page.bgPhotoId):null;
+    var bgSrc=bgPhoto?bkPhotoSrc(bgPhoto,'full'):null;
+    var bgLoad=bgSrc?bkLoadImg(bgSrc).then(function(img){
+      // "cover" : remplit toute la page en rognant l'excédent, comme le fond
+      // d'écran affiché dans l'éditeur (background-size:cover équivalent).
+      var scale=Math.max(PXW/img.width, PXH/img.height);
+      var dw=img.width*scale, dh=img.height*scale;
+      var dx=(PXW-dw)/2, dy=(PXH-dh)/2;
+      ctx.drawImage(img, dx, dy, dw, dh);
+      var dim=page.bgPhotoDim!==undefined?page.bgPhotoDim:35;
+      if(dim>0){ ctx.fillStyle='rgba(0,0,0,'+(dim/100)+')'; ctx.fillRect(0,0,PXW,PXH); }
+    }).catch(function(){}) : Promise.resolve();
     var leaves=bkCollectLeafElements(page.elements);
     var imgMap=new Map();
     var loads=leaves.map(function(el){
@@ -4547,7 +4619,7 @@ function bkRenderPageToCanvas(page, orient){
       }
       return Promise.resolve();
     });
-    Promise.all(loads).then(function(){
+    Promise.all([bgLoad].concat(loads)).then(function(){
       page.elements.forEach(function(el){ bkDrawElementTree(ctx, el, PXW, PXH, imgMap); });
       resolve(c.toDataURL('image/jpeg',0.92));
     });
