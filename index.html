@@ -270,6 +270,10 @@ img{-webkit-user-drag:none;}
 .bk-pages{display:flex;gap:8px;padding:10px 14px;background:var(--surface);border-top:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
 .bk-page-thumb{flex-shrink:0;width:38px;aspect-ratio:210/297;background:#fff;border:2px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:var(--ink-soft);position:relative;}
 .bk-page-thumb.on{border-color:var(--primary);color:var(--primary);}
+.bk-page-thumb.selected{border-color:#E53935;box-shadow:0 0 0 2px #E53935;}
+.bk-page-selcheck{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--border);font-size:.6rem;display:flex;align-items:center;justify-content:center;color:#E53935;font-weight:900;}
+.bk-page-thumb.selected .bk-page-selcheck{background:#E53935;color:#fff;border-color:#E53935;}
+.bk-page-del-confirm{flex-shrink:0;background:#E53935;color:#fff;border:none;border-radius:8px;padding:0 12px;font-size:.72rem;font-weight:800;white-space:nowrap;}
 .bk-page-add{flex-shrink:0;width:38px;aspect-ratio:210/297;border:2px dashed #D9CCF7;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-weight:800;}
 
 .bk-sheet{display:none;position:fixed;inset:0;background:rgba(20,14,36,.65);z-index:9998;align-items:flex-end;justify-content:center;}
@@ -337,7 +341,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.1.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.2.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -2609,17 +2613,17 @@ var BK_LAYOUTS = [
 ];
 var BK_STYLES = [
   { key:'clean', label:'Blanc épuré', bg:'#FFFFFF', color:'#241E38', accent:'#7B2FF7', font:'Poppins', border:0, shadow:false },
-  { key:'night', label:'Nuit violette', bg:'#241E38', color:'#FFFFFF', accent:'#FFD93D', font:'Playfair Display', border:6, shadow:true },
+  { key:'night', label:'Nuit violette', bg:'#241E38', color:'#FFFFFF', accent:'#FFD93D', font:'Playfair Display', border:2, shadow:true },
   { key:'pastel', label:'Pastel doux', bg:'#F7F5FC', color:'#241E38', accent:'#00C2A8', font:'Nunito', border:0, shadow:false },
   { key:'polaroid', label:'Polaroid', bg:'#F3EEFB', color:'#241E38', accent:'#7B2FF7', font:'Caveat', border:8, shadow:true },
   { key:'tropical', label:'Vif tropical', bg:'#FFD93D', color:'#241E38', accent:'#FF5A6E', font:'Bebas Neue', border:0, shadow:true },
-  { key:'ocean', label:'Océan', bg:'#00C2A8', color:'#FFFFFF', accent:'#241E38', font:'Montserrat', border:4, shadow:false },
+  { key:'ocean', label:'Océan', bg:'#00C2A8', color:'#FFFFFF', accent:'#241E38', font:'Montserrat', border:2, shadow:false },
   { key:'sunset', label:'Coucher de soleil', bg:'#FF8C69', color:'#2B1810', accent:'#FFD93D', font:'Oswald', border:0, shadow:true },
   { key:'mono', label:'Noir intense', bg:'#1A1A1A', color:'#FFFFFF', accent:'#CCCCCC', font:'Roboto Mono', border:2, shadow:false },
   { key:'rose', label:'Rose romantique', bg:'#FFE4E9', color:'#5C2A3A', accent:'#FF5A6E', font:'Dancing Script', border:0, shadow:false },
-  { key:'forest', label:'Forêt profonde', bg:'#1B4332', color:'#FFFFFF', accent:'#95D5B2', font:'Montserrat', border:4, shadow:true },
+  { key:'forest', label:'Forêt profonde', bg:'#1B4332', color:'#FFFFFF', accent:'#95D5B2', font:'Montserrat', border:2, shadow:true },
   { key:'sand', label:'Sable du désert', bg:'#EDE0D4', color:'#5C4A3A', accent:'#D4A373', font:'Lobster', border:0, shadow:false },
-  { key:'midnight', label:'Bleu minuit', bg:'#0B1D3A', color:'#FFFFFF', accent:'#5B8DEF', font:'Playfair Display', border:6, shadow:true },
+  { key:'midnight', label:'Bleu minuit', bg:'#0B1D3A', color:'#FFFFFF', accent:'#5B8DEF', font:'Playfair Display', border:2, shadow:true },
   { key:'coral', label:'Corail vif', bg:'#FF6B6B', color:'#FFFFFF', accent:'#FFE66D', font:'Bebas Neue', border:0, shadow:true },
   { key:'italie', label:'Italie', bg:'#FBF3E7', color:'#241E38', accent:'#C1272D', font:'Playfair Display', border:0, shadow:false },
   { key:'espagne', label:'Espagne', bg:'#FFF3D6', color:'#3A1F0F', accent:'#C60B1E', font:'Oswald', border:0, shadow:true },
@@ -2633,7 +2637,13 @@ function bkBuildElementsForLayout(layout, style){
   return layout.slots.map(function(slot){
     if(slot.type==='photo'){
       var el={type:'photo', photoIndex:photoIdx++, x:slot.x,y:slot.y,w:slot.w,h:slot.h,rot:slot.rot||0};
-      var b = slot.forceBorder ? Math.max(style.border,6) : style.border;
+      // les formes non carrées (rond, hexagone, octogone, décagone, arche,
+      // trapèze) restent volontairement SANS bordure, quel que soit le style
+      // choisi — une bordure carrée/rectangulaire autour d'une forme découpée
+      // casse le contour et rend le tout moins net. Seul circle-1/circle-duo
+      // gardent leur bordure "polaroid" volontaire (forceBorder explicite).
+      var isNonSquareShape = slot.hex||slot.octagon||slot.decagon||slot.arch||slot.triangle||slot.star||(slot.round&&!slot.forceBorder);
+      var b = isNonSquareShape ? 0 : (slot.forceBorder ? Math.max(style.border,2) : style.border);
       if(b>0) el.border={width:b, color: style.key==='night'||style.key==='ocean' ? '#FFFFFF' : (style.key==='polaroid'?'#FFFFFF':style.color)};
       if(slot.forceShadow || style.shadow) el.shadow=true;
       if(slot.round) el.round=true;
@@ -3219,6 +3229,7 @@ function bkOpenSpecificBook(id){
   bkBook=bkAlbum.books.find(function(b){ return b.id===id; });
   if(!bkBook) return;
   bkPageIdx=0; bkSelId=null;
+  bkPageSelectMode=false; bkPageSelected=[];
   bkUndoStack=[]; bkRedoStack=[];
   closeBookListSheet();
   document.getElementById('pg-book').classList.add('on');
@@ -3906,16 +3917,54 @@ function bkSetTextFont(f){
 }
 
 /* ── Pages ── */
+var bkPageSelectMode=false, bkPageSelected=[];
 function bkRenderPages(){
   var h='';
   bkBook.pages.forEach(function(pg,i){
-    h+='<div class="bk-page-thumb'+(i===bkPageIdx?' on':'')+'" onclick="bkGotoPage('+i+')">'+(i+1)+'</div>';
+    var sel=bkPageSelected.indexOf(i)>-1;
+    var cls='bk-page-thumb'+(i===bkPageIdx?' on':'')+(bkPageSelectMode&&sel?' selected':'');
+    var click=bkPageSelectMode?'bkTogglePageSelected('+i+')':'bkGotoPage('+i+')';
+    h+='<div class="'+cls+'" onclick="'+click+'">'+(i+1)
+      +(bkPageSelectMode?'<span class="bk-page-selcheck">'+(sel?'✓':'')+'</span>':'')
+      +'</div>';
   });
-  h+='<div class="bk-page-add" onclick="bkAddPage()">+</div>';
-  h+='<div class="bk-page-add" onclick="bkDuplicatePage()" title="Dupliquer la page">⎘</div>';
+  if(!bkPageSelectMode){
+    h+='<div class="bk-page-add" onclick="bkAddPage()">+</div>';
+    h+='<div class="bk-page-add" onclick="bkDuplicatePage()" title="Dupliquer la page">⎘</div>';
+  }
+  h+='<div class="bk-page-add" onclick="bkTogglePageSelectMode()" title="Sélectionner des pages à supprimer">'+(bkPageSelectMode?'✕':'🗑️')+'</div>';
+  if(bkPageSelectMode && bkPageSelected.length){
+    h+='<button class="bk-page-del-confirm" onclick="bkDeleteSelectedPages()">🗑️ Supprimer ('+bkPageSelected.length+')</button>';
+  }
   document.getElementById('bk-pages').innerHTML=h;
 }
 function bkGotoPage(i){ bkPageIdx=i; bkSelId=null; bkRenderPage(); bkRenderPages(); }
+function bkTogglePageSelectMode(){
+  bkPageSelectMode=!bkPageSelectMode;
+  bkPageSelected=[];
+  bkRenderPages();
+}
+function bkTogglePageSelected(i){
+  var idx=bkPageSelected.indexOf(i);
+  if(idx>-1) bkPageSelected.splice(idx,1); else bkPageSelected.push(i);
+  bkRenderPages();
+}
+function bkDeleteSelectedPages(){
+  if(!bkPageSelected.length) return;
+  if(bkPageSelected.length>=bkBook.pages.length){
+    toast('Impossible de supprimer toutes les pages — il en faut au moins une');
+    return;
+  }
+  var label=bkPageSelected.length>1 ? bkPageSelected.length+' pages' : '1 page';
+  if(!confirm('Supprimer '+label+' ? Cette action peut être annulée avec ↩️.')) return;
+  bkSnapshot();
+  var toDelete=bkPageSelected.slice().sort(function(a,b){ return b-a; }); // du plus grand au plus petit, pour ne pas décaler les index en supprimant
+  toDelete.forEach(function(i){ bkBook.pages.splice(i,1); });
+  bkPageSelectMode=false; bkPageSelected=[];
+  if(bkPageIdx>=bkBook.pages.length) bkPageIdx=bkBook.pages.length-1;
+  bkSelId=null;
+  bkRenderPage(); bkRenderPages();
+}
 function bkAddPage(){
   bkSnapshot();
   bkBook.pages.push({bg:'#FFFFFF', elements:[]});
