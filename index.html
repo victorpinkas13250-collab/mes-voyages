@@ -337,7 +337,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.9.1</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.0.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -2371,6 +2371,16 @@ var BK_LAYOUTS = [
     {type:'photo', x:18,y:50,w:32,h:26,rot:0},{type:'photo', x:50,y:50,w:32,h:26,rot:0},{type:'photo', x:82,y:50,w:32,h:26,rot:0},
     {type:'photo', x:18,y:85,w:32,h:26,rot:0},{type:'photo', x:50,y:85,w:32,h:26,rot:0},{type:'photo', x:82,y:85,w:32,h:26,rot:0}
   ]},
+  { key:'grid9-circles', label:'Mosaïque ronde 9 photos', slots:[
+    {type:'photo', x:17,y:15,w:32,h:23,rot:0, round:true},{type:'photo', x:50,y:15,w:32,h:23,rot:0, round:true},{type:'photo', x:83,y:15,w:32,h:23,rot:0, round:true},
+    {type:'photo', x:17,y:42,w:32,h:23,rot:0, round:true},{type:'photo', x:50,y:42,w:32,h:23,rot:0, round:true},{type:'photo', x:83,y:42,w:32,h:23,rot:0, round:true},
+    {type:'photo', x:17,y:69,w:32,h:23,rot:0, round:true},{type:'photo', x:50,y:69,w:32,h:23,rot:0, round:true},{type:'photo', x:83,y:69,w:32,h:23,rot:0, round:true}
+  ]},
+  { key:'grid9-hex', label:'Nid d\'abeilles 9 photos', slots:[
+    {type:'photo', x:17,y:16,w:36,h:29,rot:0, hex:true},{type:'photo', x:50,y:16,w:36,h:29,rot:0, hex:true},{type:'photo', x:83,y:16,w:36,h:29,rot:0, hex:true},
+    {type:'photo', x:17,y:48,w:36,h:29,rot:0, hex:true},{type:'photo', x:50,y:48,w:36,h:29,rot:0, hex:true},{type:'photo', x:83,y:48,w:36,h:29,rot:0, hex:true},
+    {type:'photo', x:17,y:80,w:36,h:29,rot:0, hex:true},{type:'photo', x:50,y:80,w:36,h:29,rot:0, hex:true},{type:'photo', x:83,y:80,w:36,h:29,rot:0, hex:true}
+  ]},
   { key:'collage', label:'Collage scrapbook', slots:[
     {type:'photo', x:35,y:33,w:44,h:38,rot:-8, forceBorder:true, forceShadow:true},
     {type:'photo', x:66,y:44,w:42,h:36,rot:6, forceBorder:true, forceShadow:true},
@@ -2677,7 +2687,7 @@ var BK_AUTO_LAYOUT_BUCKETS = {
   4: ['grid4','big-strip','magazine-4','fan-4','photobooth-4','zigzag-4','spiral-4','triangle-quad','shape-mix-4'],
   5: ['bouquet-5','stairs-5','filmstrip-5'],
   6: ['grid6','wall-6','broken-grid-6','confetti-6'],
-  9: ['grid9']
+  9: ['grid9','grid9-circles','grid9-hex']
 };
 function bkPlanAutoPages(photoCount, pageCount, preferredLayouts){
   var sizes=[6,5,4,3,2,1];
