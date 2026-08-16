@@ -278,7 +278,8 @@ img{-webkit-user-drag:none;}
 .bk-page-selcheck{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--border);font-size:.6rem;display:flex;align-items:center;justify-content:center;color:#E53935;font-weight:900;}
 .bk-page-thumb.selected .bk-page-selcheck{background:#E53935;color:#fff;border-color:#E53935;}
 .bk-page-del-confirm{flex-shrink:0;background:#E53935;color:#fff;border:none;border-radius:8px;padding:0 12px;font-size:.72rem;font-weight:800;white-space:nowrap;}
-.bk-page-add{flex-shrink:0;width:38px;aspect-ratio:210/297;border:2px dashed #D9CCF7;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-weight:800;}
+.bk-page-add{flex-shrink:0;width:38px;aspect-ratio:210/297;border:2px dashed #D9CCF7;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-weight:800;background:none;font-size:.9rem;}
+.bk-page-add:disabled{opacity:.25;}
 
 .bk-sheet{display:none;position:fixed;inset:0;background:rgba(20,14,36,.65);z-index:9998;align-items:flex-end;justify-content:center;}
 .bk-sheet.on{display:flex;}
@@ -345,7 +346,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.5.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.5.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -4172,6 +4173,8 @@ function bkRenderPages(){
       +'</div>';
   });
   if(!bkPageSelectMode){
+    h+='<button class="bk-page-add" onclick="bkMovePage(-1)" title="Déplacer cette page vers la gauche" '+(bkPageIdx===0?'disabled':'')+'>⬅️</button>';
+    h+='<button class="bk-page-add" onclick="bkMovePage(1)" title="Déplacer cette page vers la droite" '+(bkPageIdx===bkBook.pages.length-1?'disabled':'')+'>➡️</button>';
     h+='<div class="bk-page-add" onclick="bkAddPage()">+</div>';
     h+='<div class="bk-page-add" onclick="bkDuplicatePage()" title="Dupliquer la page">⎘</div>';
   }
@@ -4180,6 +4183,15 @@ function bkRenderPages(){
     h+='<button class="bk-page-del-confirm" onclick="bkDeleteSelectedPages()">🗑️ Supprimer ('+bkPageSelected.length+')</button>';
   }
   document.getElementById('bk-pages').innerHTML=h;
+}
+function bkMovePage(delta){
+  var i=bkPageIdx, j=i+delta;
+  if(j<0 || j>=bkBook.pages.length) return;
+  bkSnapshot();
+  var tmp=bkBook.pages[i]; bkBook.pages[i]=bkBook.pages[j]; bkBook.pages[j]=tmp;
+  bkPageIdx=j;
+  bkRenderPage();
+  bkRenderPages();
 }
 function bkGotoPage(i){ bkPageIdx=i; bkSelId=null; bkRenderPage(); bkRenderPages(); }
 function bkTogglePageSelectMode(){
