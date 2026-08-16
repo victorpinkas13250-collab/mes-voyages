@@ -345,7 +345,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.4.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.4.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1312,27 +1312,46 @@ var HELP_SECTIONS=[
     +'<li><b>Ajouter :</b> touche la zone en pointillés dans un album, ou glisse-dépose tes photos directement.</li>'
     +'<li><b>Rechercher :</b> tape un nom de fichier ou une date dans la barre de recherche de l\'album.</li>'
     +'<li><b>Date automatique :</b> l\'appli lit la vraie date de prise de vue dans la photo quand elle existe (icône 📷 dans la visionneuse) ; sinon elle utilise une date de repli (🗓️ ou ➕).</li>'
+    +'<li><b>Sélection multiple :</b> bouton ☑️ à côté de la recherche — coche plusieurs photos pour les supprimer ou les ranger dans un dossier en une fois.</li>'
+    +'<li><b>Ranger par jour :</b> bouton 📅 pour regrouper automatiquement tes photos par date de prise de vue, avec des sections repliables.</li>'
     +'<li><b>Tout supprimer :</b> bouton 🗑️ à côté de la recherche, avec confirmation.</li>'
     +'<li><b>Légende et favori :</b> ouvre une photo (visionneuse) pour ajouter une légende ou la mettre en favori (❤️).</li>'
     +'</ul>' },
+  { icon:'📁', title:'Dossiers personnalisés', body:
+    '<ul>'
+    +'<li>Bouton <b>📁</b> à côté de la recherche : crée, renomme ou supprime des dossiers pour organiser tes photos (par jour, par lieu, comme tu veux).</li>'
+    +'<li>Une fois qu\'une photo est rangée dans un dossier, elle <b>sort de "Non rangées"</b> — une photo n\'est jamais à deux endroits à la fois.</li>'
+    +'<li>Pour ranger des photos : mode sélection (☑️) → coche les photos → bouton 📁 Dossier → choisis un dossier existant ou crée-en un nouveau directement à ce moment.</li>'
+    +'<li><b>Réordonner :</b> dans le gestionnaire de dossiers, les flèches ⬆️⬇️ changent l\'ordre — cet ordre influence aussi l\'ordre des photos dans le livre automatique.</li>'
+    +'</ul>' },
+  { icon:'🎨', title:'Filtrer par couleur', body:
+    '<ul>'
+    +'<li>Bouton <b>🎨</b> à côté de la recherche : classe automatiquement tes photos par couleur dominante (rouge, bleu, vert, gris...).</li>'
+    +'<li>Une photo avec plusieurs couleurs marquées (ex. plage bleu + jaune) apparaît dans <b>plusieurs filtres à la fois</b>.</li>'
+    +'<li>Les compteurs affichés respectent le dossier actuellement ouvert — pas de mélange entre dossiers.</li>'
+    +'<li>Le premier calcul peut prendre quelques secondes sur un gros album ; il est ensuite mis en cache et ne se refait plus.</li>'
+    +'</ul>' },
   { icon:'🗂️', title:'Plusieurs livres par album', body:
     '<ul>'
-    +'<li>Bouton <b>🎨 Mes livres</b> depuis un album : tu peux créer, renommer, dupliquer ou supprimer autant de livres que tu veux pour le même album.</li>'
+    +'<li>Bouton <b>📚 Mes livres</b> depuis un album : crée, renomme, duplique ou supprime autant de livres que tu veux pour le même album.</li>'
     +'<li>Depuis l\'intérieur d\'un livre, le bouton 📚 en haut permet de changer de livre sans repasser par l\'album.</li>'
     +'</ul>' },
   { icon:'✏️', title:'L\'éditeur de livre', body:
     '<ul>'
     +'<li><b>Texte, Photo, Forme, Sticker, Icône :</b> touche l\'outil puis place l\'élément sur la page, déplace-le et redimensionne-le avec les poignées.</li>'
-    +'<li><b>Modèle :</b> 90 mises en page toutes prêtes (styles + agencements variés), avec recherche.</li>'
+    +'<li><b>Modèle :</b> plus de 1000 combinaisons (mises en page × styles), avec recherche — dont des formes rondes, hexagonales, octogonales, en arche, et des mosaïques de 1 à 9 photos.</li>'
+    +'<li><b>Fond de page :</b> palette de 12 couleurs, ou touche 🖼️ pour mettre une de tes photos en fond de page entière (avec un voile réglable 🔆🔅 pour garder le texte lisible).</li>'
     +'<li><b>Carte :</b> insère une image de carte avec tes lieux visités (voir section carte plus bas).</li>'
-    +'<li><b>Grouper :</b> sélectionne plusieurs éléments pour les déplacer ensemble.</li>'
+    +'<li><b>Grouper / Dégrouper :</b> sélectionne plusieurs éléments (🔗 Grouper) pour les déplacer ensemble ; touche le groupe puis "🔓 Dégrouper" pour les séparer à nouveau.</li>'
+    +'<li><b>Supprimer une ou plusieurs pages :</b> bouton 🗑️ dans la bande de pages en bas — coche les pages à supprimer, confirme. Impossible de supprimer toutes les pages d\'un coup.</li>'
     +'<li><b>Annuler / Rétablir :</b> en haut de l\'éditeur, pour revenir en arrière à tout moment.</li>'
-    +'<li>Sur un élément sélectionné : filtres, recadrage, suppression de fond, bordure, ombre, dégradé, dupliquer, verrouiller — selon le type d\'élément.</li>'
+    +'<li><b>Enregistrer :</b> bouton 💾 pour sauvegarder manuellement à tout moment (en plus de la sauvegarde automatique toutes les 20 secondes).</li>'
+    +'<li>Sur un élément sélectionné : filtres, recadrage, suppression de fond, bordure, ombre, dégradé, dupliquer, verrouiller — selon le type d\'élément. 20 polices et 12 couleurs de texte disponibles.</li>'
     +'</ul>' },
   { icon:'🪄', title:'Livre automatique', body:
     '<ul>'
-    +'<li>Depuis "Mes livres", bouton <b>🪄 Livre automatique</b> : choisis le nombre de pages, un style, une police, une couleur, des smileys favoris et jusqu\'à 4 mises en page préférées.</li>'
-    +'<li>L\'appli répartit toutes tes photos automatiquement sur les pages, avec des mises en page variées.</li>'
+    +'<li>Depuis "Mes livres", bouton <b>🪄 Livre automatique</b> : choisis le nombre de pages, un style (19 disponibles, dont des styles par pays comme Italie, Espagne, Grèce...), une police, une couleur, des smileys favoris et jusqu\'à 4 mises en page préférées.</li>'
+    +'<li>L\'appli répartit toutes tes photos automatiquement sur les pages, en respectant l\'ordre de tes dossiers si tu en as créé.</li>'
     +'<li><b>Mode "Structure vide" :</b> génère toutes les pages avec leurs cadres, mais sans aucune photo dedans — pratique pour préparer le livre avant même d\'avoir importé tes photos, ou pour choisir toi-même quelle photo va où.</li>'
     +'</ul>' },
   { icon:'✂️', title:'Retoucher une photo', body:
@@ -1342,10 +1361,11 @@ var HELP_SECTIONS=[
     +'<li><b>Supprimer le fond :</b> basique, par couleur — marche bien sur un fond uni, moins bien sur un fond complexe.</li>'
     +'<li><b>Bordure, ombre, dégradé :</b> disponibles sur les photos et les formes.</li>'
     +'</ul>' },
-  { icon:'🗺️', title:'Carte des lieux visités', body:
+  { icon:'🗺️', title:'Cartes des lieux visités', body:
     '<ul>'
-    +'<li>Depuis un album, bouton <b>🗺️ Carte</b> : cherche un lieu par son nom, ou touche directement la carte pour poser un point et lui donner un nom.</li>'
-    +'<li>Depuis l\'éditeur de livre, l\'outil <b>Carte</b> insère une image de la carte avec tous tes points, comme n\'importe quelle photo (déplaçable, redimensionnable).</li>'
+    +'<li>Depuis un album, bouton <b>🗺️ Carte</b> : ouvre la liste de tes cartes — tu peux en créer <b>plusieurs pour le même album</b> (une par ville, une par étape du voyage...).</li>'
+    +'<li>Dans une carte : cherche un lieu par son nom, ou touche directement la carte pour poser un point et lui donner un nom.</li>'
+    +'<li>Depuis l\'éditeur de livre, l\'outil <b>Carte</b> insère une image de la carte avec tous ses points, comme n\'importe quelle photo (déplaçable, redimensionnable) — si tu as plusieurs cartes, l\'appli te demande laquelle insérer.</li>'
     +'<li>Nécessite une connexion internet pour charger les rues ; sans réseau, la carte garde un fond uni.</li>'
     +'</ul>' },
   { icon:'📕', title:'Exporter en PDF', body:
