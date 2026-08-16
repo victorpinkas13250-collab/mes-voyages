@@ -135,6 +135,12 @@ img{-webkit-user-drag:none;}
 .folder-strip{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
 .folder-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--border);border-radius:50px;padding:8px 14px;font-size:.78rem;font-weight:800;color:var(--ink-soft);white-space:nowrap;}
 .folder-chip.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+.color-strip{display:flex;gap:10px;overflow-x:auto;margin:0 16px 12px;padding:2px;}
+.color-swatch-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.color-swatch-chip .dot{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--border);}
+.color-swatch-chip.on .dot{box-shadow:0 0 0 3px var(--primary);}
+.color-swatch-chip .lbl{font-size:.62rem;font-weight:800;color:var(--ink-soft);white-space:nowrap;}
+.color-swatch-chip.on .lbl{color:var(--primary-dark);}
 .folder-manage-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);}
 .folder-manage-row .n{flex:1;font-weight:800;font-size:.85rem;}
 .folder-manage-row .c{color:var(--ink-soft);font-size:.72rem;font-weight:700;}
@@ -331,7 +337,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.3.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.6.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -362,10 +368,12 @@ img{-webkit-user-drag:none;}
   </div>
   <div class="photo-search-row">
     <input type="text" id="photo-search" placeholder="Rechercher par nom de fichier ou date..." oninput="renderPhotos()">
+    <button class="photo-delall-btn" id="photo-color-btn" onclick="toggleColorStrip()" title="Filtrer par couleur">🎨</button>
     <button class="photo-delall-btn" id="photo-group-btn" onclick="togglePhotoGroupByDay()" title="Ranger par jour">📅</button>
     <button class="photo-delall-btn" id="photo-select-btn" onclick="togglePhotoSelectMode()" title="Sélectionner">☑️</button>
     <button class="photo-delall-btn" onclick="deleteAllPhotos()" title="Tout supprimer">🗑️</button>
   </div>
+  <div class="color-strip" id="color-strip" style="display:none"></div>
   <div class="photos-grid" id="pgrid"></div>
   <div class="photo-multi-actionbar" id="photo-multi-actionbar">
     <span id="photo-multi-count">0 sélectionnée(s)</span>
@@ -827,7 +835,7 @@ function saveAlbumMeta(a){
 function savePhoto(albumId, p){
   dbPut('photos', {
     id:p.id, albumId:albumId, full:p.full, thumb:p.thumb, w:p.w, h:p.h, cap:p.cap, liked:p.liked,
-    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource, folderId:p.folderId
+    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource, folderId:p.folderId, colorBucket:p.colorBucket
   });
 }
 function toast(msg){
@@ -1299,8 +1307,11 @@ function openAlbum(id){
   document.getElementById('photo-search').value='';
   photoSelectMode=false; photoSelected=[];
   bkCurrentFolderId=null;
+  bkCurrentColorFilter=null; bkColorStripOpen=false;
   document.getElementById('photo-select-btn').classList.remove('active');
   document.getElementById('photo-multi-actionbar').classList.remove('on');
+  document.getElementById('photo-color-btn').classList.remove('active');
+  document.getElementById('color-strip').style.display='none';
   document.getElementById('pg-album').style.paddingBottom='';
   renderFolderStrip();
   renderPhotos();
@@ -1330,6 +1341,81 @@ function bkPhotoMatchesSearch(p, query){
   }
   return false;
 }
+
+/* ══════════════════ FILTRE PAR COULEUR DOMINANTE ══════════════════
+   Chaque photo est classée dans l'une de 10 couleurs de référence, selon sa
+   couleur moyenne (calculée une fois, en réduisant la miniature à 20x20 et en
+   moyennant tous les pixels — rapide, et suffisant pour un tri par ambiance
+   de couleur plutôt qu'une analyse précise). Le résultat est mis en cache sur
+   la photo (p.colorBucket) pour ne jamais le recalculer deux fois. */
+var BK_COLOR_BUCKETS=[
+  {key:'rouge', label:'Rouge', hex:'#E53935', rgb:[229,57,53]},
+  {key:'orange', label:'Orange', hex:'#FB8C00', rgb:[251,140,0]},
+  {key:'jaune', label:'Jaune', hex:'#FDD835', rgb:[253,216,53]},
+  {key:'vert', label:'Vert', hex:'#43A047', rgb:[67,160,71]},
+  {key:'bleu', label:'Bleu', hex:'#1E88E5', rgb:[30,136,229]},
+  {key:'violet', label:'Violet', hex:'#8E24AA', rgb:[142,36,170]},
+  {key:'rose', label:'Rose', hex:'#EC407A', rgb:[236,64,122]},
+  {key:'marron', label:'Marron', hex:'#6D4C41', rgb:[109,76,65]},
+  {key:'blanc', label:'Blanc/clair', hex:'#F5F5F5', rgb:[245,245,245]},
+  {key:'noir', label:'Noir/foncé', hex:'#263238', rgb:[38,50,56]}
+];
+function bkNearestColorBucket(r,g,b){
+  var best=null, bestDist=Infinity;
+  BK_COLOR_BUCKETS.forEach(function(bucket){
+    var dr=r-bucket.rgb[0], dg=g-bucket.rgb[1], db=b-bucket.rgb[2];
+    var dist=dr*dr+dg*dg+db*db;
+    if(dist<bestDist){ bestDist=dist; best=bucket.key; }
+  });
+  return best;
+}
+function bkComputeDominantColorFromImg(img){
+  var SIZE=20;
+  var c=document.createElement('canvas'); c.width=SIZE; c.height=SIZE;
+  var ctx=c.getContext('2d');
+  ctx.drawImage(img,0,0,SIZE,SIZE);
+  var data;
+  try{ data=ctx.getImageData(0,0,SIZE,SIZE).data; }catch(e){ return null; } // image cross-origin non lisible (rare, tuiles carte)
+  var r=0,g=0,b=0,n=0;
+  for(var i=0;i<data.length;i+=4){ r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++; }
+  if(!n) return null;
+  return bkNearestColorBucket(Math.round(r/n), Math.round(g/n), Math.round(b/n));
+}
+function bkEnsurePhotoColor(p){
+  // calcule et met en cache la couleur dominante d'une photo si pas déjà fait ;
+  // renvoie une Promise qui se résout quand p.colorBucket est prêt.
+  if(p.colorBucket) return Promise.resolve(p.colorBucket);
+  var src=bkPhotoSrc(p,'thumb');
+  if(!src) return Promise.resolve(null);
+  return new Promise(function(resolve){
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){
+      var bucket=bkComputeDominantColorFromImg(img);
+      p.colorBucket=bucket;
+      resolve(bucket);
+    };
+    img.onerror=function(){ resolve(null); };
+    img.src=src;
+  });
+}
+function bkEnsureAllPhotoColors(album){
+  // calcule la couleur de toutes les photos qui n'en ont pas encore (vieilles
+  // photos, ou nouvelles jamais ouvertes dans le filtre couleur), en parallèle
+  // par petits lots pour rester fluide même sur un album à 500+ photos.
+  var todo=album.photos.filter(function(p){ return !p.colorBucket; });
+  if(!todo.length) return Promise.resolve();
+  var BATCH=12, i=0;
+  function next(){
+    var batch=todo.slice(i, i+BATCH);
+    i+=BATCH;
+    return Promise.all(batch.map(bkEnsurePhotoColor)).then(function(){
+      batch.forEach(function(p){ savePhoto(album.id, p); });
+      if(i<todo.length) return next();
+    });
+  }
+  return next();
+}
 /* ══════════════════ DOSSIERS PERSONNALISÉS DANS UN ALBUM ══════════════════
    Un dossier a juste un nom (choisi par l'utilisateur) ; chaque photo peut
    appartenir à au plus un dossier (photo.folderId). "Toutes" (folderId=null
@@ -1337,6 +1423,46 @@ function bkPhotoMatchesSearch(p, query){
    les dossiers sont une vue filtrée pratique, pas un rangement exclusif qui
    ferait disparaître des photos de la vue principale. */
 var bkCurrentFolderId=null;
+var bkCurrentColorFilter=null, bkColorStripOpen=false, bkColorsComputing=false;
+function toggleColorStrip(){
+  bkColorStripOpen=!bkColorStripOpen;
+  var strip=document.getElementById('color-strip');
+  strip.style.display=bkColorStripOpen?'flex':'none';
+  document.getElementById('photo-color-btn').classList.toggle('active', bkColorStripOpen);
+  if(bkColorStripOpen) renderColorStrip();
+}
+function renderColorStrip(){
+  var a=al(curAlbum);
+  var strip=document.getElementById('color-strip');
+  if(bkColorsComputing){
+    strip.innerHTML='<div class="modal-sub" style="margin:0">Analyse des couleurs en cours…</div>';
+    return;
+  }
+  var missing=a.photos.some(function(p){ return !p.colorBucket; });
+  if(missing){
+    bkColorsComputing=true;
+    strip.innerHTML='<div class="modal-sub" style="margin:0">Analyse des couleurs en cours…</div>';
+    bkEnsureAllPhotoColors(a).then(function(){
+      bkColorsComputing=false;
+      renderColorStrip();
+    });
+    return;
+  }
+  var h='<div class="color-swatch-chip'+(bkCurrentColorFilter===null?' on':'')+'" onclick="selectColorFilter(null)">'
+    +'<div class="dot" style="background:conic-gradient(red,orange,yellow,green,blue,violet,red)"></div><span class="lbl">Toutes</span></div>';
+  BK_COLOR_BUCKETS.forEach(function(bucket){
+    var n=a.photos.filter(function(p){ return p.colorBucket===bucket.key; }).length;
+    if(!n) return; // pas la peine de proposer une couleur absente de l'album
+    h+='<div class="color-swatch-chip'+(bkCurrentColorFilter===bucket.key?' on':'')+'" onclick="selectColorFilter(\''+bucket.key+'\')">'
+      +'<div class="dot" style="background:'+bucket.hex+'"></div><span class="lbl">'+bucket.label+' ('+n+')</span></div>';
+  });
+  strip.innerHTML=h;
+}
+function selectColorFilter(key){
+  bkCurrentColorFilter=key;
+  renderColorStrip();
+  renderPhotos();
+}
 function ensureFolders(a){ if(!Array.isArray(a.folders)) a.folders=[]; }
 function renderFolderStrip(){
   var a=al(curAlbum);
@@ -1504,6 +1630,9 @@ function renderPhotos(){
     // "Toutes" = les photos pas encore rangées dans un dossier ; une fois mise
     // dans un dossier, une photo n'apparaît plus que là (rangement à l'ancienne)
     list=list.filter(function(p){ return !p.folderId; });
+  }
+  if(bkCurrentColorFilter!==null){
+    list=list.filter(function(p){ return p.colorBucket===bkCurrentColorFilter; });
   }
   var myToken=++_renderPhotosToken; // annule les rendus précédents si on change d'album vite
   var CHUNK=24;
@@ -2367,12 +2496,7 @@ var BK_LAYOUTS = [
     {type:'photo', x:28,y:58,w:37,h:26,rot:0, hex:true, forceShadow:true},
     {type:'photo', x:72,y:58,w:37,h:26,rot:0, hex:true, forceShadow:true}
   ]},
-  { key:'star-1', label:'Photo étoile (1 photo)', slots:[
-    {type:'photo', x:50,y:40,w:79,h:56,rot:0, star:true, forceShadow:true},
-    {type:'accent', x:83,y:70,w:12,h:12},
-    {type:'title', x:50,y:82,w:76,h:10, fontSize:26}
-  ]},
-  { key:'triangle-1', label:'Photo triangle (1 photo)', slots:[
+  { key:'triangle-1', label:'Photo trapèze (1 photo)', slots:[
     {type:'photo', x:50,y:38,w:79,h:56,rot:0, triangle:true, forceShadow:true},
     {type:'accent', x:83,y:68,w:12,h:12},
     {type:'title', x:50,y:80,w:76,h:10, fontSize:26}
@@ -2384,23 +2508,14 @@ var BK_LAYOUTS = [
   ]},
   { key:'shape-mix-3', label:'Trio de formes (3 photos)', slots:[
     {type:'photo', x:28,y:28,w:38,h:27,rot:0, round:true, forceShadow:true},
-    {type:'photo', x:72,y:30,w:38,h:27,rot:0, star:true, forceShadow:true},
+    {type:'photo', x:72,y:30,w:38,h:27,rot:0, decagon:true, forceShadow:true},
     {type:'photo', x:50,y:68,w:38,h:27,rot:0, hex:true, forceShadow:true}
   ]},
-  { key:'star-duo', label:'Duo étoile (2 photos)', slots:[
-    {type:'photo', x:26,y:38,w:42,h:30,rot:0, star:true, forceShadow:true},
-    {type:'photo', x:74,y:56,w:42,h:30,rot:0, star:true, forceShadow:true}
-  ]},
-  { key:'star-trio', label:'Trio étoile (3 photos)', slots:[
-    {type:'photo', x:50,y:30,w:37,h:26,rot:0, star:true, forceShadow:true},
-    {type:'photo', x:28,y:58,w:37,h:26,rot:0, star:true, forceShadow:true},
-    {type:'photo', x:72,y:58,w:37,h:26,rot:0, star:true, forceShadow:true}
-  ]},
-  { key:'triangle-duo', label:'Duo triangle (2 photos)', slots:[
+  { key:'triangle-duo', label:'Duo trapèze (2 photos)', slots:[
     {type:'photo', x:26,y:38,w:42,h:30,rot:0, triangle:true, forceShadow:true},
     {type:'photo', x:74,y:56,w:42,h:30,rot:180, triangle:true, forceShadow:true}
   ]},
-  { key:'triangle-quad', label:'Quatuor triangle (4 photos)', slots:[
+  { key:'triangle-quad', label:'Quatuor trapèze (4 photos)', slots:[
     {type:'photo', x:30,y:26,w:31,h:22,rot:0, triangle:true, forceShadow:true},
     {type:'photo', x:70,y:26,w:31,h:22,rot:180, triangle:true, forceShadow:true},
     {type:'photo', x:30,y:66,w:31,h:22,rot:180, triangle:true, forceShadow:true},
@@ -2413,8 +2528,25 @@ var BK_LAYOUTS = [
   { key:'shape-mix-4', label:'Quatuor de formes (4 photos)', slots:[
     {type:'photo', x:28,y:26,w:37,h:26,rot:0, round:true, forceShadow:true},
     {type:'photo', x:72,y:26,w:37,h:26,rot:0, hex:true, forceShadow:true},
-    {type:'photo', x:28,y:68,w:37,h:26,rot:0, star:true, forceShadow:true},
+    {type:'photo', x:28,y:68,w:37,h:26,rot:0, decagon:true, forceShadow:true},
     {type:'photo', x:72,y:68,w:37,h:26,rot:0, triangle:true, forceShadow:true}
+  ]},
+  { key:'octagon-1', label:'Photo octogonale (1 photo)', slots:[
+    {type:'photo', x:50,y:40,w:79,h:56,rot:0, octagon:true, forceShadow:true},
+    {type:'accent', x:83,y:70,w:12,h:12},
+    {type:'title', x:50,y:82,w:76,h:10, fontSize:26}
+  ]},
+  { key:'octagon-duo', label:'Duo octogonale (2 photos)', slots:[
+    {type:'photo', x:26,y:38,w:42,h:30,rot:0, octagon:true, forceShadow:true},
+    {type:'photo', x:74,y:56,w:42,h:30,rot:0, octagon:true, forceShadow:true}
+  ]},
+  { key:'arch-1', label:'Photo arche (1 photo)', slots:[
+    {type:'photo', x:50,y:44,w:56,h:68,rot:0, arch:true, forceShadow:true},
+    {type:'title', x:50,y:88,w:76,h:10, fontSize:26}
+  ]},
+  { key:'arch-duo', label:'Duo arche (2 photos)', slots:[
+    {type:'photo', x:28,y:50,w:38,h:74,rot:0, arch:true, forceShadow:true},
+    {type:'photo', x:72,y:50,w:38,h:74,rot:0, arch:true, forceShadow:true}
   ]}
 ];
 var BK_STYLES = [
@@ -2445,6 +2577,8 @@ function bkBuildElementsForLayout(layout, style){
       if(slot.star) el.star=true;
       if(slot.triangle) el.triangle=true;
       if(slot.decagon) el.decagon=true;
+      if(slot.octagon) el.octagon=true;
+      if(slot.arch) el.arch=true;
       return el;
     }
     if(slot.type==='title'){
@@ -2495,9 +2629,9 @@ function bkTemplatePhoto(tpl, idx){
    L'algorithme de répartition est testé isolément (2000+ cas) avant d'être
    branché ici. */
 var BK_AUTO_LAYOUT_BUCKETS = {
-  1: ['float-1','asym-1','single-card','side-title','banner','circle-1','hex-1','star-1','triangle-1','decagon-1'],
-  2: ['duo-h','duo-v','overlap-2','diag-2','circle-duo','star-duo','triangle-duo','decagon-duo'],
-  3: ['trio','collage','cascade-3','triangle-3','polaroid-pile','giant-plus-two','vertical-triptych-3','hex-trio','shape-mix-3','star-trio'],
+  1: ['float-1','asym-1','single-card','side-title','banner','circle-1','hex-1','triangle-1','decagon-1','octagon-1','arch-1'],
+  2: ['duo-h','duo-v','overlap-2','diag-2','circle-duo','triangle-duo','decagon-duo','octagon-duo','arch-duo'],
+  3: ['trio','collage','cascade-3','triangle-3','polaroid-pile','giant-plus-two','vertical-triptych-3','hex-trio','shape-mix-3'],
   4: ['grid4','big-strip','magazine-4','fan-4','photobooth-4','zigzag-4','spiral-4','triangle-quad','shape-mix-4'],
   5: ['bouquet-5','stairs-5','filmstrip-5'],
   6: ['grid6','wall-6','broken-grid-6','confetti-6'],
@@ -2685,8 +2819,10 @@ function bkTplCellHTML(tpl, i){
     var clip = '';
     if(e.hex) clip='clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);';
     else if(e.star) clip='clip-path:'+bkShapeClipPath('star')+';';
-    else if(e.triangle) clip='clip-path:'+bkShapeClipPath('triangle')+';';
+    else if(e.triangle) clip='clip-path:'+bkShapeClipPath('photo-triangle')+';';
     else if(e.decagon) clip='clip-path:'+bkShapeClipPath('decagon')+';';
+    else if(e.octagon) clip='clip-path:'+bkShapeClipPath('octagon')+';';
+    else if(e.arch) clip='clip-path:'+bkShapeClipPath('arch')+';';
     mini+='<div style="position:absolute;left:'+(e.x-e.w/2)+'%;top:'+(e.y-e.h/2)+'%;width:'+e.w+'%;height:'+e.h+'%;background:'+bg+';border:'+brd+';border-radius:'+radius+';'+clip+'transform:rotate('+(e.rot||0)+'deg)"></div>';
   });
   return '<div class="bk-tpl-cell" onclick="bkApplyTemplate('+i+')">'
@@ -2910,8 +3046,10 @@ function bkRenderAutoBookUI(){
       if(s.round) shapeStyle='border-radius:50%;';
       else if(s.hex) shapeStyle='clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);';
       else if(s.star) shapeStyle='clip-path:'+bkShapeClipPath('star')+';';
-      else if(s.triangle) shapeStyle='clip-path:'+bkShapeClipPath('triangle')+';';
+      else if(s.triangle) shapeStyle='clip-path:'+bkShapeClipPath('photo-triangle')+';';
       else if(s.decagon) shapeStyle='clip-path:'+bkShapeClipPath('decagon')+';';
+      else if(s.octagon) shapeStyle='clip-path:'+bkShapeClipPath('octagon')+';';
+      else if(s.arch) shapeStyle='clip-path:'+bkShapeClipPath('arch')+';';
       mini+='<div class="box" style="left:'+(s.x-s.w/2)+'%;top:'+(s.y-s.h/2)+'%;width:'+s.w+'%;height:'+s.h+'%;background:'+(isPhoto?'#B9A6EE':'transparent')+';transform:rotate('+(s.rot||0)+'deg);'+shapeStyle+'"></div>';
     });
     layoutsH+='<div class="bk-autolayout-cell'+(on?' on':'')+'" onclick="bkAutoToggleLayout(\''+l.key+'\')">'+mini+(on?'<div class="bk-autolayout-check">✓</div>':'')+'</div>';
@@ -3079,8 +3217,11 @@ function bkPhotoById(id){
 }
 function bkShapeClipPath(shape){
   if(shape==='triangle') return 'polygon(50% 0%, 0% 100%, 100% 100%)';
-  if(shape==='star') return 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+  if(shape==='photo-triangle') return 'polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%)'; // trapèze dédié aux photos (~70% visible, vs ~50% pour un vrai triangle)
+  if(shape==='star') return 'polygon(50% 0%, 69.98% 22.49%, 97.55% 34.55%, 82.34% 60.51%, 79.39% 90.45%, 50% 84%, 20.61% 90.45%, 17.66% 60.51%, 2.45% 34.55%, 30.02% 22.49%)';
   if(shape==='decagon') return 'polygon(50.00% 0.00%, 79.39% 9.55%, 97.55% 34.55%, 97.55% 65.45%, 79.39% 90.45%, 50.00% 100.00%, 20.61% 90.45%, 2.45% 65.45%, 2.45% 34.55%, 20.61% 9.55%)';
+  if(shape==='octagon') return 'polygon(50% 0%, 85.36% 14.64%, 100% 50%, 85.36% 85.36%, 50% 100%, 14.64% 85.36%, 0% 50%, 14.64% 14.64%)';
+  if(shape==='arch') return 'polygon(0% 100%, 0% 60%, 1.25% 51.1%, 4.95% 42.64%, 10.91% 35.06%, 18.83% 28.73%, 28.31% 23.96%, 38.87% 21%, 50% 20%, 61.13% 21%, 71.69% 23.96%, 81.17% 28.73%, 89.09% 35.06%, 95.05% 42.64%, 98.75% 51.1%, 100% 60%, 100% 100%)';
   return 'none';
 }
 function bkFilterCSS(f){
@@ -3094,8 +3235,10 @@ function bkElementInnerHTML(el){
   var clipStyle='';
   if(el.hex) clipStyle='clip-path:'+HEX_CLIP+';';
   else if(el.star) clipStyle='clip-path:'+bkShapeClipPath('star')+';';
-  else if(el.triangle) clipStyle='clip-path:'+bkShapeClipPath('triangle')+';';
+  else if(el.triangle) clipStyle='clip-path:'+bkShapeClipPath('photo-triangle')+';';
   else if(el.decagon) clipStyle='clip-path:'+bkShapeClipPath('decagon')+';';
+  else if(el.octagon) clipStyle='clip-path:'+bkShapeClipPath('octagon')+';';
+  else if(el.arch) clipStyle='clip-path:'+bkShapeClipPath('arch')+';';
   if(el.type==='photo'){
     var ph=bkPhotoById(el.photoId);
     var src = el.mapSnapshot || el.bgRemoved || (ph?bkPhotoSrc(ph,'full'):'');
@@ -3129,7 +3272,8 @@ function bkElementInnerHTML(el){
   } else if(el.type==='text'){
     var ff=el.fontFamily||'Poppins';
     var shadowStyle = el.shadow ? 'text-shadow:0 4px 10px rgba(0,0,0,.35);' : '';
-    return '<div class="bk-txt" style="font-size:'+el.fontSize+'px;color:'+el.color+';font-weight:800;font-family:\''+ff+'\',sans-serif;'+shadowStyle+'">'+esc(el.text)+'</div>';
+    var stickerBg = el.isSticker ? 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:rgba(255,255,255,0.55);border-radius:50%;' : '';
+    return '<div class="bk-txt" style="'+stickerBg+'font-size:'+el.fontSize+'px;color:'+el.color+';font-weight:800;font-family:\''+ff+'\',sans-serif;'+shadowStyle+'">'+esc(el.text)+'</div>';
   }
   return '';
 }
@@ -3929,7 +4073,10 @@ function bkShapePath(ctx, shape, w, h){
   if(shape==='ellipse'){ ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2); }
   else if(shape==='triangle'){ ctx.moveTo(0,-h/2); ctx.lineTo(-w/2,h/2); ctx.lineTo(w/2,h/2); ctx.closePath(); }
   else if(shape==='star'){
-    var spikes=5, outerR=Math.min(w,h)/2, innerR=outerR*0.45, rot=Math.PI/2*3;
+    // étoile "grasse" (points moins fins) : ~50% de surface visible au lieu de
+    // ~33% avec l'ancien ratio — sinon une photo découpée en étoile ne montre
+    // presque rien de reconnaissable (vérifié par mesure réelle avant/après).
+    var spikes=5, outerR=Math.min(w,h)/2, innerR=outerR*0.68, rot=Math.PI/2*3;
     var x=0, y=0, step=Math.PI/spikes;
     ctx.moveTo(x, y-outerR);
     for(var i=0;i<spikes;i++){
@@ -3967,20 +4114,63 @@ function bkDecagonPath(ctx, w, h){
   }
   ctx.closePath();
 }
+function bkOctagonPath(ctx, w, h){
+  var N=8;
+  ctx.beginPath();
+  for(var i=0;i<N;i++){
+    var angle=(-90 + i*(360/N)) * Math.PI/180;
+    var x=Math.cos(angle)*w/2, y=Math.sin(angle)*h/2;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+}
+function bkArchPath(ctx, w, h){
+  // fenêtre/porte cintrée : bas rectangulaire (60% de la hauteur), dôme
+  // semi-circulaire en haut (40%) — ~71% de surface visible, mesuré.
+  var domeH=h*0.4, top=-h/2, bottom=h/2, domeBaseY=top+domeH;
+  var N=14;
+  ctx.beginPath();
+  ctx.moveTo(-w/2, bottom);
+  ctx.lineTo(-w/2, domeBaseY);
+  for(var i=0;i<=N;i++){
+    var angle=Math.PI - (Math.PI*i/N);
+    var x=Math.cos(angle)*w/2;
+    var y=domeBaseY - Math.sin(angle)*domeH;
+    ctx.lineTo(x,y);
+  }
+  ctx.lineTo(w/2, bottom);
+  ctx.closePath();
+}
 function bkPhotoClipShape(el){
   if(el.round) return 'round';
   if(el.hex) return 'hex';
   if(el.star) return 'star';
   if(el.triangle) return 'triangle';
   if(el.decagon) return 'decagon';
+  if(el.octagon) return 'octagon';
+  if(el.arch) return 'arch';
   return null;
+}
+function bkTrapezoidPath(ctx, w, h){
+  // Remplace le triangle plein pour les PHOTOS uniquement (l'outil "Forme"
+  // décorative garde son vrai triangle pointu, inchangé) : un triangle plein
+  // ne montre que 50% de la photo, sous le minimum de 70% exigé. Un sommet
+  // légèrement tronqué (40% de la largeur) fait remonter à ~70% tout en
+  // restant clairement une forme effilée, distincte des formes arrondies.
+  var topW=w*0.4;
+  ctx.beginPath();
+  ctx.moveTo(-topW/2,-h/2); ctx.lineTo(topW/2,-h/2);
+  ctx.lineTo(w/2,h/2); ctx.lineTo(-w/2,h/2);
+  ctx.closePath();
 }
 function bkApplyPhotoClip(ctx, shape, w, h){
   if(shape==='round'){ ctx.beginPath(); ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2); }
   else if(shape==='hex'){ bkHexPath(ctx, w, h); }
-  else if(shape==='star'){ bkShapePath(ctx, 'star', w, h); }
-  else if(shape==='triangle'){ bkShapePath(ctx, 'triangle', w, h); }
+  else if(shape==='star'){ bkShapePath(ctx, 'star', w, h); } // conservé pour les livres déjà générés avant ce correctif
+  else if(shape==='triangle'){ bkTrapezoidPath(ctx, w, h); }
   else if(shape==='decagon'){ bkDecagonPath(ctx, w, h); }
+  else if(shape==='octagon'){ bkOctagonPath(ctx, w, h); }
+  else if(shape==='arch'){ bkArchPath(ctx, w, h); }
 }
 function bkDrawSingleElement(ctx, el, w, h, PXW, imgMap){
   if(el.shadow){ ctx.shadowColor='rgba(0,0,0,.4)'; ctx.shadowBlur=PXW*0.012; ctx.shadowOffsetY=PXW*0.005; }
@@ -4041,6 +4231,18 @@ function bkDrawSingleElement(ctx, el, w, h, PXW, imgMap){
     }
   } else if(el.type==='text'){
     var fs=el.fontSize*(PXW/1000);
+    if(el.isSticker){
+      // petit disque de fond translucide derrière le smiley : certains emoji
+      // (🌙 pâle, ⭐ jaune...) deviennent quasi invisibles sur un fond de la
+      // même couleur sans ça — vérifié visuellement avant/après sur un vrai PDF.
+      ctx.save();
+      ctx.shadowColor='transparent';
+      ctx.fillStyle='rgba(255,255,255,0.55)';
+      ctx.beginPath();
+      ctx.arc(0,0,fs*0.62,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
     ctx.fillStyle=el.color;
     var ff=el.fontFamily||'Poppins';
     ctx.font='800 '+fs+'px "'+ff+'", sans-serif';
