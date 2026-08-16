@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mes Voyages">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&family=Caveat:wght@700&family=Bebas+Neue&family=Roboto+Mono:wght@600;700&family=Montserrat:wght@700;800&family=Lobster&family=Oswald:wght@600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&family=Caveat:wght@700&family=Bebas+Neue&family=Roboto+Mono:wght@600;700&family=Montserrat:wght@700;800&family=Lobster&family=Oswald:wght@600;700&family=Dancing+Script:wght@700&family=Pacifico&family=Merriweather:wght@700;800&family=Raleway:wght@600;700;800&family=Josefin+Sans:wght@600;700&family=Abril+Fatface&family=Indie+Flower&family=Quicksand:wght@600;700&family=Cormorant+Garamond:wght@600;700&family=Permanent+Marker&family=Archivo+Black&display=swap" rel="stylesheet">
 <script src="jspdf.umd.min.js"></script>
 <link rel="stylesheet" href="leaflet.css">
 <script src="leaflet.js"></script>
@@ -341,7 +341,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.2.1</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.3.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -353,7 +353,7 @@ img{-webkit-user-drag:none;}
     <button class="ah-back" onclick="go('home')">← Retour</button>
     <button class="ah-pdf" onclick="openPdfSheet()">📕 Export PDF</button>
     <button class="ah-book" onclick="openBookListSheet()">🎨 Mes livres</button>
-    <button class="ah-map" onclick="openMapScreen()">🗺️ Carte</button>
+    <button class="ah-map" onclick="openMapListSheet()">🗺️ Carte</button>
     <div class="ah-info">
       <h2 id="ah-title"></h2>
       <p id="ah-meta"></p>
@@ -462,8 +462,8 @@ img{-webkit-user-drag:none;}
 <div id="pg-map">
   <div class="mp-top">
     <button class="bk-btn" onclick="closeMapScreen()">✕ Fermer</button>
+    <div style="font-weight:800;font-size:.85rem" id="mp-map-title"></div>
     <div style="font-weight:800;font-size:.85rem" id="mp-count"></div>
-    <div style="width:70px"></div>
   </div>
   <div class="mp-search-row">
     <input type="text" id="mp-search" placeholder="Chercher un lieu (ville, monument...)" onkeydown="if(event.key==='Enter')mpSearchPlace()">
@@ -478,6 +478,7 @@ img{-webkit-user-drag:none;}
 <div id="pg-book">
   <div class="bk-top">
     <button class="bk-btn" onclick="closeBook()">✕ Fermer</button>
+    <button class="bk-btn" onclick="bkManualSave()" title="Enregistrer maintenant">💾</button>
     <button class="bk-btn" onclick="bkSwitchBook()" title="Mes livres">📚</button>
     <div style="display:flex;gap:6px;align-items:center">
       <button class="bk-btn" id="bk-undo-btn" onclick="bkUndo()" disabled title="Annuler">↩️</button>
@@ -554,6 +555,15 @@ img{-webkit-user-drag:none;}
     <div class="bk-booklist-grid" id="bk-booklist-grid"></div>
     <button class="bk-book-add" style="margin-top:10px;border-color:#7B2FF7" onclick="openAutoBookSheet()"><div class="plus" style="background:linear-gradient(135deg,#FF5A6E,#7B2FF7)">🪄</div><span>Livre automatique</span></button>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBookListSheet()">Fermer</button></div>
+  </div>
+</div>
+
+<!-- Feuille: liste des cartes (plusieurs cartes possibles par album) -->
+<div class="bk-sheet" id="mp-maplist-sheet">
+  <div class="bk-sheet-box">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" id="mp-maplist-title">Mes cartes</h3>
+    <div class="bk-booklist-grid" id="mp-maplist-grid"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeMapListSheet()">Fermer</button></div>
   </div>
 </div>
 
@@ -832,7 +842,7 @@ function saveAlbumMeta(a){
   dbPut('albums', {
     id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
     createdAt:a.createdAt, photoIds:a.photos.map(function(p){ return p.id; }),
-    books:a.books, book:a.book, places:a.places, folders:a.folders
+    books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders
   });
 }
 // Sauvegarde UNIQUEMENT une photo (léger même si l'album a 1000 photos)
@@ -938,12 +948,73 @@ function delAlbum(id){
    Maths de projection (lat/lon <-> position sur la carte) testées séparément
    avant intégration ici. */
 function ensurePlaces(a){ if(!Array.isArray(a.places)) a.places=[]; }
+function ensureMaps(a){
+  if(!Array.isArray(a.maps)){
+    // migration depuis l'ancien format "une seule carte par album"
+    if(a.places && a.places.length){ a.maps=[{id:gid(), name:'Carte 1', places:a.places}]; delete a.places; }
+    else { a.maps=[]; delete a.places; }
+  }
+}
+var bkCurrentMap=null;
+var mpInsertMode=false;
+function openMapListSheet(){
+  bkAlbum=al(curAlbum);
+  ensureMaps(bkAlbum);
+  mpInsertMode=false;
+  mpRenderMapList();
+  document.getElementById('mp-maplist-title').textContent='Mes cartes';
+  document.getElementById('mp-maplist-sheet').classList.add('on');
+}
+function closeMapListSheet(){ document.getElementById('mp-maplist-sheet').classList.remove('on'); mpInsertMode=false; }
+function mpRenderMapList(){
+  var h='';
+  bkAlbum.maps.forEach(function(m){
+    var openAction = mpInsertMode ? 'bkGenerateAndInsertMap(al(curAlbum).maps.find(function(x){return x.id===\''+m.id+'\';}));closeMapListSheet();' : 'mpOpenSpecificMap(\''+m.id+'\')';
+    h+='<div class="bk-book-card">'
+      +'<div class="bk-book-thumb" style="background:#EAF4FB;display:flex;align-items:center;justify-content:center;font-size:1.8rem" onclick="'+openAction+'">🗺️</div>'
+      +'<div class="bk-book-info">'
+      +'<input class="bk-book-name-input" value="'+esc(m.name)+'" onchange="mpRenameMap(\''+m.id+'\',this.value)">'
+      +'<div class="bk-book-meta">'+m.places.length+' lieu'+(m.places.length!==1?'x':'')+'</div>'
+      +'</div>'
+      +(mpInsertMode?'':'<button class="bk-book-del" onclick="mpDeleteMap(\''+m.id+'\')" title="Supprimer">🗑️</button>')
+      +'</div>';
+  });
+  if(!mpInsertMode) h+='<div class="bk-book-add" onclick="mpCreateNewMap()"><div class="plus">+</div><span>Nouvelle carte</span></div>';
+  document.getElementById('mp-maplist-grid').innerHTML=h;
+}
+function mpRenameMap(id,name){
+  var m=bkAlbum.maps.find(function(x){ return x.id===id; });
+  if(!m) return;
+  m.name=name.trim()||'Sans titre';
+  saveAlbumMeta(bkAlbum);
+}
+function mpCreateNewMap(){
+  var n=bkAlbum.maps.length+1;
+  var m={id:gid(), name:'Carte '+n, places:[]};
+  bkAlbum.maps.push(m);
+  saveAlbumMeta(bkAlbum);
+  mpOpenSpecificMap(m.id);
+}
+function mpDeleteMap(id){
+  if(!confirm('Supprimer cette carte ? Cette action est définitive.')) return;
+  bkAlbum.maps=bkAlbum.maps.filter(function(m){ return m.id!==id; });
+  saveAlbumMeta(bkAlbum);
+  mpRenderMapList();
+  toast('Carte supprimée');
+}
+function mpOpenSpecificMap(id){
+  bkCurrentMap=bkAlbum.maps.find(function(m){ return m.id===id; });
+  if(!bkCurrentMap) return;
+  closeMapListSheet();
+  openMapScreen();
+}
 
 var mpMap=null, mpMarkers={};
 function openMapScreen(){
   bkAlbum=al(curAlbum);
-  ensurePlaces(bkAlbum);
+  if(!bkCurrentMap){ ensureMaps(bkAlbum); if(!bkAlbum.maps.length){ openMapListSheet(); return; } bkCurrentMap=bkAlbum.maps[0]; }
   document.getElementById('pg-map').classList.add('on');
+  document.getElementById('mp-map-title').textContent=bkCurrentMap.name;
   document.getElementById('mp-search').value='';
   document.getElementById('mp-search-results').innerHTML='';
   if(!mpMap){
@@ -960,10 +1031,11 @@ function openMapScreen(){
 }
 function closeMapScreen(){
   document.getElementById('pg-map').classList.remove('on');
+  bkCurrentMap=null;
 }
 function mpFitAll(){
-  if(!bkAlbum.places.length) return;
-  var bounds=bkAlbum.places.map(function(p){ return [p.lat,p.lon]; });
+  if(!bkCurrentMap.places.length) return;
+  var bounds=bkCurrentMap.places.map(function(p){ return [p.lat,p.lon]; });
   if(bounds.length===1) mpMap.setView(bounds[0], 13);
   else mpMap.fitBounds(bounds, {padding:[40,40]});
 }
@@ -982,15 +1054,15 @@ function mpGetPinIcon(){
 function mpRenderMarkers(){
   Object.keys(mpMarkers).forEach(function(id){ mpMap.removeLayer(mpMarkers[id]); });
   mpMarkers={};
-  bkAlbum.places.forEach(function(p){
+  bkCurrentMap.places.forEach(function(p){
     var m=L.marker([p.lat,p.lon], {icon:mpGetPinIcon()}).addTo(mpMap).bindPopup(esc(p.name));
     mpMarkers[p.id]=m;
   });
-  document.getElementById('mp-count').textContent=bkAlbum.places.length+' lieu'+(bkAlbum.places.length!==1?'x':'');
+  document.getElementById('mp-count').textContent=bkCurrentMap.places.length+' lieu'+(bkCurrentMap.places.length!==1?'x':'');
 }
 function mpRenderList(){
   var h='';
-  bkAlbum.places.forEach(function(p){
+  bkCurrentMap.places.forEach(function(p){
     h+='<div class="mp-place-row"><span class="name">📍 '+esc(p.name)+'</span>'
       +'<button onclick="mpFocusPlace(\''+p.id+'\')">🎯</button>'
       +'<button onclick="mpDeletePlace(\''+p.id+'\')">🗑️</button></div>';
@@ -998,17 +1070,17 @@ function mpRenderList(){
   document.getElementById('mp-list').innerHTML=h;
 }
 function mpFocusPlace(id){
-  var p=bkAlbum.places.find(function(x){ return x.id===id; });
+  var p=bkCurrentMap.places.find(function(x){ return x.id===id; });
   if(p) mpMap.setView([p.lat,p.lon], 14);
 }
 function mpDeletePlace(id){
-  bkAlbum.places=bkAlbum.places.filter(function(p){ return p.id!==id; });
+  bkCurrentMap.places=bkCurrentMap.places.filter(function(p){ return p.id!==id; });
   saveAlbumMeta(bkAlbum);
   mpRenderMarkers();
   mpRenderList();
 }
 function mpAddPlace(name, lat, lon){
-  bkAlbum.places.push({id:gid(), name:name, lat:lat, lon:lon});
+  bkCurrentMap.places.push({id:gid(), name:name, lat:lat, lon:lon});
   saveAlbumMeta(bkAlbum);
   mpRenderMarkers();
   mpRenderList();
@@ -1185,8 +1257,21 @@ function bkGenerateMapSnapshot(places, pxW, pxH){
 }
 var bkMapGenInProgress=false;
 function bkAddMapElement(){
-  ensurePlaces(bkAlbum);
-  if(!bkAlbum.places.length){ toast('Ajoute au moins un lieu sur la carte avant (bouton 🗺️ Carte depuis l\'album)'); return; }
+  bkAlbum=al(curAlbum);
+  ensureMaps(bkAlbum);
+  if(!bkAlbum.maps.length || bkAlbum.maps.every(function(m){ return !m.places.length; })){
+    toast('Ajoute au moins un lieu sur une carte avant (bouton 🗺️ Carte depuis l\'album)');
+    return;
+  }
+  var withPlaces=bkAlbum.maps.filter(function(m){ return m.places.length; });
+  if(withPlaces.length===1){ bkGenerateAndInsertMap(withPlaces[0]); return; }
+  // plusieurs cartes disponibles : on laisse choisir laquelle insérer
+  mpInsertMode=true;
+  mpRenderMapList();
+  document.getElementById('mp-maplist-title').textContent='Quelle carte insérer ?';
+  document.getElementById('mp-maplist-sheet').classList.add('on');
+}
+function bkGenerateAndInsertMap(mapObj){
   if(bkMapGenInProgress){ toast('Génération déjà en cours…'); return; }
   bkMapGenInProgress=true;
   toast('Génération de la carte… (jusqu\'à 12s si le réseau est lent)');
@@ -1199,7 +1284,7 @@ function bkAddMapElement(){
       toast('❌ La génération a pris trop de temps, réessaie');
     }
   }, 20000);
-  bkGenerateMapSnapshot(bkAlbum.places, 1000, 1000).then(function(dataUrl){
+  bkGenerateMapSnapshot(mapObj.places, 1000, 1000).then(function(dataUrl){
     bkSnapshot();
     var page=bkBook.pages[bkPageIdx];
     var el={id:gid(), type:'photo', photoId:null, mapSnapshot:dataUrl, x:50,y:50,w:90,h:60,rot:0};
@@ -2306,7 +2391,7 @@ document.getElementById('pg-lb').addEventListener('touchend',function(e){
    Modèle de données : a.book = { orient:'portrait'|'landscape', pages:[ {bg, elements:[...]} ] }
    Chaque élément : {id, type:'photo'|'text', x, y, w, h (tout en % du cadre, x/y = CENTRE), rot (deg),
                      photoId? (pour type photo), text?, fontSize?, color? (pour type texte)} */
-var BK_COLORS=['#241E38','#7B2FF7','#FF5A6E','#00C2A8','#FFFFFF','#FFD93D'];
+var BK_COLORS=['#241E38','#7B2FF7','#FF5A6E','#00C2A8','#FFFFFF','#FFD93D','#000000','#FF8FA3','#1E88E5','#FB8C00','#2D8659','#9E9E9E'];
 var BK_BGS=['#FFFFFF','#F7F5FC','#241E38','#FFD93D','#7B2FF7','#00C2A8'];
 var BK_FONTS=[
   {id:'Poppins', label:'Poppins'},
@@ -2318,7 +2403,17 @@ var BK_FONTS=[
   {id:'Montserrat', label:'Montserrat'},
   {id:'Lobster', label:'Lobster'},
   {id:'Oswald', label:'Oswald'},
-  {id:'Dancing Script', label:'Dancing Script'}
+  {id:'Dancing Script', label:'Dancing Script'},
+  {id:'Pacifico', label:'Pacifico'},
+  {id:'Merriweather', label:'Merriweather'},
+  {id:'Raleway', label:'Raleway'},
+  {id:'Josefin Sans', label:'Josefin Sans'},
+  {id:'Abril Fatface', label:'Abril Fatface'},
+  {id:'Indie Flower', label:'Indie Flower'},
+  {id:'Quicksand', label:'Quicksand'},
+  {id:'Cormorant Garamond', label:'Cormorant'},
+  {id:'Permanent Marker', label:'Permanent Marker'},
+  {id:'Archivo Black', label:'Archivo Black'}
 ];
 var BK_STICKERS=['❤️','⭐','☀️','🌙','⛰️','🌊','🌴','✈️','📍','🎉','🔥','😍','👍','🏖️','🗺️','☕','🍕','📸','🎈','⚓',
   '🌸','🌈','🦋','🐚','🍹','🍷','🎶','💃','🕺','🎡','🚗','🚲','⛵','🏔️','🌅','🌇','🍦','🧳','😎','🥳',
@@ -2369,6 +2464,17 @@ var BK_LAYOUTS = [
     {type:'photo', x:74,y:50,w:46,h:30,rot:0},
     {type:'photo', x:26,y:82,w:46,h:30,rot:0},
     {type:'photo', x:74,y:82,w:46,h:30,rot:0}
+  ]},
+  { key:'grid7', label:'Mosaïque 7 photos', slots:[
+    {type:'photo', x:50,y:15,w:94,h:24,rot:0},
+    {type:'photo', x:19,y:41,w:31,h:20,rot:0},{type:'photo', x:50,y:41,w:31,h:20,rot:0},{type:'photo', x:81,y:41,w:31,h:20,rot:0},
+    {type:'photo', x:19,y:64,w:31,h:20,rot:0},{type:'photo', x:50,y:64,w:31,h:20,rot:0},{type:'photo', x:81,y:64,w:31,h:20,rot:0}
+  ]},
+  { key:'grid8', label:'Mosaïque 8 photos', slots:[
+    {type:'photo', x:26,y:14,w:46,h:22,rot:0},{type:'photo', x:74,y:14,w:46,h:22,rot:0},
+    {type:'photo', x:26,y:38,w:46,h:22,rot:0},{type:'photo', x:74,y:38,w:46,h:22,rot:0},
+    {type:'photo', x:26,y:62,w:46,h:22,rot:0},{type:'photo', x:74,y:62,w:46,h:22,rot:0},
+    {type:'photo', x:26,y:86,w:46,h:22,rot:0},{type:'photo', x:74,y:86,w:46,h:22,rot:0}
   ]},
   { key:'grid9', label:'Mosaïque 9 photos', slots:[
     {type:'photo', x:18,y:15,w:32,h:26,rot:0},{type:'photo', x:50,y:15,w:32,h:26,rot:0},{type:'photo', x:82,y:15,w:32,h:26,rot:0},
@@ -2709,6 +2815,8 @@ var BK_AUTO_LAYOUT_BUCKETS = {
   4: ['grid4','big-strip','magazine-4','fan-4','photobooth-4','zigzag-4','spiral-4','triangle-quad','shape-mix-4'],
   5: ['bouquet-5','stairs-5','filmstrip-5'],
   6: ['grid6','wall-6','broken-grid-6','confetti-6'],
+  7: ['grid7'],
+  8: ['grid8'],
   9: ['grid9','grid9-circles','grid9-hex','grid9-mosaic']
 };
 function bkPlanAutoPages(photoCount, pageCount, preferredLayouts){
@@ -3015,6 +3123,10 @@ function ensureBooks(a){
   }
 }
 function saveBook(){ saveAlbumMeta(bkAlbum); }
+function bkManualSave(){
+  saveBook();
+  toast('💾 Livre enregistré');
+}
 
 function openBookListSheet(){
   bkAlbum=al(curAlbum);
@@ -3225,6 +3337,17 @@ function bkDeleteBook(id){
   bkRenderBookList();
   toast('Livre supprimé');
 }
+var bkAutoSaveTimer=null;
+// Filet de sécurité supplémentaire : sauvegarde immédiatement si l'appli
+// passe en arrière-plan ou si l'onglet/la fenêtre se ferme, même sans passer
+// par le bouton "Fermer" (téléphone qui se verrouille, appli quittée
+// brutalement, etc.) — couvre le cas qui inquiétait le plus.
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='hidden' && bkBook) saveAlbumMeta(bkAlbum);
+});
+window.addEventListener('pagehide', function(){
+  if(bkBook) saveAlbumMeta(bkAlbum);
+});
 function bkOpenSpecificBook(id){
   bkBook=bkAlbum.books.find(function(b){ return b.id===id; });
   if(!bkBook) return;
@@ -3238,9 +3361,17 @@ function bkOpenSpecificBook(id){
   bkRenderPage();
   bkRenderPages();
   bkUpdateUndoButtons();
+  // Filet de sécurité : sauvegarde automatique en arrière-plan pendant
+  // l'édition (en plus de la sauvegarde à la fermeture et du bouton manuel
+  // 💾) — si jamais l'appli est fermée brutalement sans passer par "Fermer".
+  if(bkAutoSaveTimer) clearInterval(bkAutoSaveTimer);
+  bkAutoSaveTimer=setInterval(function(){
+    if(bkBook) saveAlbumMeta(bkAlbum);
+  }, 20000);
 }
 function closeBook(){
   saveBook();
+  if(bkAutoSaveTimer){ clearInterval(bkAutoSaveTimer); bkAutoSaveTimer=null; }
   document.getElementById('pg-book').classList.remove('on');
   document.getElementById('pg-book').style.display='none';
 }
@@ -4680,7 +4811,7 @@ initDB(function(){
           id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
           createdAt:a.createdAt||0,
           photos:photos,
-          books:a.books, book:a.book, places:a.places, folders:a.folders
+          books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders
         };
       }).sort(function(x,y){ return y.createdAt-x.createdAt; });
 
