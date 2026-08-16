@@ -346,7 +346,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.5.1</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.6.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -755,7 +755,8 @@ img{-webkit-user-drag:none;}
 <!-- Feuille: choix d'une photo de l'album -->
 <div class="bk-sheet" id="bk-photo-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Choisir une photo</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px">Choisir une photo</h3>
+    <div class="folder-strip" id="bk-picker-folder-strip" style="margin:0 0 12px"></div>
     <div class="bk-photo-grid" id="bk-photo-grid"></div>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkPhotoSheet()">Annuler</button></div>
   </div>
@@ -3467,12 +3468,9 @@ function bkSetBg(c){
   renderBkSwatches();
 }
 function openBgPhotoPicker(){
-  var h='';
-  bkAlbum.photos.forEach(function(p){
-    h+='<img src="'+bkPhotoSrc(p,'thumb')+'" onclick="bkSetBgPhoto(\''+p.id+'\')">';
-  });
-  if(!bkAlbum.photos.length) h='<p style="grid-column:1/-1;color:var(--ink-soft);text-align:center;padding:20px">Aucune photo dans cet album</p>';
-  document.getElementById('bk-photo-grid').innerHTML=h;
+  bkPickerFolderId=null;
+  bkPickerSelectFn='bkSetBgPhoto';
+  bkRenderPickerGrid();
   document.getElementById('bk-photo-sheet').classList.add('on');
 }
 function bkSetBgPhoto(photoId){
@@ -3800,13 +3798,31 @@ function bkAddText(){
   bkRenderPage();
   openBkTextSheet();
 }
-function openPhotoPicker(){
-  var h='';
-  bkAlbum.photos.forEach(function(p){
-    h+='<img src="'+bkPhotoSrc(p,'thumb')+'" onclick="bkPickPhoto(\''+p.id+'\')">';
+var bkPickerFolderId=null, bkPickerSelectFn='bkPickPhoto';
+function bkRenderPickerGrid(){
+  ensureFolders(bkAlbum);
+  var stripH='<div class="folder-chip'+(bkPickerFolderId===null?' on':'')+'" onclick="bkSelectPickerFolder(null)">Non rangées ('+bkAlbum.photos.filter(function(p){return !p.folderId;}).length+')</div>';
+  bkAlbum.folders.forEach(function(f){
+    var n=bkAlbum.photos.filter(function(p){ return p.folderId===f.id; }).length;
+    stripH+='<div class="folder-chip'+(bkPickerFolderId===f.id?' on':'')+'" onclick="bkSelectPickerFolder(\''+f.id+'\')">📁 '+esc(f.name)+' ('+n+')</div>';
   });
-  if(!bkAlbum.photos.length) h='<p style="grid-column:1/-1;color:var(--ink-soft);text-align:center;padding:20px">Aucune photo dans cet album</p>';
+  document.getElementById('bk-picker-folder-strip').innerHTML=stripH;
+
+  var list=bkPickerFolderId===null
+    ? bkAlbum.photos.filter(function(p){ return !p.folderId; })
+    : bkAlbum.photos.filter(function(p){ return p.folderId===bkPickerFolderId; });
+  var h='';
+  list.forEach(function(p){
+    h+='<img src="'+bkPhotoSrc(p,'thumb')+'" onclick="'+bkPickerSelectFn+'(\''+p.id+'\')">';
+  });
+  if(!list.length) h='<p style="grid-column:1/-1;color:var(--ink-soft);text-align:center;padding:20px">Aucune photo ici</p>';
   document.getElementById('bk-photo-grid').innerHTML=h;
+}
+function bkSelectPickerFolder(id){ bkPickerFolderId=id; bkRenderPickerGrid(); }
+function openPhotoPicker(){
+  bkPickerFolderId=null;
+  bkPickerSelectFn='bkPickPhoto';
+  bkRenderPickerGrid();
   document.getElementById('bk-photo-sheet').classList.add('on');
 }
 function closeBkPhotoSheet(){ document.getElementById('bk-photo-sheet').classList.remove('on'); }
@@ -4683,7 +4699,18 @@ function bkRenderPageToCanvas(page, orient){
       }
       return Promise.resolve();
     });
-    Promise.all([bgLoad].concat(loads)).then(function(){
+    // Attend explicitement que TOUTES les polices utilisées sur cette page
+    // soient vraiment prêtes avant de dessiner quoi que ce soit — sans ça,
+    // sur une connexion lente ou une police tout juste ajoutée, le texte peut
+    // se dessiner AVANT la fin du téléchargement et basculer silencieusement
+    // sur une police de secours (contrairement aux photos, déjà attendues).
+    var fontsUsed=new Set();
+    leaves.forEach(function(el){ if(el.type==='text' && el.fontFamily) fontsUsed.add(el.fontFamily); });
+    var fontLoads=Array.from(fontsUsed).map(function(f){
+      return document.fonts.load('800 40px "'+f+'"').catch(function(){});
+    });
+    var fontsReady=Promise.all(fontLoads).then(function(){ return document.fonts.ready; }).catch(function(){});
+    Promise.all([bgLoad, fontsReady].concat(loads)).then(function(){
       page.elements.forEach(function(el){ bkDrawElementTree(ctx, el, PXW, PXH, imgMap); });
       resolve(c.toDataURL('image/jpeg',0.92));
     });
