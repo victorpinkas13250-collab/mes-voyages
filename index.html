@@ -346,7 +346,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.8.1</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.9.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -2523,6 +2523,26 @@ var BK_LAYOUTS = [
     {type:'photo', x:27,y:64,w:46,h:20,rot:0},{type:'photo', x:73,y:64,w:46,h:20,rot:0},
     {type:'photo', x:12,y:88,w:22,h:16,rot:0},{type:'photo', x:37,y:88,w:22,h:16,rot:0},{type:'photo', x:63,y:88,w:22,h:16,rot:0},{type:'photo', x:88,y:88,w:22,h:16,rot:0}
   ]},
+  { key:'grid2-thin', label:'Grille traits fins 2 photos', slots:[
+    {type:'photo', x:50,y:24.625,w:100,h:49.25,rot:0},{type:'photo', x:50,y:75.375,w:100,h:49.25,rot:0}
+  ]},
+  { key:'grid3-thin', label:'Grille traits fins 3 photos', slots:[
+    {type:'photo', x:50,y:16.167,w:100,h:32.333,rot:0},{type:'photo', x:50,y:50,w:100,h:32.333,rot:0},{type:'photo', x:50,y:83.833,w:100,h:32.333,rot:0}
+  ]},
+  { key:'grid4-thin', label:'Grille traits fins 4 photos', slots:[
+    {type:'photo', x:24.625,y:24.625,w:49.25,h:49.25,rot:0},{type:'photo', x:75.375,y:24.625,w:49.25,h:49.25,rot:0},
+    {type:'photo', x:24.625,y:75.375,w:49.25,h:49.25,rot:0},{type:'photo', x:75.375,y:75.375,w:49.25,h:49.25,rot:0}
+  ]},
+  { key:'grid6-thin', label:'Grille traits fins 6 photos', slots:[
+    {type:'photo', x:24.625,y:16.167,w:49.25,h:32.333,rot:0},{type:'photo', x:75.375,y:16.167,w:49.25,h:32.333,rot:0},
+    {type:'photo', x:24.625,y:50,w:49.25,h:32.333,rot:0},{type:'photo', x:75.375,y:50,w:49.25,h:32.333,rot:0},
+    {type:'photo', x:24.625,y:83.833,w:49.25,h:32.333,rot:0},{type:'photo', x:75.375,y:83.833,w:49.25,h:32.333,rot:0}
+  ]},
+  { key:'grid9-thin', label:'Grille traits fins 9 photos', slots:[
+    {type:'photo', x:16.167,y:16.167,w:32.333,h:32.333,rot:0},{type:'photo', x:50,y:16.167,w:32.333,h:32.333,rot:0},{type:'photo', x:83.833,y:16.167,w:32.333,h:32.333,rot:0},
+    {type:'photo', x:16.167,y:50,w:32.333,h:32.333,rot:0},{type:'photo', x:50,y:50,w:32.333,h:32.333,rot:0},{type:'photo', x:83.833,y:50,w:32.333,h:32.333,rot:0},
+    {type:'photo', x:16.167,y:83.833,w:32.333,h:32.333,rot:0},{type:'photo', x:50,y:83.833,w:32.333,h:32.333,rot:0},{type:'photo', x:83.833,y:83.833,w:32.333,h:32.333,rot:0}
+  ]},
   { key:'grid7-circles', label:'Mosaïque ronde tailles variées 7 photos', slots:[
     {type:'photo', x:50,y:22,w:62,h:44,rot:0, round:true},
     {type:'photo', x:15.31,y:63,w:34,h:24,rot:0, round:true},{type:'photo', x:50,y:63,w:34,h:24,rot:0, round:true},{type:'photo', x:84.69,y:63,w:34,h:24,rot:0, round:true},
@@ -2891,14 +2911,14 @@ function bkTemplatePhoto(tpl, idx){
    branché ici. */
 var BK_AUTO_LAYOUT_BUCKETS = {
   1: ['float-1','asym-1','single-card','side-title','banner','circle-1','hex-1','triangle-1','decagon-1','octagon-1','arch-1'],
-  2: ['duo-h','duo-v','overlap-2','diag-2','circle-duo','triangle-duo','decagon-duo','octagon-duo','arch-duo'],
-  3: ['trio','collage','cascade-3','triangle-3','polaroid-pile','giant-plus-two','vertical-triptych-3','hex-trio','shape-mix-3','trio-hero','trio-hero-round'],
-  4: ['grid4','big-strip','magazine-4','fan-4','photobooth-4','zigzag-4','spiral-4','triangle-quad','shape-mix-4','quad-hero','quad-hero-hex'],
+  2: ['duo-h','duo-v','overlap-2','diag-2','circle-duo','triangle-duo','decagon-duo','octagon-duo','arch-duo','grid2-thin'],
+  3: ['trio','collage','cascade-3','triangle-3','polaroid-pile','giant-plus-two','vertical-triptych-3','hex-trio','shape-mix-3','trio-hero','trio-hero-round','grid3-thin'],
+  4: ['grid4','big-strip','magazine-4','fan-4','photobooth-4','zigzag-4','spiral-4','triangle-quad','shape-mix-4','quad-hero','quad-hero-hex','grid4-thin'],
   5: ['bouquet-5','stairs-5','filmstrip-5','five-hero-round'],
-  6: ['grid6','wall-6','broken-grid-6','confetti-6','six-hero'],
+  6: ['grid6','wall-6','broken-grid-6','confetti-6','six-hero','grid6-thin'],
   7: ['grid7','grid7-circles','grid7-hex'],
   8: ['grid8','grid8-circles','grid8-octagon'],
-  9: ['grid9','grid9-circles','grid9-hex','grid9-mosaic','grid9-octagon','grid9-shapes-varied']
+  9: ['grid9','grid9-circles','grid9-hex','grid9-mosaic','grid9-octagon','grid9-shapes-varied','grid9-thin']
 };
 function bkPlanAutoPages(photoCount, pageCount, preferredLayouts){
   var sizes=[6,5,4,3,2,1];
