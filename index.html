@@ -337,7 +337,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.9.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.9.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -2816,6 +2816,7 @@ function bkAutoGenerateBook(opts){
   var pages=[];
   var photoCursor=0;
   var emojis=(opts.emojis||[]).filter(Boolean);
+  var lastStickerEmoji=null;
   plan.forEach(function(step, pageIdx){
     var layout=BK_LAYOUTS.find(function(l){ return l.key===step.layoutKey; });
     var elements=bkBuildElementsForLayout(layout, style);
@@ -2840,12 +2841,14 @@ function bkAutoGenerateBook(opts){
       el.id=gid();
     });
     // touche décorative : un des smileys favoris, sur 2 pages sur 3 environ
-    // (choisi au hasard parmi ceux sélectionnés, pour varier) — l'utilisateur
-    // trouvait qu'il n'y en avait pas assez avec 1 page sur 3.
+    // (choisi au hasard parmi ceux sélectionnés, pour varier) — jamais le même
+    // deux fois de suite quand on a le choix entre plusieurs.
     if(emojis.length && pageIdx%3!==0){
-      var chosen=emojis[Math.floor(Math.random()*emojis.length)];
+      var candidates = emojis.length>1 ? emojis.filter(function(e){ return e!==lastStickerEmoji; }) : emojis;
+      var chosen=candidates[Math.floor(Math.random()*candidates.length)];
+      lastStickerEmoji=chosen;
       elements.push({id:gid(), type:'text', text:chosen, x:88,y:12,w:16,h:16,rot:Math.round(Math.random()*20-10),
-        fontSize:38, color:style.accent, fontFamily:style.font, isSticker:true});
+        fontSize:38, color:style.accent, fontFamily:style.font, isSticker:true, bgColor:style.bg});
     }
     pages.push({bg:style.bg, elements:elements});
   });
@@ -3315,7 +3318,9 @@ function bkElementInnerHTML(el){
   } else if(el.type==='text'){
     var ff=el.fontFamily||'Poppins';
     var shadowStyle = el.shadow ? 'text-shadow:0 4px 10px rgba(0,0,0,.35);' : '';
-    var stickerBg = el.isSticker ? 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:rgba(255,255,255,0.55);border-radius:50%;' : '';
+    var stickerBg = el.isSticker
+      ? 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:'+(el.bgColor||'rgba(255,255,255,0.55)')+';border-radius:50%;box-shadow:0 3px 8px rgba(0,0,0,.25);'
+      : '';
     return '<div class="bk-txt" style="'+stickerBg+'font-size:'+el.fontSize+'px;color:'+el.color+';font-weight:800;font-family:\''+ff+'\',sans-serif;'+shadowStyle+'">'+esc(el.text)+'</div>';
   }
   return '';
@@ -4275,12 +4280,12 @@ function bkDrawSingleElement(ctx, el, w, h, PXW, imgMap){
   } else if(el.type==='text'){
     var fs=el.fontSize*(PXW/1000);
     if(el.isSticker){
-      // petit disque de fond translucide derrière le smiley : certains emoji
-      // (🌙 pâle, ⭐ jaune...) deviennent quasi invisibles sur un fond de la
-      // même couleur sans ça — vérifié visuellement avant/après sur un vrai PDF.
+      // disque de fond derrière le smiley, de la même couleur que le fond de
+      // la page (au lieu d'un blanc fixe qui tranchait) — une ombre légère le
+      // garde quand même repérable si jamais il se fond presque dans le fond.
       ctx.save();
-      ctx.shadowColor='transparent';
-      ctx.fillStyle='rgba(255,255,255,0.55)';
+      ctx.shadowColor='rgba(0,0,0,.25)'; ctx.shadowBlur=fs*0.15; ctx.shadowOffsetY=fs*0.04;
+      ctx.fillStyle=el.bgColor||'rgba(255,255,255,0.55)';
       ctx.beginPath();
       ctx.arc(0,0,fs*0.62,0,Math.PI*2);
       ctx.fill();
