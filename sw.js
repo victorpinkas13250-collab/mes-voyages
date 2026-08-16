@@ -1,7 +1,7 @@
 /* Numéro de version : à incrémenter à CHAQUE mise à jour du site.
    C'est ce qui force les téléphones à récupérer la nouvelle version
    au lieu de rester bloqués sur l'ancienne en cache. */
-const APP_VERSION = '3.6.0';
+const APP_VERSION = '3.7.0';
 const CACHE_NAME = 'mes-voyages-' + APP_VERSION;
 
 const ASSETS = [

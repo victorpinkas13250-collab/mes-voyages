@@ -337,7 +337,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.6.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.7.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -835,7 +835,7 @@ function saveAlbumMeta(a){
 function savePhoto(albumId, p){
   dbPut('photos', {
     id:p.id, albumId:albumId, full:p.full, thumb:p.thumb, w:p.w, h:p.h, cap:p.cap, liked:p.liked,
-    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource, folderId:p.folderId, colorBucket:p.colorBucket
+    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource, folderId:p.folderId, colorBuckets:p.colorBuckets
   });
 }
 function toast(msg){
@@ -1369,31 +1369,44 @@ function bkNearestColorBucket(r,g,b){
   });
   return best;
 }
-function bkComputeDominantColorFromImg(img){
-  var SIZE=20;
+function bkComputeColorBucketsFromImg(img){
+  // Analyse la RÉPARTITION des couleurs (pas juste une moyenne globale, qui
+  // écraserait par exemple une plage bleu+jaune en un vert-gris insignifiant) :
+  // chaque pixel de la miniature réduite est classé dans sa couleur la plus
+  // proche, puis toute couleur qui représente au moins 20% de la photo est
+  // retenue — une même photo peut donc avoir plusieurs couleurs.
+  var SIZE=20, THRESHOLD=20;
   var c=document.createElement('canvas'); c.width=SIZE; c.height=SIZE;
   var ctx=c.getContext('2d');
   ctx.drawImage(img,0,0,SIZE,SIZE);
   var data;
   try{ data=ctx.getImageData(0,0,SIZE,SIZE).data; }catch(e){ return null; } // image cross-origin non lisible (rare, tuiles carte)
-  var r=0,g=0,b=0,n=0;
-  for(var i=0;i<data.length;i+=4){ r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++; }
+  var counts={}, n=0;
+  for(var i=0;i<data.length;i+=4){
+    var bucket=bkNearestColorBucket(data[i], data[i+1], data[i+2]);
+    counts[bucket]=(counts[bucket]||0)+1;
+    n++;
+  }
   if(!n) return null;
-  return bkNearestColorBucket(Math.round(r/n), Math.round(g/n), Math.round(b/n));
+  var result=[];
+  Object.keys(counts).forEach(function(k){
+    if(counts[k]/n*100 >= THRESHOLD) result.push(k);
+  });
+  return result;
 }
 function bkEnsurePhotoColor(p){
-  // calcule et met en cache la couleur dominante d'une photo si pas déjà fait ;
-  // renvoie une Promise qui se résout quand p.colorBucket est prêt.
-  if(p.colorBucket) return Promise.resolve(p.colorBucket);
+  // calcule et met en cache les couleurs d'une photo si pas déjà fait ;
+  // renvoie une Promise qui se résout quand p.colorBuckets est prêt.
+  if(p.colorBuckets) return Promise.resolve(p.colorBuckets);
   var src=bkPhotoSrc(p,'thumb');
   if(!src) return Promise.resolve(null);
   return new Promise(function(resolve){
     var img=new Image();
     img.crossOrigin='anonymous';
     img.onload=function(){
-      var bucket=bkComputeDominantColorFromImg(img);
-      p.colorBucket=bucket;
-      resolve(bucket);
+      var buckets=bkComputeColorBucketsFromImg(img);
+      p.colorBuckets=buckets;
+      resolve(buckets);
     };
     img.onerror=function(){ resolve(null); };
     img.src=src;
@@ -1403,7 +1416,7 @@ function bkEnsureAllPhotoColors(album){
   // calcule la couleur de toutes les photos qui n'en ont pas encore (vieilles
   // photos, ou nouvelles jamais ouvertes dans le filtre couleur), en parallèle
   // par petits lots pour rester fluide même sur un album à 500+ photos.
-  var todo=album.photos.filter(function(p){ return !p.colorBucket; });
+  var todo=album.photos.filter(function(p){ return !p.colorBuckets; });
   if(!todo.length) return Promise.resolve();
   var BATCH=12, i=0;
   function next(){
@@ -1438,7 +1451,7 @@ function renderColorStrip(){
     strip.innerHTML='<div class="modal-sub" style="margin:0">Analyse des couleurs en cours…</div>';
     return;
   }
-  var missing=a.photos.some(function(p){ return !p.colorBucket; });
+  var missing=a.photos.some(function(p){ return !p.colorBuckets; });
   if(missing){
     bkColorsComputing=true;
     strip.innerHTML='<div class="modal-sub" style="margin:0">Analyse des couleurs en cours…</div>';
@@ -1451,7 +1464,7 @@ function renderColorStrip(){
   var h='<div class="color-swatch-chip'+(bkCurrentColorFilter===null?' on':'')+'" onclick="selectColorFilter(null)">'
     +'<div class="dot" style="background:conic-gradient(red,orange,yellow,green,blue,violet,red)"></div><span class="lbl">Toutes</span></div>';
   BK_COLOR_BUCKETS.forEach(function(bucket){
-    var n=a.photos.filter(function(p){ return p.colorBucket===bucket.key; }).length;
+    var n=a.photos.filter(function(p){ return p.colorBuckets && p.colorBuckets.indexOf(bucket.key)>-1; }).length;
     if(!n) return; // pas la peine de proposer une couleur absente de l'album
     h+='<div class="color-swatch-chip'+(bkCurrentColorFilter===bucket.key?' on':'')+'" onclick="selectColorFilter(\''+bucket.key+'\')">'
       +'<div class="dot" style="background:'+bucket.hex+'"></div><span class="lbl">'+bucket.label+' ('+n+')</span></div>';
@@ -1632,7 +1645,7 @@ function renderPhotos(){
     list=list.filter(function(p){ return !p.folderId; });
   }
   if(bkCurrentColorFilter!==null){
-    list=list.filter(function(p){ return p.colorBucket===bkCurrentColorFilter; });
+    list=list.filter(function(p){ return p.colorBuckets && p.colorBuckets.indexOf(bkCurrentColorFilter)>-1; });
   }
   var myToken=++_renderPhotosToken; // annule les rendus précédents si on change d'album vite
   var CHUNK=24;
