@@ -345,7 +345,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.4.1</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.5.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -2882,9 +2882,21 @@ function bkPlanAutoPages(photoCount, pageCount, preferredLayouts){
   }
   return plan;
 }
-function bkSuggestedPageCount(photoCount){
+function bkAvgSlotsPerPage(preferredLayouts){
+  // Moyenne de photos par page selon les mises en page réellement choisies —
+  // sans ça, la suggestion reste calée sur "4 photos/page" même si on choisit
+  // uniquement des mises en page à 1 photo (il en faudrait bien plus) ou à 9
+  // photos (il en faudrait bien moins).
+  var layouts = (preferredLayouts && preferredLayouts.length)
+    ? BK_LAYOUTS.filter(function(l){ return preferredLayouts.indexOf(l.key)>-1; })
+    : BK_LAYOUTS;
+  if(!layouts.length) return 4;
+  var total=layouts.reduce(function(sum,l){ return sum+l.slots.filter(function(s){ return s.type==='photo'; }).length; }, 0);
+  return Math.max(1, total/layouts.length);
+}
+function bkSuggestedPageCount(photoCount, preferredLayouts){
   if(photoCount<=0) return 3;
-  return Math.max(1, Math.round(photoCount/4)); // ~4 photos par page en moyenne
+  return Math.max(1, Math.round(photoCount/bkAvgSlotsPerPage(preferredLayouts)));
 }
 function bkTextColorFor(bgHex){
   // choisit texte clair ou foncé selon la luminosité de la couleur principale choisie,
@@ -3171,6 +3183,7 @@ function openAutoBookSheet(){
     mode: 'full', // 'full' = avec les vraies photos de l'album, 'empty' = cadres vides à remplir soi-même
     pageCount: bkSuggestedPageCount(n),
     suggestedPageCount: bkSuggestedPageCount(n),
+    photoCount: n,
     styleKey: 'clean',
     fontFamily: 'Poppins',
     fontSize: 24,
@@ -3224,6 +3237,15 @@ function bkAutoToggleLayout(key){
     if(bkAutoState.preferredLayouts.length>=4){ toast('Maximum 4 mises en page'); return; }
     bkAutoState.preferredLayouts.push(key);
   }
+  // la suggestion de nombre de pages dépend des mises en page choisies (une
+  // page à 9 photos "consomme" plus vite l'album qu'une page à 1 photo) —
+  // on la recalcule à chaque changement, sans écraser un nombre déjà tapé
+  // à la main par l'utilisateur.
+  var photoCount = bkAutoState.photoCount!==undefined ? bkAutoState.photoCount : 0;
+  var newSuggestion = bkSuggestedPageCount(photoCount, bkAutoState.preferredLayouts);
+  var wasOnSuggestion = bkAutoState.pageCount===bkAutoState.suggestedPageCount;
+  bkAutoState.suggestedPageCount=newSuggestion;
+  if(wasOnSuggestion) bkAutoState.pageCount=newSuggestion;
   bkRenderAutoBookUI();
 }
 function bkRenderAutoBookUI(){
@@ -3294,6 +3316,16 @@ function bkRenderAutoBookUI(){
 function bkRunAutoGenerate(){
   var pagesInput=document.getElementById('bk-autobook-pages-input');
   bkAutoSetPages(pagesInput.value); // récupère la dernière valeur tapée, même sans avoir quitté le champ
+  // Avertit AVANT de générer si le nombre de pages tapé ne suffit clairement
+  // pas à caser toutes les photos avec les mises en page choisies — plutôt
+  // que de générer en silence un livre où des dizaines de photos manquent.
+  if(bkAutoState.mode==='full' && bkAutoState.photoCount>0){
+    var capacity=bkAutoState.pageCount*bkAvgSlotsPerPage(bkAutoState.preferredLayouts);
+    if(capacity < bkAutoState.photoCount*0.95){
+      var manque=Math.round(bkAutoState.photoCount-capacity);
+      if(!confirm('Avec '+bkAutoState.pageCount+' page(s) et ces mises en page, il n\'y a pas assez de place pour tes '+bkAutoState.photoCount+' photos (environ '+manque+' ne rentreraient pas). Continuer quand même, ou touche "Annuler" pour ajuster le nombre de pages (suggestion mise à jour : '+bkAutoState.suggestedPageCount+').')) return;
+    }
+  }
   var pages=bkAutoGenerateBook(bkAutoState);
   ensureBooks(bkAlbum);
   var n=bkAlbum.books.length+1;
