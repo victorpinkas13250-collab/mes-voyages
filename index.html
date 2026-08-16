@@ -346,7 +346,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.8.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.8.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -597,7 +597,7 @@ img{-webkit-user-drag:none;}
     <div id="bk-autobook-styles" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Mises en page préférées (optionnel, jusqu'à 4)</div>
-    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem">⬇️ Fais défiler pour tout voir (49 mises en page : carrées, rondes, hexagonales, étoile, triangle, décagonale...). Aucune sélection = l'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l'ordre).</div>
+    <div class="modal-sub" style="margin-bottom:8px;font-size:.72rem" id="bk-autobook-layouts-hint">⬇️ Fais défiler pour tout voir. Aucune sélection = l'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l'ordre).</div>
     <div id="bk-autobook-layouts" class="bk-autolayout-grid"></div>
 
     <div class="pdf-lbl" style="margin-top:16px">Police</div>
@@ -3329,8 +3329,10 @@ function bkRenderAutoBookUI(){
   document.getElementById('bk-autobook-styles').innerHTML=stylesH;
 
   var layoutsH='';
+  var layoutsShown=0;
   BK_LAYOUTS.forEach(function(l){
     if(l.key==='quote') return; // pas pertinent comme préférence (pas de photo)
+    layoutsShown++;
     var on=bkAutoState.preferredLayouts.indexOf(l.key)>-1;
     var mini='';
     l.slots.forEach(function(s){
@@ -3348,6 +3350,9 @@ function bkRenderAutoBookUI(){
     layoutsH+='<div class="bk-autolayout-cell'+(on?' on':'')+'" onclick="bkAutoToggleLayout(\''+l.key+'\')">'+mini+(on?'<div class="bk-autolayout-check">✓</div>':'')+'</div>';
   });
   document.getElementById('bk-autobook-layouts').innerHTML=layoutsH;
+  // compte toujours recalculé (jamais un chiffre écrit en dur qui deviendrait
+  // faux dès qu'on ajoute ou retire des mises en page, comme précédemment)
+  document.getElementById('bk-autobook-layouts-hint').innerHTML='⬇️ Fais défiler pour tout voir ('+layoutsShown+' mises en page : carrées, rondes, hexagonales, octogonales, décagonales, arche, trapèze, mosaïques 1 à 9 photos...). Aucune sélection = l\'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l\'ordre).';
 
   var fontsH='';
   BK_FONTS.forEach(function(f){
