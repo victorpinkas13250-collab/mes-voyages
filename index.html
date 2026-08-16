@@ -337,7 +337,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.7.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v3.7.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1389,9 +1389,24 @@ function bkComputeColorBucketsFromImg(img){
   }
   if(!n) return null;
   var result=[];
-  Object.keys(counts).forEach(function(k){
-    if(counts[k]/n*100 >= THRESHOLD) result.push(k);
+  // noir/blanc : pourcentage sur la photo ENTIÈRE (un fond vraiment noir doit
+  // pouvoir rester détecté comme "noir").
+  ['noir','blanc'].forEach(function(k){
+    if((counts[k]||0)/n*100 >= THRESHOLD) result.push(k);
   });
+  // couleurs vives : pourcentage sur la partie COLORÉE seulement, en ignorant
+  // le noir/blanc au dénominateur — sinon une photo sombre (vitrail éclairé
+  // dans une voûte en ombre, coucher de soleil sur fond de nuit...) ne
+  // remonte jamais sa vraie couleur, noyée sous un fond neutre qui n'est
+  // pas vraiment "une couleur" au sens où on l'entend ici.
+  var neutral=(counts['noir']||0)+(counts['blanc']||0);
+  var chromaticTotal=n-neutral;
+  if(chromaticTotal>0){
+    Object.keys(counts).forEach(function(k){
+      if(k==='noir'||k==='blanc') return;
+      if(counts[k]/chromaticTotal*100 >= THRESHOLD) result.push(k);
+    });
+  }
   return result;
 }
 function bkEnsurePhotoColor(p){
