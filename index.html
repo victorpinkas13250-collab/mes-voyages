@@ -93,6 +93,7 @@ img{-webkit-user-drag:none;}
 .ac-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.6rem;}
 .ac-count{position:absolute;bottom:8px;right:8px;background:rgba(255,255,255,.92);color:var(--primary-dark);font-weight:800;font-size:.65rem;padding:4px 9px;border-radius:20px;}
 .ac-del-btn{position:absolute;top:7px;left:7px;background:rgba(36,30,56,.55);color:#fff;border:none;border-radius:50%;width:26px;height:26px;font-size:.7rem;display:flex;align-items:center;justify-content:center;z-index:3;}
+.ac-dup-btn{position:absolute;top:7px;left:39px;background:rgba(36,30,56,.55);color:#fff;border:none;border-radius:50%;width:26px;height:26px;font-size:.7rem;display:flex;align-items:center;justify-content:center;z-index:3;}
 .ac-info{padding:11px 12px 13px;}
 .ac-title{font-weight:800;font-size:.88rem;line-height:1.25;font-family:'Poppins',sans-serif;}
 .ac-meta{font-size:.68rem;color:var(--ink-soft);font-weight:700;margin-top:3px;}
@@ -346,7 +347,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v4.9.0</div>
+  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.0.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -377,6 +378,7 @@ img{-webkit-user-drag:none;}
   </div>
   <div class="photo-search-row">
     <input type="text" id="photo-search" placeholder="Rechercher par nom de fichier ou date..." oninput="renderPhotos()">
+    <button class="photo-delall-btn" id="photo-fav-btn" onclick="togglePhotoFavFilter()" title="Voir mes favoris">❤️</button>
     <button class="photo-delall-btn" id="photo-color-btn" onclick="toggleColorStrip()" title="Filtrer par couleur">🎨</button>
     <button class="photo-delall-btn" id="photo-group-btn" onclick="togglePhotoGroupByDay()" title="Ranger par jour">📅</button>
     <button class="photo-delall-btn" id="photo-select-btn" onclick="togglePhotoSelectMode()" title="Sélectionner">☑️</button>
@@ -387,6 +389,8 @@ img{-webkit-user-drag:none;}
   <div class="photo-multi-actionbar" id="photo-multi-actionbar">
     <span id="photo-multi-count">0 sélectionnée(s)</span>
     <button class="mbtn mbtn-cancel" onclick="togglePhotoSelectMode()">Annuler</button>
+    <button class="mbtn" id="photo-multi-left-btn" onclick="moveSelectedPhoto(-1)" disabled title="Déplacer plus tôt">⬅️</button>
+    <button class="mbtn" id="photo-multi-right-btn" onclick="moveSelectedPhoto(1)" disabled title="Déplacer plus tard">➡️</button>
     <button class="mbtn mbtn-ok" id="photo-multi-move-btn" onclick="openMoveToFolderSheet()" disabled>📁 Dossier</button>
     <button class="mbtn mbtn-danger" id="photo-multi-del-btn" onclick="deleteSelectedPhotos()" disabled>🗑️ Supprimer</button>
   </div>
@@ -501,6 +505,8 @@ img{-webkit-user-drag:none;}
     <button class="bk-tool" onclick="openIconPicker()"><span class="ic">◇</span>Icône</button>
     <button class="bk-tool" onclick="openTemplatePicker()"><span class="ic">▦</span>Modèle</button>
     <button class="bk-tool" onclick="bkAddMapElement()"><span class="ic">🗺️</span>Carte</button>
+    <button class="bk-tool" onclick="bkAddSummaryPage()"><span class="ic">📊</span>Résumé</button>
+    <button class="bk-tool" onclick="openGlobalStyleSheet()"><span class="ic">🎨</span>Style global</button>
     <button class="bk-tool" id="bk-group-btn" onclick="bkToggleMultiSelectMode()"><span class="ic">🔗</span>Grouper</button>
     <button class="bk-tool" onclick="bkToggleOrient()"><span class="ic">🔄</span>Format</button>
     <div id="bk-bgswatches" style="display:flex;gap:8px;align-items:center;padding-left:4px"></div>
@@ -569,6 +575,16 @@ img{-webkit-user-drag:none;}
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" id="mp-maplist-title">Mes cartes</h3>
     <div class="bk-booklist-grid" id="mp-maplist-grid"></div>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeMapListSheet()">Fermer</button></div>
+  </div>
+</div>
+
+<!-- Feuille: appliquer un style à toutes les pages du livre -->
+<div class="bk-sheet" id="bk-globalstyle-sheet">
+  <div class="bk-sheet-box">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🎨 Style global</h3>
+    <div class="modal-sub" style="margin-bottom:12px">Change le fond, les couleurs et la police de TOUTES les pages du livre d'un coup (les photos et le contenu restent, seul l'habillage change).</div>
+    <div id="bk-globalstyle-choices" style="display:flex;flex-wrap:wrap;gap:8px;max-height:340px;overflow-y:auto"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeGlobalStyleSheet()">Fermer</button></div>
   </div>
 </div>
 
@@ -889,6 +905,7 @@ function renderHome(){
     var cover=a.photos[0]?bkPhotoSrc(a.photos[0],'thumb'):null;
     h+='<div class="album-card" onclick="openAlbum(\''+a.id+'\')">'
       +'<button class="ac-del-btn" onclick="event.stopPropagation();delAlbum(\''+a.id+'\')">🗑️</button>'
+      +'<button class="ac-dup-btn" onclick="event.stopPropagation();duplicateAlbum(\''+a.id+'\')" title="Dupliquer">⎘</button>'
       +'<div class="ac-cover">'+(cover?'<img src="'+cover+'" loading="lazy">':'<div class="ac-emoji">'+a.emoji+'</div>')
       +'<div class="ac-count">'+a.photos.length+' photo'+(a.photos.length!==1?'s':'')+'</div></div>'
       +'<div class="ac-info"><div class="ac-title">'+esc(a.title)+'</div>'
@@ -943,6 +960,53 @@ function delAlbum(id){
   dbDeleteMany('photos', photoIds);
   renderHome();
   toast('Album supprimé');
+}
+function duplicateAlbum(id){
+  var src=al(id);
+  if(!src) return;
+  if(!confirm('Dupliquer "'+src.title+'" avec ses '+src.photos.length+' photo'+(src.photos.length!==1?'s':'')+' ? Ça peut prendre un instant pour un album chargé.')) return;
+  toast('Duplication en cours…');
+  setTimeout(function(){
+    var copy={
+      id: gid(), title: src.title+' (copie)', loc: src.loc, date: src.date, emoji: src.emoji,
+      createdAt: Date.now(), photos: [], books: [], book: null, folders: [], maps: []
+    };
+    // les photos gardent le même contenu (mêmes blobs), mais avec de nouveaux
+    // identifiants propres à la copie — un dossier/livre de l'original ne doit
+    // jamais pouvoir modifier accidentellement l'album source, ni l'inverse.
+    var idMap={};
+    src.photos.forEach(function(p){
+      var newId=gid()+'-'+Math.random().toString(36).slice(2,6);
+      idMap[p.id]=newId;
+      var np={
+        id:newId, full:p.full, thumb:p.thumb, w:p.w, h:p.h, cap:p.cap, liked:p.liked,
+        fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource,
+        folderId:null, colorBuckets:p.colorBuckets, colorBucketsV:p.colorBucketsV
+      };
+      copy.photos.push(np);
+      savePhoto(copy.id, np);
+    });
+    (src.folders||[]).forEach(function(f){
+      copy.folders.push({id:gid(), name:f.name});
+    });
+    // réassigne chaque photo copiée au bon NOUVEAU dossier (même nom, nouvel id)
+    if(copy.folders.length){
+      src.photos.forEach(function(p, i){
+        if(p.folderId){
+          var origFolder=(src.folders||[]).find(function(f){ return f.id===p.folderId; });
+          if(origFolder){
+            var newFolder=copy.folders.find(function(f){ return f.name===origFolder.name; });
+            if(newFolder) copy.photos[i].folderId=newFolder.id;
+          }
+        }
+      });
+      copy.photos.forEach(function(p){ savePhoto(copy.id, p); });
+    }
+    albums.push(copy);
+    saveAlbumMeta(copy);
+    renderHome();
+    toast('✅ Album dupliqué : "'+copy.title+'"');
+  }, 50);
 }
 
 /* ══════════════════ ALBUM ══════════════════ */
@@ -1057,6 +1121,7 @@ function mpGetPinIcon(){
   }
   return mpPinIcon;
 }
+var mpRouteLine=null;
 function mpRenderMarkers(){
   Object.keys(mpMarkers).forEach(function(id){ mpMap.removeLayer(mpMarkers[id]); });
   mpMarkers={};
@@ -1064,16 +1129,31 @@ function mpRenderMarkers(){
     var m=L.marker([p.lat,p.lon], {icon:mpGetPinIcon()}).addTo(mpMap).bindPopup(esc(p.name));
     mpMarkers[p.id]=m;
   });
+  if(mpRouteLine){ mpMap.removeLayer(mpRouteLine); mpRouteLine=null; }
+  if(bkCurrentMap.places.length>1){
+    var latlngs=bkCurrentMap.places.map(function(p){ return [p.lat,p.lon]; });
+    mpRouteLine=L.polyline(latlngs, {color:'#7B2FF7', weight:3, opacity:.75, dashArray:'6,6'}).addTo(mpMap);
+  }
   document.getElementById('mp-count').textContent=bkCurrentMap.places.length+' lieu'+(bkCurrentMap.places.length!==1?'x':'');
 }
 function mpRenderList(){
   var h='';
-  bkCurrentMap.places.forEach(function(p){
-    h+='<div class="mp-place-row"><span class="name">📍 '+esc(p.name)+'</span>'
+  bkCurrentMap.places.forEach(function(p,i){
+    h+='<div class="mp-place-row"><span class="name">'+(i+1)+'. 📍 '+esc(p.name)+'</span>'
+      +'<button onclick="mpMovePlace(\''+p.id+'\',-1)" '+(i===0?'disabled':'')+'>⬆️</button>'
+      +'<button onclick="mpMovePlace(\''+p.id+'\',1)" '+(i===bkCurrentMap.places.length-1?'disabled':'')+'>⬇️</button>'
       +'<button onclick="mpFocusPlace(\''+p.id+'\')">🎯</button>'
       +'<button onclick="mpDeletePlace(\''+p.id+'\')">🗑️</button></div>';
   });
   document.getElementById('mp-list').innerHTML=h;
+}
+function mpMovePlace(id, delta){
+  var i=bkCurrentMap.places.findIndex(function(p){ return p.id===id; });
+  var j=i+delta;
+  if(i<0||j<0||j>=bkCurrentMap.places.length) return;
+  var tmp=bkCurrentMap.places[i]; bkCurrentMap.places[i]=bkCurrentMap.places[j]; bkCurrentMap.places[j]=tmp;
+  saveAlbumMeta(bkAlbum);
+  mpRenderMarkers(); mpRenderList();
 }
 function mpFocusPlace(id){
   var p=bkCurrentMap.places.find(function(x){ return x.id===id; });
@@ -1207,6 +1287,21 @@ function bkGenerateMapSnapshot(places, pxW, pxH){
     // de tuile ne se réglait jamais, on ne bloque jamais la génération plus de 12s.
     var safetyTimeout=new Promise(function(res){ setTimeout(res, 12000); });
     Promise.race([ Promise.all(loads), safetyTimeout ]).then(function(){
+      // relie les lieux dans l'ordre (celui affiché dans la liste, réordonnable
+      // avec les flèches ⬆️⬇️) : donne un vrai effet "itinéraire du voyage"
+      // plutôt que de simples punaises isolées.
+      if(places.length>1){
+        ctx.save();
+        ctx.strokeStyle='#7B2FF7'; ctx.lineWidth=3; ctx.globalAlpha=.75;
+        ctx.setLineDash([10,8]);
+        ctx.beginPath();
+        places.forEach(function(p,i){
+          var px=bkLon2x(p.lon,zoom)*256-originX, py=bkLat2y(p.lat,zoom)*256-originY;
+          if(i===0) ctx.moveTo(px,py-9); else ctx.lineTo(px,py-9);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
       places.forEach(function(p){
         var px=bkLon2x(p.lon,zoom)*256-originX, py=bkLat2y(p.lat,zoom)*256-originY;
         // Pin plus grand et avec une ombre portée, pour bien ressortir même sur
@@ -1315,7 +1410,9 @@ var HELP_SECTIONS=[
     +'<li><b>Rechercher :</b> tape un nom de fichier ou une date dans la barre de recherche de l\'album.</li>'
     +'<li><b>Date automatique :</b> l\'appli lit la vraie date de prise de vue dans la photo quand elle existe (icône 📷 dans la visionneuse) ; sinon elle utilise une date de repli (🗓️ ou ➕).</li>'
     +'<li><b>Sélection multiple :</b> bouton ☑️ à côté de la recherche — coche plusieurs photos pour les supprimer ou les ranger dans un dossier en une fois.</li>'
+    +'<li><b>Réordonner :</b> en mode sélection, coche UNE seule photo pour faire apparaître des flèches ⬅️➡️ qui la déplacent dans l\'ordre affiché.</li>'
     +'<li><b>Ranger par jour :</b> bouton 📅 pour regrouper automatiquement tes photos par date de prise de vue, avec des sections repliables.</li>'
+    +'<li><b>Voir tes favoris :</b> bouton ❤️ à côté de la recherche pour ne voir que les photos mises en favori.</li>'
     +'<li><b>Tout supprimer :</b> bouton 🗑️ à côté de la recherche, avec confirmation.</li>'
     +'<li><b>Légende et favori :</b> ouvre une photo (visionneuse) pour ajouter une légende ou la mettre en favori (❤️).</li>'
     +'</ul>' },
@@ -1333,21 +1430,26 @@ var HELP_SECTIONS=[
     +'<li>Les compteurs affichés respectent le dossier actuellement ouvert — pas de mélange entre dossiers.</li>'
     +'<li>Le premier calcul peut prendre quelques secondes sur un gros album ; il est ensuite mis en cache et ne se refait plus.</li>'
     +'</ul>' },
-  { icon:'🗂️', title:'Plusieurs livres par album', body:
+  { icon:'🗂️', title:'Plusieurs livres par album, dupliquer un album', body:
     '<ul>'
     +'<li>Bouton <b>📚 Mes livres</b> depuis un album : crée, renomme, duplique ou supprime autant de livres que tu veux pour le même album.</li>'
     +'<li>Depuis l\'intérieur d\'un livre, le bouton 📚 en haut permet de changer de livre sans repasser par l\'album.</li>'
+    +'<li><b>Dupliquer un album entier :</b> bouton ⎘ sur la carte d\'un album (page d\'accueil) — copie toutes ses photos et ses dossiers dans un nouvel album indépendant, pratique pour un voyage similaire à un précédent.</li>'
     +'</ul>' },
   { icon:'✏️', title:'L\'éditeur de livre', body:
     '<ul>'
     +'<li><b>Texte, Photo, Forme, Sticker, Icône :</b> touche l\'outil puis place l\'élément sur la page, déplace-le et redimensionne-le avec les poignées.</li>'
     +'<li><b>Modèle :</b> plus de 1000 combinaisons (mises en page × styles), avec recherche — dont des formes rondes, hexagonales, octogonales, en arche, et des mosaïques de 1 à 9 photos.</li>'
     +'<li><b>Fond de page :</b> palette de 12 couleurs, ou touche 🖼️ pour mettre une de tes photos en fond de page entière (avec un voile réglable 🔆🔅 pour garder le texte lisible).</li>'
+    +'<li><b>Style global :</b> bouton 🎨 pour appliquer un style (fond, police, couleurs) à TOUTES les pages du livre d\'un coup, sans repasser page par page — le contenu (photos, texte) ne bouge pas, seul l\'habillage change.</li>'
+    +'<li><b>Page résumé :</b> bouton 📊 pour ajouter automatiquement une page avec le nombre de photos, de jours et de lieux du voyage, calculée à partir de tes vraies données.</li>'
     +'<li><b>Carte :</b> insère une image de carte avec tes lieux visités (voir section carte plus bas).</li>'
     +'<li><b>Grouper / Dégrouper :</b> sélectionne plusieurs éléments (🔗 Grouper) pour les déplacer ensemble ; touche le groupe puis "🔓 Dégrouper" pour les séparer à nouveau.</li>'
+    +'<li><b>Réordonner les pages :</b> flèches ⬅️➡️ dans la bande de pages en bas, pour déplacer la page ouverte.</li>'
     +'<li><b>Supprimer une ou plusieurs pages :</b> bouton 🗑️ dans la bande de pages en bas — coche les pages à supprimer, confirme. Impossible de supprimer toutes les pages d\'un coup.</li>'
     +'<li><b>Annuler / Rétablir :</b> en haut de l\'éditeur, pour revenir en arrière à tout moment.</li>'
     +'<li><b>Enregistrer :</b> bouton 💾 pour sauvegarder manuellement à tout moment (en plus de la sauvegarde automatique toutes les 20 secondes).</li>'
+    +'<li><b>Recadrage intelligent automatique :</b> quand tu places une photo dans une forme (rond, hexagone...), l\'appli repère toute seule la zone la plus "chargée en détails" pour éviter de couper bêtement un visage sur le bord — recadre-la toi-même ensuite si le résultat ne te va pas.</li>'
     +'<li>Sur un élément sélectionné : filtres, recadrage, suppression de fond, bordure, ombre, dégradé, dupliquer, verrouiller — selon le type d\'élément. 20 polices et 12 couleurs de texte disponibles.</li>'
     +'</ul>' },
   { icon:'🪄', title:'Livre automatique', body:
@@ -1367,6 +1469,8 @@ var HELP_SECTIONS=[
     '<ul>'
     +'<li>Depuis un album, bouton <b>🗺️ Carte</b> : ouvre la liste de tes cartes — tu peux en créer <b>plusieurs pour le même album</b> (une par ville, une par étape du voyage...).</li>'
     +'<li>Dans une carte : cherche un lieu par son nom, ou touche directement la carte pour poser un point et lui donner un nom.</li>'
+    +'<li><b>Itinéraire relié :</b> dès que tu as 2 lieux ou plus, une ligne en pointillés les relie dans l\'ordre — sur la carte interactive ET sur l\'image insérée dans le livre.</li>'
+    +'<li><b>Réordonner les lieux :</b> flèches ⬆️⬇️ à côté de chaque lieu dans la liste, pour changer l\'ordre de l\'itinéraire.</li>'
     +'<li>Depuis l\'éditeur de livre, l\'outil <b>Carte</b> insère une image de la carte avec tous ses points, comme n\'importe quelle photo (déplaçable, redimensionnable) — si tu as plusieurs cartes, l\'appli te demande laquelle insérer.</li>'
     +'<li>Nécessite une connexion internet pour charger les rues ; sans réseau, la carte garde un fond uni.</li>'
     +'</ul>' },
@@ -1423,9 +1527,11 @@ function openAlbum(id){
   photoSelectMode=false; photoSelected=[];
   bkCurrentFolderId=null;
   bkCurrentColorFilter=null; bkColorStripOpen=false;
+  bkFavFilterOn=false;
   document.getElementById('photo-select-btn').classList.remove('active');
   document.getElementById('photo-multi-actionbar').classList.remove('on');
   document.getElementById('photo-color-btn').classList.remove('active');
+  document.getElementById('photo-fav-btn').classList.remove('active');
   document.getElementById('color-strip').style.display='none';
   document.getElementById('pg-album').style.paddingBottom='';
   renderFolderStrip();
@@ -1573,6 +1679,12 @@ function bkEnsureAllPhotoColors(album){
    ferait disparaître des photos de la vue principale. */
 var bkCurrentFolderId=null;
 var bkCurrentColorFilter=null, bkColorStripOpen=false, bkColorsComputing=false;
+var bkFavFilterOn=false;
+function togglePhotoFavFilter(){
+  bkFavFilterOn=!bkFavFilterOn;
+  document.getElementById('photo-fav-btn').classList.toggle('active', bkFavFilterOn);
+  renderPhotos();
+}
 function toggleColorStrip(){
   bkColorStripOpen=!bkColorStripOpen;
   var strip=document.getElementById('color-strip');
@@ -1798,6 +1910,9 @@ function renderPhotos(){
   if(bkCurrentColorFilter!==null){
     list=list.filter(function(p){ return p.colorBuckets && p.colorBuckets.indexOf(bkCurrentColorFilter)>-1; });
   }
+  if(bkFavFilterOn){
+    list=list.filter(function(p){ return p.liked; });
+  }
   var myToken=++_renderPhotosToken; // annule les rendus précédents si on change d'album vite
   var CHUNK=24;
   function photoHTML(p){
@@ -1889,6 +2004,39 @@ function updatePhotoMultiBar(){
   document.getElementById('photo-multi-count').textContent=n+' sélectionnée'+(n!==1?'s':'');
   document.getElementById('photo-multi-del-btn').disabled=(n===0);
   document.getElementById('photo-multi-move-btn').disabled=(n===0);
+  // déplacer un cran plus tôt/tard n'a de sens que pour UNE photo à la fois
+  var canReorder = n===1 && !photoGroupByDay; // le rangement par jour impose son propre ordre
+  document.getElementById('photo-multi-left-btn').disabled=!canReorder;
+  document.getElementById('photo-multi-right-btn').disabled=!canReorder;
+}
+function bkCurrentPhotoListOrder(){
+  // reproduit exactement le même filtrage que renderPhotos (dossier, couleur,
+  // recherche, favoris) pour que "plus tôt/plus tard" corresponde bien à ce
+  // que la personne voit réellement à l'écran au moment du déplacement.
+  var a=al(curAlbum);
+  var query=(document.getElementById('photo-search').value||'').trim().toLowerCase();
+  var list=query ? a.photos.filter(function(p){ return bkPhotoMatchesSearch(p, query); }) : a.photos;
+  if(bkCurrentFolderId!==null) list=list.filter(function(p){ return p.folderId===bkCurrentFolderId; });
+  else list=list.filter(function(p){ return !p.folderId; });
+  if(bkCurrentColorFilter!==null) list=list.filter(function(p){ return p.colorBuckets && p.colorBuckets.indexOf(bkCurrentColorFilter)>-1; });
+  if(bkFavFilterOn) list=list.filter(function(p){ return p.liked; });
+  return list;
+}
+function moveSelectedPhoto(delta){
+  if(photoSelected.length!==1) return;
+  var id=photoSelected[0];
+  var visibleList=bkCurrentPhotoListOrder();
+  var viIdx=visibleList.findIndex(function(p){ return p.id===id; });
+  var neighborIdx=viIdx+delta;
+  if(viIdx<0 || neighborIdx<0 || neighborIdx>=visibleList.length) return; // déjà au bord de la vue actuelle
+  var neighborId=visibleList[neighborIdx].id;
+  var a=al(curAlbum);
+  var realI=a.photos.findIndex(function(p){ return p.id===id; });
+  var realJ=a.photos.findIndex(function(p){ return p.id===neighborId; });
+  if(realI<0 || realJ<0) return;
+  var tmp=a.photos[realI]; a.photos[realI]=a.photos[realJ]; a.photos[realJ]=tmp;
+  saveAlbumMeta(a);
+  renderPhotos();
 }
 function deleteSelectedPhotos(){
   var n=photoSelected.length;
@@ -3221,6 +3369,160 @@ function bkUpdateUndoButtons(){
   if(r) r.disabled=!bkRedoStack.length;
 }
 
+function bkComputeTripStats(a){
+  var photoCount=a.photos.length;
+  var dates=a.photos.map(function(p){ return p.takenAt; }).filter(Boolean);
+  var dayCount=0, dateRangeLabel='';
+  if(dates.length){
+    var dayKeys={};
+    dates.forEach(function(t){ dayKeys[new Date(t).toISOString().slice(0,10)]=true; });
+    dayCount=Object.keys(dayKeys).length;
+    var min=Math.min.apply(null,dates), max=Math.max.apply(null,dates);
+    dateRangeLabel = dayCount>1 ? (bkFormatDate(min)+' → '+bkFormatDate(max)) : bkFormatDate(min);
+  }
+  var folderCount=(a.folders||[]).filter(function(f){ return a.photos.some(function(p){ return p.folderId===f.id; }); }).length;
+  var placeCount=0;
+  (a.maps||[]).forEach(function(m){ placeCount+=m.places.length; });
+  return {photoCount:photoCount, dayCount:dayCount, dateRangeLabel:dateRangeLabel, folderCount:folderCount, placeCount:placeCount};
+}
+function openGlobalStyleSheet(){
+  var h='';
+  BK_STYLES.forEach(function(s){
+    h+='<div class="bk-style-chip" onclick="bkApplyGlobalStyle(\''+s.key+'\')" style="cursor:pointer;border-radius:12px;overflow:hidden;width:72px;text-align:center;border:2px solid var(--border)">'
+      +'<div style="height:44px;background:'+s.bg+';display:flex;align-items:center;justify-content:center;color:'+s.color+';font-family:\''+s.font+'\',sans-serif;font-weight:800;font-size:.8rem">Aa</div>'
+      +'<div style="font-size:.62rem;font-weight:700;padding:4px 2px;color:var(--ink-soft)">'+s.label+'</div></div>';
+  });
+  document.getElementById('bk-globalstyle-choices').innerHTML=h;
+  document.getElementById('bk-globalstyle-sheet').classList.add('on');
+}
+function closeGlobalStyleSheet(){ document.getElementById('bk-globalstyle-sheet').classList.remove('on'); }
+function bkApplyGlobalStyle(styleKey){
+  var style=BK_STYLES.find(function(s){ return s.key===styleKey; });
+  if(!style) return;
+  if(!confirm('Appliquer le style "'+style.label+'" à toutes les '+bkBook.pages.length+' pages de ce livre ? Annulable avec ↩️.')) return;
+  bkSnapshot();
+  bkBook.pages.forEach(function(page){
+    if(!page.bgPhotoId) page.bg=style.bg; // une photo de fond volontaire n'est jamais touchée
+    function restyleEl(el){
+      if(el.type==='group'){ el.children.forEach(restyleEl); return; }
+      if(el.type==='text' && !el.isSticker){
+        el.color=style.color;
+        el.fontFamily=style.font;
+      }
+      if(el.type==='photo'){
+        var isShaped = el.round||el.hex||el.octagon||el.decagon||el.arch||el.triangle||el.star;
+        if(!isShaped){
+          if(el.border){ el.border={width:Math.max(style.border,2), color: style.key==='night'||style.key==='ocean'||style.key==='midnight'||style.key==='forest' ? '#FFFFFF' : (style.key==='polaroid'?'#FFFFFF':style.color)}; }
+          else if(style.border>0){ el.border={width:style.border, color: style.color}; }
+        }
+        if(style.shadow) el.shadow=true;
+      }
+    }
+    page.elements.forEach(restyleEl);
+  });
+  closeGlobalStyleSheet();
+  bkRenderPage(); renderBkSwatches();
+  toast('🎨 Style "'+style.label+'" appliqué à tout le livre');
+}
+function bkComputeSaliency(img){
+  // Recadrage plus intelligent sur les formes : au lieu de toujours centrer
+  // bêtement (ce qui coupe souvent un visage sur le bord d'un cercle/hexagone),
+  // on repère la zone la plus "chargée en détails" (bords/contrastes marqués —
+  // un visage, un objet texturé — plutôt qu'un ciel ou un mur uni) et on centre
+  // le recadrage dessus. Pas une vraie détection de visage, mais un vrai
+  // progrès mesurable par rapport au centrage géométrique pur.
+  var N=24;
+  var c=document.createElement('canvas'); c.width=N; c.height=N;
+  var ctx=c.getContext('2d');
+  ctx.drawImage(img,0,0,N,N);
+  var data;
+  try{ data=ctx.getImageData(0,0,N,N).data; }catch(e){ return {x:0.5,y:0.5}; }
+  var lum=new Float32Array(N*N);
+  for(var i=0;i<N*N;i++){ lum[i]=0.299*data[i*4]+0.587*data[i*4+1]+0.114*data[i*4+2]; }
+  var totalW=0, sx=0, sy=0;
+  for(var y=1;y<N-1;y++){
+    for(var x=1;x<N-1;x++){
+      var gx=lum[y*N+x+1]-lum[y*N+x-1];
+      var gy=lum[(y+1)*N+x]-lum[(y-1)*N+x];
+      var mag=Math.sqrt(gx*gx+gy*gy);
+      totalW+=mag; sx+=mag*x; sy+=mag*y;
+    }
+  }
+  if(totalW<1) return {x:0.5,y:0.5}; // image trop unie pour qu'un point ressorte : centre par défaut
+  return {x:(sx/totalW)/N, y:(sy/totalW)/N};
+}
+function bkEnsurePhotoSaliency(p){
+  if(p.saliency) return Promise.resolve(p.saliency);
+  var src=bkPhotoSrc(p,'thumb');
+  if(!src) return Promise.resolve(null);
+  return new Promise(function(resolve){
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){
+      var s=bkComputeSaliency(img);
+      p.saliency=s;
+      resolve(s);
+    };
+    img.onerror=function(){ resolve(null); };
+    img.src=src;
+  });
+}
+function bkSmartCropRect(imgW, imgH, slotW, slotH, saliency){
+  var srcRatio=imgW/imgH, dstRatio=slotW/slotH;
+  var sw,sh;
+  if(srcRatio>dstRatio){ sh=imgH; sw=sh*dstRatio; } else { sw=imgW; sh=sw/dstRatio; }
+  var idealCx=saliency.x*imgW, idealCy=saliency.y*imgH;
+  var sx=Math.max(0, Math.min(imgW-sw, idealCx-sw/2));
+  var sy=Math.max(0, Math.min(imgH-sh, idealCy-sh/2));
+  return {sx:sx/imgW, sy:sy/imgH, sw:sw/imgW, sh:sh/imgH};
+}
+function bkApplySmartCropsOnPage(){
+  // ne s'applique qu'aux formes non carrées (rond, hexagone, etc.) : un carré
+  // plein cadre profite peu du recadrage intelligent, et le centrage par
+  // défaut y est déjà presque toujours satisfaisant.
+  if(!bkBook) return;
+  var page=bkBook.pages[bkPageIdx];
+  if(!page) return;
+  bkCollectLeafElements(page.elements).forEach(function(el){
+    if(el.type!=='photo' || el.crop || !el.photoId) return;
+    var isShaped=el.round||el.hex||el.octagon||el.decagon||el.arch||el.triangle;
+    if(!isShaped) return;
+    var photo=bkPhotoById(el.photoId);
+    if(!photo) return;
+    bkEnsurePhotoSaliency(photo).then(function(saliency){
+      if(!saliency || el.crop) return; // déjà recadrée entre-temps (édition manuelle) : on ne touche à rien
+      var img=new Image();
+      img.onload=function(){
+        el.crop=bkSmartCropRect(img.width, img.height, el.w, el.h, saliency);
+        savePhoto(bkAlbum.id, photo);
+        if(bkBook.pages[bkPageIdx]===page) bkRenderPage();
+      };
+      img.src=bkPhotoSrc(photo,'thumb');
+    });
+  });
+}
+function bkAddSummaryPage(){
+  bkAlbum=al(curAlbum);
+  var stats=bkComputeTripStats(bkAlbum);
+  bkSnapshot();
+  var lines=[];
+  lines.push({icon:'📸', label:stats.photoCount+' photo'+(stats.photoCount!==1?'s':'')});
+  if(stats.dayCount) lines.push({icon:'📅', label:stats.dayCount+' jour'+(stats.dayCount!==1?'s':'')+(stats.dateRangeLabel?' · '+stats.dateRangeLabel:'')});
+  if(stats.folderCount) lines.push({icon:'📁', label:stats.folderCount+' dossier'+(stats.folderCount!==1?'s':'')});
+  if(stats.placeCount) lines.push({icon:'📍', label:stats.placeCount+' lieu'+(stats.placeCount!==1?'x':'')+' marqué'+(stats.placeCount!==1?'s':'')});
+  var elements=[
+    {id:gid(), type:'text', text:bkAlbum.title||'Mon voyage', x:50,y:22,w:88,h:16,rot:0,fontSize:34,color:'#241E38',fontFamily:'Playfair Display'},
+    {id:gid(), type:'text', text:bkAlbum.loc||'', x:50,y:32,w:88,h:8,rot:0,fontSize:16,color:'#7B2FF7',fontFamily:'Poppins'}
+  ];
+  lines.forEach(function(l, i){
+    elements.push({id:gid(), type:'text', text:l.icon+'  '+l.label, x:50,y:48+i*10,w:80,h:9,rot:0,fontSize:19,color:'#241E38',fontFamily:'Poppins'});
+  });
+  var page={bg:'#F7F5FC', elements:elements};
+  bkBook.pages.push(page);
+  bkPageIdx=bkBook.pages.length-1; bkSelId=null;
+  bkRenderPage(); bkRenderPages();
+  toast('📊 Page résumé ajoutée');
+}
 function bkDefaultPages(a){
   var firstPhoto=a.photos[0];
   return [{ bg:'#FFFFFF', elements: firstPhoto ? [
@@ -3599,6 +3901,7 @@ function bkRenderPage(){
   canvas.appendChild(bkGuideNode('v')); canvas.appendChild(bkGuideNode('h'));
   document.getElementById('bk-pagelabel').textContent=bkBook.name+' — Page '+(bkPageIdx+1)+' / '+bkBook.pages.length;
   bkRenderSelBar();
+  bkApplySmartCropsOnPage();
 }
 function bkGuideNode(axis){
   var d=document.createElement('div');
