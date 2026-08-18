@@ -430,7 +430,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.6.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.7.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -598,6 +598,7 @@ img{-webkit-user-drag:none;}
     <button class="bk-tool" onclick="openStickerPicker()"><span class="ic">✨</span>Sticker</button>
     <button class="bk-tool" onclick="openIconPicker()"><span class="ic">◇</span>Icône</button>
     <button class="bk-tool" onclick="openTemplatePicker()"><span class="ic">▦</span>Modèle</button>
+    <button class="bk-tool" onclick="bkSurpriseLayout()"><span class="ic">🎲</span>Surprise</button>
     <button class="bk-tool" onclick="bkAddMapElement()"><span class="ic">🗺️</span>Carte</button>
     <button class="bk-tool" onclick="bkAddSummaryPage()"><span class="ic">📊</span>Résumé</button>
     <button class="bk-tool" onclick="openGlobalStyleSheet()"><span class="ic">🎨</span>Style global</button>
@@ -1658,6 +1659,7 @@ var HELP_SECTIONS=[
     +'<li><b>Fond de page :</b> palette de 12 couleurs, ou touche 🖼️ pour mettre une de tes photos en fond de page entière (avec un voile réglable 🔆🔅 pour garder le texte lisible).</li>'
     +'<li><b>Style global :</b> bouton 🎨 pour appliquer un style (fond, police, couleurs) à TOUTES les pages du livre d\'un coup, sans repasser page par page — le contenu (photos, texte) ne bouge pas, seul l\'habillage change.</li>'
     +'<li><b>Page résumé :</b> bouton 📊 pour ajouter automatiquement une page avec le nombre de photos, de jours et de lieux du voyage, calculée à partir de tes vraies données.</li>'
+    +'<li><b>Mise en page surprise :</b> bouton 🎲 — change au hasard la disposition de la page (formes, tailles) en gardant les mêmes photos dans le même ordre. Le texte et les stickers déjà en place ne bougent pas. Touche-le plusieurs fois pour voir d\'autres idées.</li>'
     +'<li><b>Carte :</b> insère une image de carte avec tes lieux visités (voir section carte plus bas).</li>'
     +'<li><b>Grouper / Dégrouper :</b> sélectionne plusieurs éléments (🔗 Grouper) pour les déplacer ensemble ; touche le groupe puis "🔓 Dégrouper" pour les séparer à nouveau.</li>'
     +'<li><b>Réordonner les pages :</b> flèches ⬅️➡️ dans la bande de pages en bas, pour déplacer la page ouverte.</li>'
@@ -3739,6 +3741,43 @@ var BK_STYLES = [
   { key:'maroc', label:'Maroc', bg:'#F3E4D0', color:'#5C2A1A', accent:'#00A896', font:'Lobster', border:0, shadow:true },
   { key:'japon', label:'Japon', bg:'#FDFDFB', color:'#1A1A1A', accent:'#BC002D', font:'Poppins', border:2, shadow:false }
 ];
+/* ══════════════════ MISE EN PAGE "SURPRISE" ══════════════════
+   Change au hasard la disposition de la page actuelle (formes, tailles,
+   arrangement) en gardant les MÊMES photos, dans le même ordre — pratique
+   pour voir d'autres idées sans reprendre tout à zéro. Le texte, les
+   stickers et les icônes déjà présents sur la page ne sont jamais touchés,
+   seules les photos sont replacées selon la nouvelle disposition. */
+function bkSurpriseLayout(){
+  var page=bkBook.pages[bkPageIdx];
+  var photoEls=page.elements.filter(function(el){ return el.type==='photo'; });
+  if(!photoEls.length){ toast('Aucune photo sur cette page à réarranger'); return; }
+  var photoIds=photoEls.map(function(el){ return el.photoId; });
+  var n=photoIds.length;
+  var candidates=BK_LAYOUTS.filter(function(l){
+    if(l.key==='quote') return false;
+    var slotCount=l.slots.filter(function(s){ return s.type==='photo'; }).length;
+    return slotCount>=Math.min(n,2) && slotCount<=n+3;
+  });
+  if(!candidates.length){ toast('Aucune autre mise en page adaptée trouvée'); return; }
+  var pick=candidates[Math.floor(Math.random()*candidates.length)];
+  // reprend le style le plus proche de la page actuelle (même couleur de
+  // fond si un style connu correspond), pour rester cohérent visuellement —
+  // sinon un style neutre sans bordure.
+  var style=BK_STYLES.find(function(s){ return s.bg===page.bg; }) || {key:'clean', bg:page.bg, color:'#241E38', border:0, shadow:false};
+  var newPhotoEls=bkBuildElementsForLayout(pick, style).filter(function(el){ return el.type==='photo'; });
+  var photoIdx=0;
+  newPhotoEls.forEach(function(el){
+    el.id=gid();
+    el.photoId = photoIdx<photoIds.length ? photoIds[photoIdx] : null;
+    photoIdx++;
+  });
+  bkSnapshot();
+  var nonPhotoEls=page.elements.filter(function(el){ return el.type!=='photo'; });
+  page.elements=newPhotoEls.concat(nonPhotoEls); // photos en dessous, texte/stickers/icônes gardent leur place au-dessus
+  bkSelId=null;
+  bkRenderPage();
+  toast('🎲 Nouvelle disposition');
+}
 function bkBuildElementsForLayout(layout, style){
   var photoIdx=0;
   return layout.slots.map(function(slot){
