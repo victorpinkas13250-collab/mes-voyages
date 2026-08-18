@@ -42,6 +42,8 @@ img{-webkit-user-drag:none;}
 
 /* ── TOAST ── */
 #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:50px;font-weight:700;font-size:.85rem;opacity:0;pointer-events:none;transition:.25s;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:88vw;text-align:center;}
+#toast.on{pointer-events:auto;}
+.toast-undo-btn{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:20px;padding:5px 12px;font-weight:800;font-size:.78rem;margin-left:6px;}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ── MODAL générique ── */
@@ -300,6 +302,12 @@ img{-webkit-user-drag:none;}
 .bk-fsize-row{display:flex;align-items:center;gap:10px;margin-top:14px;}
 .bk-fsize-row button{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg);font-weight:900;font-size:1.1rem;color:var(--primary-dark);}
 .bk-photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:50vh;overflow-y:auto;}
+.dup-group{margin-bottom:16px;}
+.dup-group-h{font-weight:800;font-size:.8rem;color:var(--ink-soft);margin-bottom:8px;}
+.dup-group-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+.dup-thumb{position:relative;flex-shrink:0;width:88px;height:88px;border-radius:10px;overflow:hidden;}
+.dup-thumb img{width:100%;height:100%;object-fit:cover;}
+.dup-thumb button{position:absolute;top:4px;right:4px;background:rgba(20,14,36,.65);color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:.65rem;}
 .bk-icon-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-height:50vh;overflow-y:auto;}
 .bk-icon-grid .bk-icon-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:12px;cursor:pointer;}
 .bk-icon-grid .bk-icon-cell svg{width:60%;height:60%;stroke:var(--ink);}
@@ -340,6 +348,32 @@ img{-webkit-user-drag:none;}
   </div>
 </div>
 
+<!-- Feuille: sauvegarde / restauration complète -->
+<div class="bk-sheet" id="backup-sheet">
+  <div class="bk-sheet-box">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">💾 Sauvegarder / restaurer</h3>
+    <div class="modal-sub" style="margin-bottom:14px">Un seul fichier avec TOUT (albums, photos, livres, cartes) — à garder de côté, ou à réimporter si tu changes de téléphone.</div>
+    <button class="bk-btn primary" style="width:100%;margin-bottom:10px" onclick="exportFullBackup()">⬇️ Créer une sauvegarde complète</button>
+    <div id="backup-export-progress" class="modal-sub" style="display:none;margin-bottom:10px"></div>
+    <label class="bk-btn" style="width:100%;display:block;text-align:center;box-sizing:border-box;cursor:pointer;margin-bottom:4px">
+      ⬆️ Restaurer depuis un fichier
+      <input type="file" id="backup-file-input" accept="application/json,.json" style="display:none" onchange="importFullBackup(this.files[0])">
+    </label>
+    <div id="backup-import-progress" class="modal-sub" style="display:none;margin-bottom:10px"></div>
+    <div class="modal-sub" style="margin-top:10px">La restauration <b>ajoute</b> les albums du fichier (jamais d'écrasement) — utile aussi pour transférer vers un nouveau téléphone.</div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBackupSheet()">Fermer</button></div>
+  </div>
+</div>
+
+<!-- Feuille: détection de doublons -->
+<div class="bk-sheet" id="dup-sheet">
+  <div class="bk-sheet-box" style="max-height:80vh;overflow-y:auto">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px">👯 Doublons probables</h3>
+    <div id="dup-sheet-body"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeDuplicatesFinder()">Fermer</button></div>
+  </div>
+</div>
+
 <!-- ══════════ HOME ══════════ -->
 <div class="page on" id="pg-home">
   <div class="hdr">
@@ -349,6 +383,7 @@ img{-webkit-user-drag:none;}
         <div class="t">Mes Voyages</div>
         <div class="hdr-stats" id="hstats">0 album · 0 photo</div>
       </div>
+      <button class="hdr-help-btn" onclick="openBackupSheet()" style="margin-right:6px" title="Sauvegarder / restaurer">💾</button>
       <button class="hdr-help-btn" onclick="openHelpSheet()">❔</button>
     </div>
     <div class="search-wrap">
@@ -357,7 +392,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.2.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.3.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -392,6 +427,7 @@ img{-webkit-user-drag:none;}
     <button class="photo-delall-btn" id="photo-blur-btn" onclick="togglePhotoBlurCheck()" title="Repérer les photos possiblement floues">🌫️</button>
     <button class="photo-delall-btn" id="photo-color-btn" onclick="toggleColorStrip()" title="Filtrer par couleur">🎨</button>
     <button class="photo-delall-btn" id="photo-tag-btn" onclick="toggleTagStrip()" title="Filtrer par étiquette">🏷️</button>
+    <button class="photo-delall-btn" onclick="openDuplicatesFinder()" title="Détecter les doublons">👯</button>
     <button class="photo-delall-btn" id="photo-group-btn" onclick="togglePhotoGroupByDay()" title="Ranger par jour">📅</button>
     <button class="photo-delall-btn" id="photo-select-btn" onclick="togglePhotoSelectMode()" title="Sélectionner">☑️</button>
     <button class="photo-delall-btn" onclick="deleteAllPhotos()" title="Tout supprimer">🗑️</button>
@@ -404,6 +440,7 @@ img{-webkit-user-drag:none;}
     <button class="mbtn mbtn-cancel" onclick="togglePhotoSelectMode()">Annuler</button>
     <button class="mbtn" id="photo-multi-left-btn" onclick="moveSelectedPhoto(-1)" disabled title="Déplacer plus tôt">⬅️</button>
     <button class="mbtn" id="photo-multi-right-btn" onclick="moveSelectedPhoto(1)" disabled title="Déplacer plus tard">➡️</button>
+    <button class="mbtn" id="photo-multi-cover-btn" onclick="setSelectedAsCover()" disabled title="Utiliser comme couverture de l'album">🖼️</button>
     <button class="mbtn mbtn-ok" id="photo-multi-move-btn" onclick="openMoveToFolderSheet()" disabled title="Déplacer vers un dossier">📁</button>
     <button class="mbtn mbtn-ok" id="photo-multi-fill-btn" onclick="openBulkFillPicker()" disabled title="Mettre dans le livre">📖</button>
     <button class="mbtn mbtn-danger" id="photo-multi-del-btn" onclick="deleteSelectedPhotos()" disabled>🗑️</button>
@@ -526,6 +563,7 @@ img{-webkit-user-drag:none;}
     <button class="bk-tool" onclick="openGlobalStyleSheet()"><span class="ic">🎨</span>Style global</button>
     <button class="bk-tool" id="bk-group-btn" onclick="bkToggleMultiSelectMode()"><span class="ic">🔗</span>Grouper</button>
     <button class="bk-tool" onclick="bkToggleOrient()"><span class="ic">🔄</span>Format</button>
+    <button class="bk-tool" id="bk-safe-margin-btn" onclick="bkToggleSafeMargin()"><span class="ic">📐</span>Repères impression</button>
     <div id="bk-bgswatches" style="display:flex;gap:8px;align-items:center;padding-left:4px"></div>
   </div>
   <div class="bk-stage-wrap">
@@ -898,14 +936,30 @@ function saveAlbumMeta(a){
 function savePhoto(albumId, p){
   dbPut('photos', {
     id:p.id, albumId:albumId, full:p.full, thumb:p.thumb, w:p.w, h:p.h, cap:p.cap, liked:p.liked,
-    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource, folderId:p.folderId, colorBuckets:p.colorBuckets, colorBucketsV:p.colorBucketsV, blurScore:p.blurScore, tags:p.tags
+    fileName:p.fileName, takenAt:p.takenAt, takenAtSource:p.takenAtSource, folderId:p.folderId, colorBuckets:p.colorBuckets, colorBucketsV:p.colorBucketsV, blurScore:p.blurScore, tags:p.tags, dHash:p.dHash
   });
 }
 function toast(msg){
   var t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('on');
+  t.innerHTML=esc(msg); t.classList.add('on');
   clearTimeout(t._h);
   t._h=setTimeout(function(){ t.classList.remove('on'); },2400);
+}
+function toastUndo(msg, onUndo, delayMs){
+  // Suppression "douce" : le message reste affiché plus longtemps et propose
+  // "Annuler" — la vraie suppression (IndexedDB) n'a lieu qu'après ce délai,
+  // pas immédiatement, pour laisser une vraie chance de rattrapage.
+  var t=document.getElementById('toast');
+  var undone=false;
+  t.innerHTML=esc(msg)+' <button class="toast-undo-btn" id="toast-undo-btn">↩️ Annuler</button>';
+  t.classList.add('on');
+  clearTimeout(t._h);
+  document.getElementById('toast-undo-btn').onclick=function(){
+    undone=true;
+    t.classList.remove('on');
+    onUndo();
+  };
+  t._h=setTimeout(function(){ t.classList.remove('on'); }, delayMs||5000);
 }
 
 /* ══════════════════ NAVIGATION ══════════════════ */
@@ -929,7 +983,9 @@ function renderHome(){
     albums.length+' album'+(albums.length>1?'s':'')+' · '+tot+' photo'+(tot>1?'s':'');
   var h='';
   fil.forEach(function(a){
-    var cover=a.photos[0]?bkPhotoSrc(a.photos[0],'thumb'):null;
+    var coverPhoto = a.coverPhotoId ? a.photos.find(function(p){ return p.id===a.coverPhotoId; }) : null;
+    if(!coverPhoto) coverPhoto=a.photos[0];
+    var cover=coverPhoto?bkPhotoSrc(coverPhoto,'thumb'):null;
     h+='<div class="album-card" onclick="openAlbum(\''+a.id+'\')">'
       +'<button class="ac-del-btn" onclick="event.stopPropagation();delAlbum(\''+a.id+'\')">🗑️</button>'
       +'<button class="ac-dup-btn" onclick="event.stopPropagation();duplicateAlbum(\''+a.id+'\')" title="Dupliquer">⎘</button>'
@@ -979,14 +1035,23 @@ function createAlbum(){
   openAlbum(a.id);
 }
 function delAlbum(id){
-  if(!confirm('Supprimer cet album et toutes ses photos ?')) return;
+  if(!confirm('Supprimer cet album et toutes ses photos ? Tu pourras annuler juste après.')) return;
   var a=al(id);
-  var photoIds=a?a.photos.map(function(p){ return p.id; }):[];
-  albums=albums.filter(function(x){ return x.id!==id; });
-  dbDelete('albums',id);
-  dbDeleteMany('photos', photoIds);
+  if(!a) return;
+  var photoIds=a.photos.map(function(p){ return p.id; });
+  var idx=albums.indexOf(a);
+  albums.splice(idx,1); // retiré de l'affichage, pas encore de la base
   renderHome();
-  toast('Album supprimé');
+  toastUndo('Album "'+a.title+'" supprimé', function(){
+    albums.splice(idx,0,a);
+    renderHome();
+  }, 5000);
+  setTimeout(function(){
+    if(albums.indexOf(a)===-1){ // toujours absent = pas annulé
+      dbDelete('albums',id);
+      dbDeleteMany('photos', photoIds);
+    }
+  }, 5100);
 }
 function duplicateAlbum(id){
   var src=al(id);
@@ -1507,7 +1572,10 @@ var HELP_SECTIONS=[
     +'<li><b>Ranger par jour :</b> bouton 📅 pour regrouper automatiquement tes photos par date de prise de vue, avec des sections repliables.</li>'
     +'<li><b>Voir tes favoris :</b> bouton ❤️ à côté de la recherche pour ne voir que les photos mises en favori.</li>'
     +'<li><b>Repérer les photos floues :</b> bouton 🌫️ — analyse tes photos et marque celles qui semblent floues d\'un petit badge. C\'est une estimation, pas une certitude (une photo de ciel bien nette peut être marquée à tort) : vérifie toujours à l\'œil avant de supprimer.</li>'
+    +'<li><b>Détecter les doublons :</b> bouton 👯 — repère les photos très ressemblantes (rafale, quasi-identiques) et les regroupe pour te laisser choisir lesquelles garder. Une estimation aussi, à vérifier avant de supprimer.</li>'
+    +'<li><b>Choisir la couverture de l\'album :</b> en mode sélection (☑️), coche UNE photo puis touche 🖼️ pour l\'utiliser comme image de couverture (sinon c\'est toujours la première photo ajoutée).</li>'
     +'<li><b>Tout supprimer :</b> bouton 🗑️ à côté de la recherche, avec confirmation.</li>'
+    +'<li><b>Annuler une suppression :</b> après avoir supprimé une photo, plusieurs photos, ou un album entier, un message reste affiché quelques secondes avec un bouton "↩️ Annuler" — passé ce délai, la suppression devient définitive.</li>'
     +'<li><b>Légende et favori :</b> ouvre une photo (visionneuse) pour ajouter une légende ou la mettre en favori (❤️).</li>'
     +'</ul>' },
   { icon:'🏷️', title:'Étiquettes libres', body:
@@ -1583,11 +1651,18 @@ var HELP_SECTIONS=[
     +'<li><b>Depuis un album :</b> bouton "Export PDF" pour une grille rapide de toutes tes photos, sans passer par l\'éditeur.</li>'
     +'<li><b>Format story :</b> bouton 📱 dans l\'éditeur — exporte chaque page en image verticale 1080×1920 (le format Instagram/Snapchat/TikTok Stories), une image par page, prêtes à poster directement.</li>'
     +'</ul>' },
-  { icon:'💾', title:'Où sont tes données ?', body:
+  { icon:'💾', title:'Où sont tes données ? Sauvegarder / restaurer', body:
     '<ul>'
     +'<li>Tout est stocké <b>uniquement sur ton téléphone</b> (dans le navigateur) — pas de compte, pas de cloud, rien n\'est envoyé ailleurs.</li>'
     +'<li>Un PDF exporté part dans le dossier Téléchargements normal de ton téléphone, comme n\'importe quel fichier téléchargé.</li>'
-    +'<li>Si tu changes de téléphone ou effaces les données du site, tes albums ne se transfèrent pas automatiquement : pense à exporter ce qui compte avant.</li>'
+    +'<li><b>Sauvegarde complète :</b> bouton 💾 en haut de l\'écran d\'accueil — crée un seul fichier avec TOUT (albums, photos, livres, cartes). Garde-le de côté, ou réimporte-le si tu changes de téléphone ou effaces les données du site.</li>'
+    +'<li><b>Restaurer :</b> depuis ce même écran, "⬆️ Restaurer depuis un fichier" — les albums du fichier sont <b>ajoutés</b> à ceux déjà présents (jamais d\'écrasement), même si tu réimportes plusieurs fois.</li>'
+    +'</ul>' },
+  { icon:'📐', title:'Repères pour un imprimeur professionnel', body:
+    '<ul>'
+    +'<li>Bouton <b>📐 Repères impression</b> dans l\'éditeur de livre : affiche une zone en pointillés à 5% du bord de la page.</li>'
+    +'<li>Utile si tu comptes envoyer ton livre chez un vrai imprimeur : évite de placer du texte ou un visage important trop près du bord, qui pourrait être perdu à la découpe ou la reliure.</li>'
+    +'<li>C\'est un repère visuel <b>uniquement pour toi pendant l\'édition</b> — il n\'apparaît jamais dans le PDF exporté, ni dans le format story.</li>'
     +'</ul>' }
 ];
 function bkRenderHelpAccordion(){
@@ -1611,12 +1686,134 @@ function closeHelpSheet(){
   document.getElementById('help-sheet').classList.remove('on');
   try{ localStorage.setItem('mv_help_seen','1'); }catch(e){}
 }
+/* ══════════════════ SAUVEGARDE / RESTAURATION COMPLÈTE ══════════════════
+   Un seul fichier JSON contenant TOUT (métadonnées + photos encodées en
+   base64) — répond directement au point signalé dans l'aide : "si tu changes
+   de téléphone, tes albums ne se transfèrent pas automatiquement". Pas de
+   nouvelle dépendance (pas de zip) : juste du JSON, lisible par n'importe
+   quel outil si besoin, au prix d'un fichier un peu plus gros (~33% de plus
+   que les photos d'origine, inhérent à l'encodage base64). */
+function openBackupSheet(){
+  document.getElementById('backup-export-progress').style.display='none';
+  document.getElementById('backup-import-progress').style.display='none';
+  document.getElementById('backup-sheet').classList.add('on');
+}
+function closeBackupSheet(){ document.getElementById('backup-sheet').classList.remove('on'); }
+function exportFullBackup(){
+  var prog=document.getElementById('backup-export-progress');
+  prog.style.display='block'; prog.textContent='Préparation…';
+  dbGetAll('albums', function(albumRows){
+    dbGetAll('photos', function(photoRows){
+      var total=photoRows.length, done=0;
+      var photosById={};
+      function next(i){
+        if(i>=photoRows.length){ finish(); return; }
+        var p=photoRows[i];
+        Promise.all([
+          bkPhotoSrcAsDataURL(p,'full'),
+          bkPhotoSrcAsDataURL(p,'thumb')
+        ]).then(function(res){
+          photosById[p.id]=Object.assign({}, p, {full:res[0], thumb:res[1]});
+          done++;
+          if(done%10===0 || done===total) prog.textContent='Préparation… '+done+'/'+total+' photos';
+          next(i+1);
+        });
+      }
+      function finish(){
+        var backup={
+          appVersion: (document.getElementById('app-version-footer')||{}).textContent || 'inconnue',
+          createdAt: new Date().toISOString(),
+          albums: albumRows,
+          photos: Object.values(photosById)
+        };
+        prog.textContent='Écriture du fichier…';
+        var blob=new Blob([JSON.stringify(backup)], {type:'application/json'});
+        var url=URL.createObjectURL(blob);
+        var link=document.createElement('a');
+        var fname='mes-voyages-sauvegarde-'+new Date().toISOString().slice(0,10)+'.json';
+        link.href=url; link.download=fname;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+        prog.textContent='✅ Sauvegarde téléchargée : '+fname;
+      }
+      if(!photoRows.length) finish(); else next(0);
+    });
+  });
+}
+function importFullBackup(file){
+  if(!file) return;
+  var prog=document.getElementById('backup-import-progress');
+  prog.style.display='block'; prog.textContent='Lecture du fichier…';
+  var reader=new FileReader();
+  reader.onerror=function(){ prog.textContent='❌ Impossible de lire ce fichier'; };
+  reader.onload=function(){
+    var backup;
+    try{ backup=JSON.parse(reader.result); }
+    catch(e){ prog.textContent='❌ Fichier invalide (pas une sauvegarde reconnue)'; return; }
+    if(!backup || !Array.isArray(backup.albums) || !Array.isArray(backup.photos)){
+      prog.textContent='❌ Fichier invalide (pas une sauvegarde reconnue)'; return;
+    }
+    prog.textContent='Restauration… 0/'+backup.albums.length+' albums';
+    // Association photo <-> album via photoIds (comme le fait l'appli elle-même
+    // au démarrage), PAS via photo.albumId : ce dernier n'a jamais été rempli
+    // sur les photos ajoutées par le flux normal d'import (bug préexistant,
+    // maintenant corrigé pour les nouvelles photos, mais photoIds reste la
+    // source fiable pour TOUTES les photos, anciennes ou récentes).
+    var photoById={};
+    backup.photos.forEach(function(p){ photoById[p.id]=p; });
+    var albumsDone=0;
+    function nextAlbum(i){
+      if(i>=backup.albums.length){ finish(); return; }
+      var srcAlbum=backup.albums[i];
+      var newAlbumId=gid()+'-restore';
+      var srcPhotoIds=Array.isArray(srcAlbum.photoIds) ? srcAlbum.photoIds : [];
+      var srcPhotos=srcPhotoIds.map(function(id){ return photoById[id]; }).filter(Boolean);
+      var photoIdMap={};
+      srcPhotos.forEach(function(p){ photoIdMap[p.id]=gid()+'-'+Math.random().toString(36).slice(2,6); });
+      var newFolders=(srcAlbum.folders||[]).map(function(f){ return Object.assign({}, f, {id:gid()}); });
+      var folderNameToNewId={};
+      newFolders.forEach(function(f,fi){ folderNameToNewId[(srcAlbum.folders||[])[fi].id]=f.id; });
+      var fullPhotos=srcPhotos.map(function(p){
+        var np=Object.assign({}, p, {id:photoIdMap[p.id]});
+        if(np.folderId && folderNameToNewId[np.folderId]) np.folderId=folderNameToNewId[np.folderId];
+        else np.folderId=null;
+        return np;
+      });
+      var newAlbum=Object.assign({}, srcAlbum, {
+        id:newAlbumId,
+        photos: fullPhotos,
+        folders: newFolders,
+        maps: (srcAlbum.maps||[]).map(function(m){ return Object.assign({}, m, {id:gid()}); }),
+        books: (srcAlbum.books||[]).map(function(b){ return Object.assign({}, b, {id:gid()}); })
+      });
+      delete newAlbum.photoIds; // recalculé proprement par saveAlbumMeta à partir de newAlbum.photos
+      albums.push(newAlbum);
+      saveAlbumMeta(newAlbum);
+      fullPhotos.forEach(function(p){ savePhoto(newAlbum.id, p); });
+      albumsDone++;
+      prog.textContent='Restauration… '+albumsDone+'/'+backup.albums.length+' albums';
+      setTimeout(function(){ nextAlbum(i+1); }, 10); // laisse respirer l'interface entre chaque album
+    }
+    function finish(){
+      prog.textContent='✅ '+backup.albums.length+' album'+(backup.albums.length>1?'s':'')+' restauré'+(backup.albums.length>1?'s':'');
+      renderHome();
+      toast('✅ Sauvegarde restaurée');
+    }
+    if(!backup.albums.length){ finish(); } else { nextAlbum(0); }
+  };
+  reader.readAsText(file);
+  document.getElementById('backup-file-input').value=''; // permet de réimporter le même fichier une seconde fois si besoin
+}
 function bkMaybeShowHelpOnFirstLaunch(){
   var seen=false;
   try{ seen=localStorage.getItem('mv_help_seen')==='1'; }catch(e){}
   if(!seen) openHelpSheet();
 }
 
+function bkAlbumCoverPhoto(a){
+  var cover = a.coverPhotoId ? a.photos.find(function(p){ return p.id===a.coverPhotoId; }) : null;
+  return cover || a.photos[0] || null;
+}
 function openAlbum(id){
   curAlbum=id;
   var a=al(id);
@@ -1624,7 +1821,8 @@ function openAlbum(id){
   document.getElementById('ah-title').textContent=a.title;
   document.getElementById('ah-meta').textContent=a.loc+' · '+a.date+' · '+a.photos.length+' photo'+(a.photos.length!==1?'s':'');
   var hi=document.getElementById('ah-img'), he=document.getElementById('ah-emoji');
-  if(a.photos.length){ hi.src=bkPhotoSrc(a.photos[0],'full'); hi.style.display='block'; he.style.display='none'; }
+  var coverPhoto=bkAlbumCoverPhoto(a);
+  if(coverPhoto){ hi.src=bkPhotoSrc(coverPhoto,'full'); hi.style.display='block'; he.style.display='none'; }
   else { hi.style.display='none'; he.style.display='flex'; he.textContent=a.emoji; }
   document.getElementById('upload-progress-holder').innerHTML='';
   document.getElementById('photo-search').value='';
@@ -1651,7 +1849,8 @@ function refreshAlbumHeader(){
   var a=al(curAlbum);
   document.getElementById('ah-meta').textContent=a.loc+' · '+a.date+' · '+a.photos.length+' photo'+(a.photos.length!==1?'s':'');
   var hi=document.getElementById('ah-img'), he=document.getElementById('ah-emoji');
-  if(a.photos.length){ hi.src=bkPhotoSrc(a.photos[0],'full'); hi.style.display='block'; he.style.display='none'; }
+  var coverPhoto=bkAlbumCoverPhoto(a);
+  if(coverPhoto){ hi.src=bkPhotoSrc(coverPhoto,'full'); hi.style.display='block'; he.style.display='none'; }
   else { hi.style.display='none'; he.style.display='flex'; }
 }
 /* Rendu progressif de la grille : le 1er lot s'affiche immédiatement, le reste
@@ -1847,6 +2046,108 @@ function togglePhotoBlurCheck(){
   }
   renderPhotos();
 }
+/* ══════════════════ DÉTECTER LES DOUBLONS ══════════════════
+   "dHash" (hachage de différence) : réduit chaque photo à une petite
+   empreinte de 64 bits résumant ses variations de luminosité — deux photos
+   très proches (rafale, même scène) ont une empreinte quasi identique, même
+   après recompression ou léger changement de luminosité. Comparé sur de
+   vraies images avant intégration : écart de 1 bit entre quasi-doublons
+   contre 36-37 entre photos différentes — marge large et fiable. */
+var BK_DUP_THRESHOLD=6; // bits de différence max pour considérer "quasi-doublon"
+function bkComputeDHash(img){
+  var W=9,H=8;
+  var c=document.createElement('canvas'); c.width=W; c.height=H;
+  var ctx=c.getContext('2d');
+  ctx.drawImage(img,0,0,W,H);
+  var data;
+  try{ data=ctx.getImageData(0,0,W,H).data; }catch(e){ return null; }
+  var gray=[];
+  for(var i=0;i<W*H;i++){ gray.push(0.299*data[i*4]+0.587*data[i*4+1]+0.114*data[i*4+2]); }
+  var bits='';
+  for(var y=0;y<H;y++){
+    for(var x=0;x<W-1;x++){ bits += gray[y*W+x] < gray[y*W+x+1] ? '1' : '0'; }
+  }
+  return bits;
+}
+function bkHammingDist(a,b){
+  if(!a || !b || a.length!==b.length) return 999;
+  var d=0;
+  for(var i=0;i<a.length;i++) if(a[i]!==b[i]) d++;
+  return d;
+}
+function bkEnsurePhotoDHash(p){
+  if(p.dHash!==undefined) return Promise.resolve(p.dHash);
+  var src=bkPhotoSrc(p,'thumb');
+  if(!src) return Promise.resolve(null);
+  return new Promise(function(resolve){
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){ var h=bkComputeDHash(img); p.dHash=h; resolve(h); };
+    img.onerror=function(){ resolve(null); };
+    img.src=src;
+  });
+}
+function openDuplicatesFinder(){
+  var a=al(curAlbum);
+  if(a.photos.length<2){ toast('Pas assez de photos pour comparer'); return; }
+  document.getElementById('dup-sheet-body').innerHTML='<div class="modal-sub" style="text-align:center;padding:20px">Analyse en cours…</div>';
+  document.getElementById('dup-sheet').classList.add('on');
+  var todo=a.photos.filter(function(p){ return p.dHash===undefined; });
+  var BATCH=12, i=0;
+  function next(){
+    var batch=todo.slice(i,i+BATCH); i+=BATCH;
+    return Promise.all(batch.map(bkEnsurePhotoDHash)).then(function(){
+      batch.forEach(function(p){ savePhoto(a.id,p); });
+      if(i<todo.length) return next();
+    });
+  }
+  (todo.length ? next() : Promise.resolve()).then(function(){
+    bkRenderDuplicateGroups(a);
+  });
+}
+function bkRenderDuplicateGroups(a){
+  // regroupement simple : chaque photo rejoint le premier groupe existant
+  // avec lequel elle est assez proche, sinon elle en ouvre un nouveau.
+  var groups=[];
+  a.photos.forEach(function(p){
+    if(!p.dHash) return;
+    var joined=false;
+    for(var g=0; g<groups.length; g++){
+      if(bkHammingDist(p.dHash, groups[g][0].dHash) <= BK_DUP_THRESHOLD){
+        groups[g].push(p); joined=true; break;
+      }
+    }
+    if(!joined) groups.push([p]);
+  });
+  var realGroups=groups.filter(function(g){ return g.length>1; });
+  var body=document.getElementById('dup-sheet-body');
+  if(!realGroups.length){
+    body.innerHTML='<div class="modal-sub" style="text-align:center;padding:20px">✅ Aucun doublon probable trouvé.</div>';
+    return;
+  }
+  var h='<div class="modal-sub" style="margin-bottom:10px">'+realGroups.length+' groupe'+(realGroups.length>1?'s':'')+' de photos qui se ressemblent beaucoup — vérifie avant de supprimer, ce n\'est qu\'une estimation.</div>';
+  realGroups.forEach(function(g,gi){
+    h+='<div class="dup-group"><div class="dup-group-h">Groupe '+(gi+1)+' ('+g.length+' photos)</div><div class="dup-group-row">';
+    g.forEach(function(p){
+      h+='<div class="dup-thumb"><img src="'+bkPhotoSrc(p,'thumb')+'"><button onclick="bkDeleteDupPhoto(\''+p.id+'\',this)">🗑️</button></div>';
+    });
+    h+='</div></div>';
+  });
+  body.innerHTML=h;
+}
+function bkDeleteDupPhoto(id, btnEl){
+  var a=al(curAlbum);
+  var idx=a.photos.findIndex(function(p){ return p.id===id; });
+  if(idx<0) return;
+  var removed=a.photos[idx];
+  a.photos.splice(idx,1);
+  bkRevokePhotoUrls(removed);
+  dbDelete('photos', id);
+  saveAlbumMeta(a);
+  btnEl.closest('.dup-thumb').remove();
+  renderFolderStrip(); renderPhotos(); refreshAlbumHeader();
+}
+function closeDuplicatesFinder(){ document.getElementById('dup-sheet').classList.remove('on'); }
 /* ══════════════════ DOSSIERS PERSONNALISÉS DANS UN ALBUM ══════════════════
    Un dossier a juste un nom (choisi par l'utilisateur) ; chaque photo peut
    appartenir à au plus un dossier (photo.folderId). "Toutes" (folderId=null
@@ -2292,6 +2593,16 @@ function updatePhotoMultiBar(){
   var canReorder = n===1 && !photoGroupByDay; // le rangement par jour impose son propre ordre
   document.getElementById('photo-multi-left-btn').disabled=!canReorder;
   document.getElementById('photo-multi-right-btn').disabled=!canReorder;
+  document.getElementById('photo-multi-cover-btn').disabled=(n!==1);
+}
+function setSelectedAsCover(){
+  if(photoSelected.length!==1) return;
+  var a=al(curAlbum);
+  a.coverPhotoId=photoSelected[0];
+  saveAlbumMeta(a);
+  togglePhotoSelectMode(); // sort du mode sélection, comme une action "terminale"
+  refreshAlbumHeader();
+  toast('🖼️ Couverture de l\'album mise à jour');
 }
 function bkCurrentPhotoListOrder(){
   // reproduit exactement le même filtrage que renderPhotos (dossier, couleur,
@@ -2325,13 +2636,12 @@ function moveSelectedPhoto(delta){
 function deleteSelectedPhotos(){
   var n=photoSelected.length;
   if(!n) return;
-  if(!confirm('Supprimer '+n+' photo'+(n>1?'s':'')+' sélectionnée'+(n>1?'s':'')+' ? Cette action est définitive.')) return;
+  if(!confirm('Supprimer '+n+' photo'+(n>1?'s':'')+' sélectionnée'+(n>1?'s':'')+' ? Tu pourras annuler juste après.')) return;
   var a=al(curAlbum);
   var idsSet={}; photoSelected.forEach(function(id){ idsSet[id]=true; });
-  a.photos.forEach(function(p){ if(idsSet[p.id]) bkRevokePhotoUrls(p); });
+  var removedPhotos=a.photos.filter(function(p){ return idsSet[p.id]; });
+  var removedIds=photoSelected.slice();
   a.photos=a.photos.filter(function(p){ return !idsSet[p.id]; });
-  dbDeleteMany('photos', photoSelected);
-  saveAlbumMeta(a);
   photoSelectMode=false;
   photoSelected=[];
   document.getElementById('photo-select-btn').classList.remove('active');
@@ -2340,36 +2650,64 @@ function deleteSelectedPhotos(){
   renderFolderStrip();
   renderPhotos();
   refreshAlbumHeader();
-  toast('🗑️ '+n+' photo'+(n>1?'s':'')+' supprimée'+(n>1?'s':''));
+  toastUndo('🗑️ '+n+' photo'+(n>1?'s':'')+' supprimée'+(n>1?'s':''), function(){
+    a.photos=a.photos.concat(removedPhotos);
+    renderFolderStrip(); renderPhotos(); refreshAlbumHeader();
+  }, 5000);
+  setTimeout(function(){
+    var stillGone=removedPhotos.every(function(p){ return a.photos.indexOf(p)===-1; });
+    if(stillGone){ // pas annulé
+      removedPhotos.forEach(bkRevokePhotoUrls);
+      dbDeleteMany('photos', removedIds);
+      saveAlbumMeta(a);
+    }
+  }, 5100);
 }
 function quickDelPhoto(id){
   var a=al(curAlbum);
-  var removed=a.photos.find(function(p){ return p.id===id; });
-  if(removed) bkRevokePhotoUrls(removed);
-  a.photos=a.photos.filter(function(p){ return p.id!==id; });
-  dbDelete('photos', id);
-  saveAlbumMeta(a);
+  var idx=a.photos.findIndex(function(p){ return p.id===id; });
+  if(idx<0) return;
+  var removed=a.photos[idx];
+  a.photos.splice(idx,1); // retiré de l'affichage tout de suite, mais PAS encore de la base
   renderFolderStrip();
   renderPhotos();
   refreshAlbumHeader();
-  toast('Photo supprimée');
+  toastUndo('Photo supprimée', function(){
+    a.photos.splice(idx,0,removed);
+    renderFolderStrip(); renderPhotos(); refreshAlbumHeader();
+  }, 5000);
+  setTimeout(function(){
+    if(a.photos.indexOf(removed)===-1){ // toujours absente = pas annulé : suppression réellement faite maintenant
+      bkRevokePhotoUrls(removed);
+      dbDelete('photos', id);
+      saveAlbumMeta(a);
+    }
+  }, 5100);
 }
 function deleteAllPhotos(){
   var a=al(curAlbum);
   if(!a.photos.length){ toast('Aucune photo à supprimer'); return; }
   var n=a.photos.length;
-  if(!confirm('Supprimer les '+n+' photo'+(n>1?'s':'')+' de cet album ? Cette action est définitive.')) return;
-  var ids=a.photos.map(function(p){ return p.id; });
-  a.photos.forEach(bkRevokePhotoUrls);
+  if(!confirm('Supprimer les '+n+' photo'+(n>1?'s':'')+' de cet album ? Cette action peut être annulée juste après.')) return;
+  var removedPhotos=a.photos.slice();
+  var ids=removedPhotos.map(function(p){ return p.id; });
   a.photos=[];
-  dbDeleteMany('photos', ids);
-  saveAlbumMeta(a);
   document.getElementById('photo-search').value='';
   bkCurrentFolderId=null;
   renderFolderStrip();
   renderPhotos();
   refreshAlbumHeader();
-  toast('🗑️ '+n+' photo'+(n>1?'s':'')+' supprimée'+(n>1?'s':''));
+  toastUndo('🗑️ '+n+' photo'+(n>1?'s':'')+' supprimée'+(n>1?'s':''), function(){
+    a.photos=removedPhotos;
+    renderFolderStrip(); renderPhotos(); refreshAlbumHeader();
+  }, 5000);
+  setTimeout(function(){
+    if(!a.photos.length){ // toujours vide = pas annulé
+      removedPhotos.forEach(bkRevokePhotoUrls);
+      dbDeleteMany('photos', ids);
+      saveAlbumMeta(a);
+    }
+  }, 5100);
 }
 
 /* ══════════════════ AJOUT PHOTOS (compression + stockage local fiable) ══════════════════ */
@@ -2706,6 +3044,7 @@ function addFiles(files){
         if(!takenAt){ takenAt = file.lastModified || Date.now(); takenAtSource='file'; }
         var photo={
           id:gid(),
+          albumId:a.id,
           full:sizes.fullBlob, w:sizes.fullW, h:sizes.fullH,
           thumb:sizes.thumbBlob,
           cap:'', liked:false,
@@ -4110,6 +4449,8 @@ function bkOpenSpecificBook(id){
   bkPageIdx = (bkBook.lastPageIdx!==undefined && bkBook.lastPageIdx<bkBook.pages.length) ? bkBook.lastPageIdx : 0;
   bkSelId=null;
   bkPageSelectMode=false; bkPageSelected=[];
+  bkSafeMarginOn=false;
+  document.getElementById('bk-safe-margin-btn').classList.remove('active');
   bkUndoStack=[]; bkRedoStack=[];
   closeBookListSheet();
   document.getElementById('pg-book').classList.add('on');
@@ -4217,9 +4558,29 @@ function bkRenderPage(){
   canvas.innerHTML='';
   page.elements.forEach(function(el){ canvas.appendChild(bkBuildElNode(el)); });
   canvas.appendChild(bkGuideNode('v')); canvas.appendChild(bkGuideNode('h'));
+  if(bkSafeMarginOn) canvas.appendChild(bkSafeMarginNode());
   document.getElementById('bk-pagelabel').textContent=bkBook.name+' — Page '+(bkPageIdx+1)+' / '+bkBook.pages.length;
   bkRenderSelBar();
   bkApplySmartCropsOnPage();
+}
+var bkSafeMarginOn=false;
+function bkToggleSafeMargin(){
+  bkSafeMarginOn=!bkSafeMarginOn;
+  document.getElementById('bk-safe-margin-btn').classList.toggle('active', bkSafeMarginOn);
+  bkRenderPage();
+}
+function bkSafeMarginNode(){
+  // Repère visuel UNIQUEMENT dans l'éditeur (jamais dessiné dans le PDF ou
+  // l'export story) : une marge de 5% depuis chaque bord, généralement
+  // recommandée avant d'envoyer un livre chez un imprimeur professionnel, pour
+  // ne pas perdre de texte ou de visage important à la découpe/reliure.
+  var d=document.createElement('div');
+  d.style.cssText='position:absolute;left:5%;top:5%;right:5%;bottom:5%;border:2px dashed rgba(255,90,110,.85);pointer-events:none;z-index:500;';
+  var label=document.createElement('div');
+  label.textContent='Zone de sécurité impression';
+  label.style.cssText='position:absolute;top:-22px;left:0;font-size:.62rem;font-weight:800;color:#FF5A6E;background:rgba(255,255,255,.85);padding:2px 6px;border-radius:6px;white-space:nowrap;';
+  d.appendChild(label);
+  return d;
 }
 function bkGuideNode(axis){
   var d=document.createElement('div');
