@@ -448,16 +448,17 @@ img{-webkit-user-drag:none;}
         <div class="hdr-stats" id="hstats">0 album · 0 photo</div>
       </div>
       <button class="hdr-help-btn" id="theme-toggle-btn" onclick="bkToggleTheme()" style="margin-right:6px" title="Basculer clair/sombre">🌙</button>
+      <button class="hdr-help-btn" id="lang-toggle-btn" onclick="bkCycleLanguage()" style="margin-right:6px;font-size:.62rem;font-weight:800" title="Changer la langue de l'interface">🇫🇷 FR</button>
       <button class="hdr-help-btn" onclick="openBackupSheet()" style="margin-right:6px" title="Sauvegarder / restaurer">💾</button>
       <button class="hdr-help-btn" onclick="openHelpSheet()">❔</button>
     </div>
     <div class="search-wrap">
       <span class="si">🔍</span>
-      <input type="text" id="search" placeholder="Rechercher un voyage..." oninput="renderHome()">
+      <input type="text" id="search" placeholder="Rechercher un voyage..." data-i18n-placeholder="search_placeholder" oninput="renderHome()">
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.9.1</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.12.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -484,18 +485,18 @@ img{-webkit-user-drag:none;}
   <div id="upload-progress-holder"></div>
   <div class="folder-strip-row">
     <div class="folder-strip" id="folder-strip"></div>
-    <button class="photo-delall-btn" onclick="openFolderManageSheet()" title="Gérer les dossiers">📁</button>
+    <button class="photo-delall-btn" onclick="openFolderManageSheet()" data-i18n-title="btn_folders" title="Gérer les dossiers">📁</button>
   </div>
   <div class="photo-search-row">
-    <input type="text" id="photo-search" placeholder="Rechercher par nom de fichier ou date..." oninput="renderPhotos()">
-    <button class="photo-delall-btn" id="photo-fav-btn" onclick="togglePhotoFavFilter()" title="Voir mes favoris">❤️</button>
-    <button class="photo-delall-btn" id="photo-blur-btn" onclick="togglePhotoBlurCheck()" title="Repérer les photos possiblement floues">🌫️</button>
-    <button class="photo-delall-btn" id="photo-color-btn" onclick="toggleColorStrip()" title="Filtrer par couleur">🎨</button>
-    <button class="photo-delall-btn" id="photo-tag-btn" onclick="toggleTagStrip()" title="Filtrer par étiquette">🏷️</button>
-    <button class="photo-delall-btn" onclick="openDuplicatesFinder()" title="Détecter les doublons">👯</button>
-    <button class="photo-delall-btn" id="photo-group-btn" onclick="togglePhotoGroupByDay()" title="Ranger par jour">📅</button>
-    <button class="photo-delall-btn" id="photo-select-btn" onclick="togglePhotoSelectMode()" title="Sélectionner">☑️</button>
-    <button class="photo-delall-btn" onclick="deleteAllPhotos()" title="Tout supprimer">🗑️</button>
+    <input type="text" id="photo-search" placeholder="Rechercher par nom de fichier ou date..." data-i18n-placeholder="photo_search_placeholder" oninput="renderPhotos()">
+    <button class="photo-delall-btn" id="photo-fav-btn" onclick="togglePhotoFavFilter()" data-i18n-title="btn_favorites" title="Voir mes favoris">❤️</button>
+    <button class="photo-delall-btn" id="photo-blur-btn" onclick="togglePhotoBlurCheck()" data-i18n-title="btn_blur" title="Repérer les photos possiblement floues">🌫️</button>
+    <button class="photo-delall-btn" id="photo-color-btn" onclick="toggleColorStrip()" data-i18n-title="btn_color" title="Filtrer par couleur">🎨</button>
+    <button class="photo-delall-btn" id="photo-tag-btn" onclick="toggleTagStrip()" data-i18n-title="btn_tags" title="Filtrer par étiquette">🏷️</button>
+    <button class="photo-delall-btn" onclick="openDuplicatesFinder()" data-i18n-title="btn_duplicates" title="Détecter les doublons">👯</button>
+    <button class="photo-delall-btn" id="photo-group-btn" onclick="togglePhotoGroupByDay()" data-i18n-title="btn_group_day" title="Ranger par jour">📅</button>
+    <button class="photo-delall-btn" id="photo-select-btn" onclick="togglePhotoSelectMode()" data-i18n-title="btn_select" title="Sélectionner">☑️</button>
+    <button class="photo-delall-btn" onclick="deleteAllPhotos()" data-i18n-title="btn_delete_all" title="Tout supprimer">🗑️</button>
   </div>
   <div class="color-strip" id="color-strip" style="display:none"></div>
   <div class="color-strip" id="tag-strip" style="display:none"></div>
@@ -605,36 +606,37 @@ img{-webkit-user-drag:none;}
 <!-- ══════════ ÉDITEUR DE LIVRE (pages libres) ══════════ -->
 <div id="pg-book">
   <div class="bk-top">
-    <button class="bk-btn" onclick="closeBook()">✕ Fermer</button>
-    <button class="bk-btn" onclick="bkManualSave()" title="Enregistrer maintenant">💾</button>
-    <button class="bk-btn" onclick="bkSwitchBook()" title="Mes livres">📚</button>
-    <button class="bk-btn" onclick="openBookOverview()" title="Vue d'ensemble de toutes les pages">🔲</button>
-    <button class="bk-btn" onclick="openVersionHistory()" title="Historique des versions">🕐</button>
+    <button class="bk-btn" onclick="closeBook()" data-i18n="btn_close">✕ Fermer</button>
+    <button class="bk-btn" onclick="bkManualSave()" data-i18n-title="btn_save_now" title="Enregistrer maintenant">💾</button>
+    <button class="bk-btn" onclick="bkSwitchBook()" data-i18n-title="btn_my_books" title="Mes livres">📚</button>
+    <button class="bk-btn" onclick="openBookOverview()" data-i18n-title="btn_overview" title="Vue d'ensemble de toutes les pages">🔲</button>
+    <button class="bk-btn" onclick="openVersionHistory()" data-i18n-title="btn_history" title="Historique des versions">🕐</button>
     <div style="display:flex;gap:6px;align-items:center">
-      <button class="bk-btn" id="bk-undo-btn" onclick="bkUndo()" disabled title="Annuler">↩️</button>
-      <button class="bk-btn" id="bk-redo-btn" onclick="bkRedo()" disabled title="Rétablir">↪️</button>
+      <button class="bk-btn" id="bk-undo-btn" onclick="bkUndo()" disabled data-i18n-title="btn_undo" title="Annuler">↩️</button>
+      <button class="bk-btn" id="bk-redo-btn" onclick="bkRedo()" disabled data-i18n-title="btn_redo" title="Rétablir">↪️</button>
     </div>
-    <button class="bk-btn" onclick="exportPageAsImage()" title="Exporter la page en image">🖼️</button>
-    <button class="bk-btn" onclick="exportBookStory()" title="Exporter en format story (vertical, réseaux sociaux)">📱</button>
-    <button class="bk-btn primary" onclick="exportBookPDF()">Exporter PDF</button>
+    <button class="bk-btn" onclick="exportPageAsImage()" data-i18n-title="btn_export_image" title="Exporter la page en image">🖼️</button>
+    <button class="bk-btn" onclick="exportBookStory()" data-i18n-title="btn_share_story" title="Exporter en format story (vertical, réseaux sociaux)">📱</button>
+    <button class="bk-btn primary" onclick="exportBookPDF()" data-i18n="btn_export_pdf">Exporter PDF</button>
   </div>
   <div id="bk-pagelabel" style="font-weight:800;font-size:.78rem;text-align:center;padding:4px 0;color:var(--ink-soft)"></div>
   <div class="bk-toolbar">
-    <button class="bk-tool" onclick="bkAddText()"><span class="ic">🔤</span>Texte</button>
-    <button class="bk-tool" onclick="openPhotoPicker()"><span class="ic">🖼️</span>Photo</button>
-    <button class="bk-tool" onclick="openShapePicker()"><span class="ic">⬛</span>Forme</button>
-    <button class="bk-tool" onclick="openStickerPicker()"><span class="ic">✨</span>Sticker</button>
-    <button class="bk-tool" onclick="openIconPicker()"><span class="ic">◇</span>Icône</button>
-    <button class="bk-tool" onclick="openTemplatePicker()"><span class="ic">▦</span>Modèle</button>
-    <button class="bk-tool" onclick="bkSurpriseLayout()"><span class="ic">🎲</span>Surprise</button>
-    <button class="bk-tool" onclick="bkAddMapElement()"><span class="ic">🗺️</span>Carte</button>
-    <button class="bk-tool" onclick="bkAddSummaryPage()"><span class="ic">📊</span>Résumé</button>
-    <button class="bk-tool" onclick="openGlobalStyleSheet()"><span class="ic">🎨</span>Style global</button>
-    <button class="bk-tool" id="bk-group-btn" onclick="bkToggleMultiSelectMode()"><span class="ic">🔗</span>Grouper</button>
-    <button class="bk-tool" onclick="bkToggleOrient()"><span class="ic">🔄</span>Format</button>
-    <button class="bk-tool" id="bk-safe-margin-btn" onclick="bkToggleSafeMargin()"><span class="ic">📐</span>Repères impression</button>
-    <button class="bk-tool" onclick="bkFitCurrentPageToSafeMargin()"><span class="ic">🔧</span>Ajuster cette page</button>
-    <button class="bk-tool" onclick="bkFitMultiplePagesToSafeMargin()"><span class="ic">🔧</span>Ajuster plusieurs pages</button>
+    <button class="bk-tool" onclick="bkAddText()"><span class="ic">🔤</span><span data-i18n="tool_text">Texte</span></button>
+    <button class="bk-tool" onclick="openPhotoPicker()"><span class="ic">🖼️</span><span data-i18n="tool_photo">Photo</span></button>
+    <button class="bk-tool" onclick="openShapePicker()"><span class="ic">⬛</span><span data-i18n="tool_shape">Forme</span></button>
+    <button class="bk-tool" onclick="openStickerPicker()"><span class="ic">✨</span><span data-i18n="tool_sticker">Sticker</span></button>
+    <button class="bk-tool" onclick="openIconPicker()"><span class="ic">◇</span><span data-i18n="tool_icon">Icône</span></button>
+    <button class="bk-tool" onclick="openTemplatePicker()"><span class="ic">▦</span><span data-i18n="tool_template">Modèle</span></button>
+    <button class="bk-tool" onclick="bkSurpriseLayout()"><span class="ic">🎲</span><span data-i18n="tool_surprise">Surprise</span></button>
+    <button class="bk-tool" onclick="bkAddMapElement()"><span class="ic">🗺️</span><span data-i18n="tool_map">Carte</span></button>
+    <button class="bk-tool" onclick="bkAddSummaryPage()"><span class="ic">📊</span><span data-i18n="tool_summary">Résumé</span></button>
+    <button class="bk-tool" onclick="bkAddTableOfContents()"><span class="ic">📑</span><span data-i18n="tool_toc">Sommaire</span></button>
+    <button class="bk-tool" onclick="openGlobalStyleSheet()"><span class="ic">🎨</span><span data-i18n="tool_global_style">Style global</span></button>
+    <button class="bk-tool" id="bk-group-btn" onclick="bkToggleMultiSelectMode()"><span class="ic">🔗</span><span data-i18n="tool_group">Grouper</span></button>
+    <button class="bk-tool" onclick="bkToggleOrient()"><span class="ic">🔄</span><span data-i18n="tool_format">Format</span></button>
+    <button class="bk-tool" id="bk-safe-margin-btn" onclick="bkToggleSafeMargin()"><span class="ic">📐</span><span data-i18n="tool_safe_margin">Repères impression</span></button>
+    <button class="bk-tool" onclick="bkFitCurrentPageToSafeMargin()"><span class="ic">🔧</span><span data-i18n="tool_fit_page">Ajuster cette page</span></button>
+    <button class="bk-tool" onclick="bkFitMultiplePagesToSafeMargin()"><span class="ic">🔧</span><span data-i18n="tool_fit_pages">Ajuster plusieurs pages</span></button>
     <div id="bk-bgswatches" style="display:flex;gap:8px;align-items:center;padding-left:4px;overflow-x:auto;padding-bottom:2px"></div>
   </div>
   <div class="bk-stage-wrap">
@@ -1001,7 +1003,7 @@ function saveAlbumMeta(a){
   dbPut('albums', {
     id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
     createdAt:a.createdAt, photoIds:a.photos.map(function(p){ return p.id; }),
-    books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders
+    books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders, customStickers:a.customStickers
   });
 }
 // Sauvegarde UNIQUEMENT une photo (léger même si l'album a 1000 photos)
@@ -1073,9 +1075,9 @@ function renderHome(){
   if(!fil.length && albums.length){
     h='<div class="empty-state"><div class="ico">🔍</div>Aucun résultat</div>';
   } else if(!albums.length){
-    h='<div class="empty-state"><div class="ico">🗺️</div>Aucun voyage pour l\'instant<br>Crée ton premier album !</div>';
+    h='<div class="empty-state"><div class="ico">🗺️</div>'+t('empty_title')+'<br>'+t('empty_sub')+'</div>';
   }
-  h+='<div class="add-card" onclick="openModal()"><div class="plus">+</div><span>Créer un album</span></div>';
+  h+='<div class="add-card" onclick="openModal()"><div class="plus">+</div><span>'+t('create_album')+'</span></div>';
   document.getElementById('albums-grid').innerHTML=h;
 }
 function esc(s){
@@ -1637,126 +1639,140 @@ function bkGenerateAndInsertMap(mapObj){
 }
 
 /* ══════════════════ AIDE ══════════════════ */
-var HELP_SECTIONS=[
-  { icon:'📸', title:'Ajouter et gérer tes photos', body:
-    '<ul>'
-    +'<li><b>Ajouter :</b> touche la zone en pointillés dans un album, ou glisse-dépose tes photos directement.</li>'
-    +'<li><b>Rechercher :</b> tape un nom de fichier ou une date dans la barre de recherche de l\'album.</li>'
-    +'<li><b>Date automatique :</b> l\'appli lit la vraie date de prise de vue dans la photo quand elle existe (icône 📷 dans la visionneuse) ; sinon elle utilise une date de repli (🗓️ ou ➕).</li>'
-    +'<li><b>Sélection multiple :</b> bouton ☑️ à côté de la recherche — coche plusieurs photos pour les supprimer, les ranger dans un dossier, ou les mettre directement dans le livre (voir plus bas).</li>'
-    +'<li><b>Sélection en gamme :</b> en mode sélection, bouton 🔗 — touche une photo de départ puis une photo d\'arrivée, et tout ce qu\'il y a entre les deux se coche d\'un coup.</li>'
-    +'<li><b>Réordonner :</b> en mode sélection, coche UNE seule photo pour faire apparaître des flèches ⬅️➡️ qui la déplacent dans l\'ordre affiché.</li>'
-    +'<li><b>Ranger par jour :</b> bouton 📅 pour regrouper automatiquement tes photos par date de prise de vue, avec des sections repliables.</li>'
-    +'<li><b>Voir tes favoris :</b> bouton ❤️ à côté de la recherche pour ne voir que les photos mises en favori.</li>'
-    +'<li><b>Repérer les photos floues :</b> bouton 🌫️ — analyse tes photos et marque celles qui semblent floues d\'un petit badge. C\'est une estimation, pas une certitude (une photo de ciel bien nette peut être marquée à tort) : vérifie toujours à l\'œil avant de supprimer.</li>'
-    +'<li><b>Détecter les doublons :</b> bouton 👯 — repère les photos très ressemblantes (rafale, quasi-identiques) et les regroupe pour te laisser choisir lesquelles garder. Une estimation aussi, à vérifier avant de supprimer.</li>'
-    +'<li><b>Choisir la couverture de l\'album :</b> en mode sélection (☑️), coche UNE photo puis touche 🖼️ pour l\'utiliser comme image de couverture (sinon c\'est toujours la première photo ajoutée).</li>'
-    +'<li><b>Tout supprimer :</b> bouton 🗑️ à côté de la recherche, avec confirmation.</li>'
-    +'<li><b>Annuler une suppression :</b> après avoir supprimé une photo, plusieurs photos, ou un album entier, un message reste affiché quelques secondes avec un bouton "↩️ Annuler" — passé ce délai, la suppression devient définitive.</li>'
-    +'<li><b>Légende et favori :</b> ouvre une photo (visionneuse) pour ajouter une légende ou la mettre en favori (❤️).</li>'
-    +'</ul>' },
-  { icon:'🏷️', title:'Étiquettes libres', body:
-    '<ul>'
-    +'<li>Depuis une photo ouverte (visionneuse), bouton <b>+ étiquette</b> sous la légende : ajoute autant de mots-clés que tu veux (ex: "plage", "famille", "nourriture") — contrairement aux dossiers, une photo peut avoir plusieurs étiquettes à la fois.</li>'
-    +'<li>Bouton <b>🏷️</b> à côté de la recherche de l\'album, pour filtrer tes photos par étiquette.</li>'
-    +'<li>Touche la croix sur une étiquette (dans la visionneuse) pour la retirer de cette photo.</li>'
-    +'</ul>' },
-  { icon:'📁', title:'Dossiers personnalisés', body:
-    '<ul>'
-    +'<li>Bouton <b>📁</b> à côté de la recherche : crée, renomme ou supprime des dossiers pour organiser tes photos (par jour, par lieu, comme tu veux).</li>'
-    +'<li>Une fois qu\'une photo est rangée dans un dossier, elle <b>sort de "Non rangées"</b> — une photo n\'est jamais à deux endroits à la fois (contrairement aux étiquettes, voir plus haut).</li>'
-    +'<li>Pour ranger des photos : mode sélection (☑️) → coche les photos → bouton 📁 Dossier → choisis un dossier existant ou crée-en un nouveau directement à ce moment.</li>'
-    +'<li><b>Réordonner :</b> dans le gestionnaire de dossiers, les flèches ⬆️⬇️ changent l\'ordre — cet ordre influence aussi l\'ordre des photos dans le livre automatique.</li>'
-    +'</ul>' },
-  { icon:'🎨', title:'Filtrer par couleur', body:
-    '<ul>'
-    +'<li>Bouton <b>🎨</b> à côté de la recherche : classe automatiquement tes photos par couleur dominante (rouge, bleu, vert, gris...).</li>'
-    +'<li>Une photo avec plusieurs couleurs marquées (ex. plage bleu + jaune) apparaît dans <b>plusieurs filtres à la fois</b>.</li>'
-    +'<li>Les compteurs affichés respectent le dossier actuellement ouvert — pas de mélange entre dossiers.</li>'
-    +'<li>Le premier calcul peut prendre quelques secondes sur un gros album ; il est ensuite mis en cache et ne se refait plus.</li>'
-    +'</ul>' },
-  { icon:'🗂️', title:'Plusieurs livres par album, dupliquer un album', body:
-    '<ul>'
-    +'<li>Bouton <b>📚 Mes livres</b> depuis un album : crée, renomme, duplique ou supprime autant de livres que tu veux pour le même album.</li>'
-    +'<li>Depuis l\'intérieur d\'un livre, le bouton 📚 en haut permet de changer de livre sans repasser par l\'album.</li>'
-    +'<li>Un livre se rouvre directement sur la <b>dernière page que tu modifiais</b>, pas toujours la première.</li>'
-    +'<li><b>Dupliquer un album entier :</b> bouton ⎘ sur la carte d\'un album (page d\'accueil) — copie toutes ses photos et ses dossiers dans un nouvel album indépendant, pratique pour un voyage similaire à un précédent.</li>'
-    +'<li><b>Remplissage en masse :</b> depuis un album, sélectionne plusieurs photos (☑️) puis touche 📖 — choisis une mise en page à plusieurs cases et toutes les photos sélectionnées s\'y répartissent d\'un coup, dans le premier livre de l\'album (nouvelle page ajoutée à la fin).</li>'
-    +'</ul>' },
-  { icon:'✏️', title:'L\'éditeur de livre', body:
-    '<ul>'
-    +'<li><b>Texte, Photo, Forme, Sticker, Icône :</b> touche l\'outil puis place l\'élément sur la page, déplace-le et redimensionne-le avec les poignées.</li>'
-    +'<li><b>Modèle :</b> plus de 1000 combinaisons (mises en page × styles), avec recherche — dont des formes rondes, hexagonales, octogonales, en arche, et des mosaïques de 1 à 9 photos.</li>'
-    +'<li><b>Fond de page :</b> palette de 12 couleurs, ou touche 🖼️ pour mettre une de tes photos en fond de page entière (avec un voile réglable 🔆🔅 pour garder le texte lisible).</li>'
-    +'<li><b>Style global :</b> bouton 🎨 pour appliquer un style (fond, police, couleurs) à TOUTES les pages du livre d\'un coup, sans repasser page par page — le contenu (photos, texte) ne bouge pas, seul l\'habillage change.</li>'
-    +'<li><b>Page résumé :</b> bouton 📊 pour ajouter automatiquement une page avec le nombre de photos, de jours et de lieux du voyage, calculée à partir de tes vraies données.</li>'
-    +'<li><b>Mise en page surprise :</b> bouton 🎲 — change au hasard la disposition de la page (formes, tailles) en gardant les mêmes photos dans le même ordre. Le texte et les stickers déjà en place ne bougent pas. Touche-le plusieurs fois pour voir d\'autres idées.</li>'
-    +'<li><b>Historique des versions :</b> bouton 🕐 — un point de sauvegarde est gardé à chaque fois que tu fermes ou changes de livre (jusqu\'à 15 versions), consultable même en rouvrant l\'appli un autre jour. Va plus loin que "Annuler" (↩️), qui lui se perd à la fermeture de l\'appli. Restaurer une version reste lui-même annulable juste après.</li>'
-    +'<li><b>Piocher une couleur dans une photo :</b> bouton "🎨 Piocher" pour le fond de page, ou "🎨 Piocher dans une photo" dans le réglage du texte — choisis une photo, sa couleur moyenne s\'applique automatiquement, pour une page assortie à l\'image.</li>'
-    +'<li><b>Carte :</b> insère une image de carte avec tes lieux visités (voir section carte plus bas).</li>'
-    +'<li><b>Grouper / Dégrouper :</b> sélectionne plusieurs éléments (🔗 Grouper) pour les déplacer ensemble ; touche le groupe puis "🔓 Dégrouper" pour les séparer à nouveau.</li>'
-    +'<li><b>Réordonner les pages :</b> flèches ⬅️➡️ dans la bande de pages en bas, pour déplacer la page ouverte.</li>'
-    +'<li><b>Supprimer une ou plusieurs pages :</b> bouton 🗑️ dans la bande de pages en bas — coche les pages à supprimer, confirme. Impossible de supprimer toutes les pages d\'un coup.</li>'
-    +'<li><b>Annuler / Rétablir :</b> en haut de l\'éditeur, pour revenir en arrière à tout moment.</li>'
-    +'<li><b>Enregistrer :</b> bouton 💾 pour sauvegarder manuellement à tout moment (en plus de la sauvegarde automatique toutes les 20 secondes).</li>'
-    +'<li><b>Recadrage intelligent automatique :</b> quand tu places une photo dans une forme (rond, hexagone...), l\'appli repère toute seule la zone la plus "chargée en détails" pour éviter de couper bêtement un visage sur le bord — recadre-la toi-même ensuite si le résultat ne te va pas.</li>'
-    +'<li>Sur un élément sélectionné : filtres, recadrage, suppression de fond, bordure, ombre, dégradé, dupliquer, verrouiller — selon le type d\'élément. 20 polices et 12 couleurs de texte disponibles.</li>'
-    +'</ul>' },
-  { icon:'🪄', title:'Livre automatique', body:
-    '<ul>'
-    +'<li>Depuis "Mes livres", bouton <b>🪄 Livre automatique</b> : choisis le nombre de pages, un style (19 disponibles, dont des styles par pays comme Italie, Espagne, Grèce...), une police, une couleur, des smileys favoris et jusqu\'à 4 mises en page préférées.</li>'
-    +'<li>L\'appli répartit toutes tes photos automatiquement sur les pages, en respectant l\'ordre de tes dossiers si tu en as créé.</li>'
-    +'<li><b>Mode "Structure vide" :</b> génère toutes les pages avec leurs cadres, mais sans aucune photo dedans — pratique pour préparer le livre avant même d\'avoir importé tes photos, ou pour choisir toi-même quelle photo va où.</li>'
-    +'</ul>' },
-  { icon:'✂️', title:'Retoucher une photo', body:
-    '<ul>'
-    +'<li><b>Recadrer :</b> zoom et déplace pour choisir la partie visible de la photo.</li>'
-    +'<li><b>Filtres :</b> luminosité, contraste, saturation, noir et blanc.</li>'
-    +'<li><b>Supprimer le fond :</b> basique, par couleur — marche bien sur un fond uni, moins bien sur un fond complexe.</li>'
-    +'<li><b>Bordure, ombre, dégradé :</b> disponibles sur les photos et les formes.</li>'
-    +'</ul>' },
-  { icon:'🗺️', title:'Cartes des lieux visités', body:
-    '<ul>'
-    +'<li>Depuis un album, bouton <b>🗺️ Carte</b> : ouvre la liste de tes cartes — tu peux en créer <b>plusieurs pour le même album</b> (une par ville, une par étape du voyage...).</li>'
-    +'<li>Dans une carte : cherche un lieu par son nom, ou touche directement la carte pour poser un point et lui donner un nom.</li>'
-    +'<li><b>Itinéraire relié :</b> dès que tu as 2 lieux ou plus, une ligne en pointillés les relie dans l\'ordre — sur la carte interactive ET sur l\'image insérée dans le livre.</li>'
-    +'<li><b>Réordonner les lieux :</b> flèches ⬆️⬇️ à côté de chaque lieu dans la liste, pour changer l\'ordre de l\'itinéraire.</li>'
-    +'<li><b>Style du trait :</b> pointillés, plein, avec flèches indiquant le sens, ou aucun trait — choisis juste en dessous de la barre de recherche de la carte.</li>'
-    +'<li>Depuis l\'éditeur de livre, l\'outil <b>Carte</b> insère une image de la carte avec tous ses points, comme n\'importe quelle photo (déplaçable, redimensionnable) — si tu as plusieurs cartes, l\'appli te demande laquelle insérer.</li>'
-    +'<li>Nécessite une connexion internet pour charger les rues ; sans réseau, la carte garde un fond uni.</li>'
-    +'</ul>' },
-  { icon:'📕', title:'Exporter, partager, vue d\'ensemble', body:
-    '<ul>'
-    +'<li><b>Depuis l\'éditeur de livre :</b> bouton "Exporter PDF" en haut, exporte le livre tel que tu l\'as construit page par page.</li>'
-    +'<li><b>Depuis un album :</b> bouton "Export PDF" pour une grille rapide de toutes tes photos, sans passer par l\'éditeur.</li>'
-    +'<li><b>Format story :</b> bouton 📱 dans l\'éditeur — exporte la page actuelle en image verticale 1080×1920 (le format Instagram/Snapchat/TikTok Stories).</li>'
-    +'<li><b>Partage direct :</b> sur téléphone, chaque export (PDF, image, story) ouvre directement le menu de partage natif (WhatsApp, Mail, Messages...) au lieu de juste télécharger — l\'option d\'enregistrer le fichier reste disponible dans ce même menu.</li>'
-    +'<li><b>Vue d\'ensemble :</b> bouton 🔲 dans l\'éditeur — toutes les pages du livre en miniatures sur une seule planche, pour repérer une page vide ou un souci avant d\'exporter. Touche une vignette pour y aller directement.</li>'
-    +'</ul>' },
-  { icon:'🌙', title:'Thème clair / sombre', body:
-    '<ul>'
-    +'<li>Bouton 🌙 (ou ☀️) en haut de l\'écran d\'accueil : bascule l\'interface de l\'appli entre clair et sombre. Ton choix est mémorisé pour les prochaines fois.</li>'
-    +'<li>C\'est différent des styles de <b>livre</b> (Nuit violette, Noir intense...) qui restent indépendants — un livre garde ses propres couleurs choisies page par page, peu importe le thème de l\'appli.</li>'
-    +'</ul>' },
-  { icon:'💾', title:'Où sont tes données ? Sauvegarder / restaurer', body:
-    '<ul>'
-    +'<li>Tout est stocké <b>uniquement sur ton téléphone</b> (dans le navigateur) — pas de compte, pas de cloud, rien n\'est envoyé ailleurs.</li>'
-    +'<li>Un PDF exporté part dans le dossier Téléchargements normal de ton téléphone, comme n\'importe quel fichier téléchargé.</li>'
-    +'<li><b>Sauvegarde complète :</b> bouton 💾 en haut de l\'écran d\'accueil — crée un seul fichier avec TOUT (albums, photos, livres, cartes). Garde-le de côté, ou réimporte-le si tu changes de téléphone ou effaces les données du site.</li>'
-    +'<li><b>Restaurer :</b> depuis ce même écran, "⬆️ Restaurer depuis un fichier" — les albums du fichier sont <b>ajoutés</b> à ceux déjà présents (jamais d\'écrasement), même si tu réimportes plusieurs fois.</li>'
-    +'</ul>' },
-  { icon:'📐', title:'Repères pour un imprimeur professionnel', body:
-    '<ul>'
-    +'<li>Bouton <b>📐 Repères impression</b> dans l\'éditeur de livre : affiche une zone en pointillés à 5% du bord de la page.</li>'
-    +'<li>Utile si tu comptes envoyer ton livre chez un vrai imprimeur : évite de placer du texte ou un visage important trop près du bord, qui pourrait être perdu à la découpe ou la reliure.</li>'
-    +'<li>C\'est un repère visuel <b>uniquement pour toi pendant l\'édition</b> — il n\'apparaît jamais dans le PDF exporté, ni dans le format story.</li>'
-    +'<li><b>Ajuster cette page :</b> bouton 🔧 — réduit et recentre automatiquement tout le contenu de la page pour qu\'il tienne dans la zone de sécurité, en gardant la disposition relative (pas de re-création, juste un "zoom arrière"). Ne fait rien si la page y est déjà.</li>'
-    +'<li><b>Ajuster plusieurs pages :</b> même chose, mais en choisissant les pages à traiter d\'un coup dans une liste à cocher — les pages déjà dans la zone sont décochées par défaut.</li>'
-    +'</ul>' }
-];
+var HELP_SECTIONS_I18N={
+  "fr": [
+    { icon:"\ud83d\udcf8", title:"Ajouter et g\u00e9rer tes photos", body:
+      '<ul>'+"<li><b>Ajouter :</b> touche la zone en pointill\u00e9s dans un album, ou glisse-d\u00e9pose tes photos directement.</li>"+"<li><b>Rechercher :</b> tape un nom de fichier ou une date dans la barre de recherche de l'album.</li>"+"<li><b>Date automatique :</b> l'appli lit la vraie date de prise de vue dans la photo quand elle existe (ic\u00f4ne \ud83d\udcf7 dans la visionneuse) ; sinon elle utilise une date de repli (\ud83d\uddd3\ufe0f ou \u2795).</li>"+"<li><b>S\u00e9lection multiple :</b> bouton \u2611\ufe0f \u00e0 c\u00f4t\u00e9 de la recherche \u2014 coche plusieurs photos pour les supprimer, les ranger dans un dossier, ou les mettre directement dans le livre (voir plus bas).</li>"+"<li><b>S\u00e9lection en gamme :</b> en mode s\u00e9lection, bouton \ud83d\udd17 \u2014 touche une photo de d\u00e9part puis une photo d'arriv\u00e9e, et tout ce qu'il y a entre les deux se coche d'un coup.</li>"+"<li><b>R\u00e9ordonner :</b> en mode s\u00e9lection, coche UNE seule photo pour faire appara\u00eetre des fl\u00e8ches \u2b05\ufe0f\u27a1\ufe0f qui la d\u00e9placent dans l'ordre affich\u00e9.</li>"+"<li><b>Ranger par jour :</b> bouton \ud83d\udcc5 pour regrouper automatiquement tes photos par date de prise de vue, avec des sections repliables.</li>"+"<li><b>Voir tes favoris :</b> bouton \u2764\ufe0f \u00e0 c\u00f4t\u00e9 de la recherche pour ne voir que les photos mises en favori.</li>"+"<li><b>Rep\u00e9rer les photos floues :</b> bouton \ud83c\udf2b\ufe0f \u2014 analyse tes photos et marque celles qui semblent floues d'un petit badge. C'est une estimation, pas une certitude (une photo de ciel bien nette peut \u00eatre marqu\u00e9e \u00e0 tort) : v\u00e9rifie toujours \u00e0 l'\u0153il avant de supprimer.</li>"+"<li><b>D\u00e9tecter les doublons :</b> bouton \ud83d\udc6f \u2014 rep\u00e8re les photos tr\u00e8s ressemblantes (rafale, quasi-identiques) et les regroupe pour te laisser choisir lesquelles garder. Une estimation aussi, \u00e0 v\u00e9rifier avant de supprimer.</li>"+"<li><b>Choisir la couverture de l'album :</b> en mode s\u00e9lection (\u2611\ufe0f), coche UNE photo puis touche \ud83d\uddbc\ufe0f pour l'utiliser comme image de couverture (sinon c'est toujours la premi\u00e8re photo ajout\u00e9e).</li>"+"<li><b>Tout supprimer :</b> bouton \ud83d\uddd1\ufe0f \u00e0 c\u00f4t\u00e9 de la recherche, avec confirmation.</li>"+"<li><b>Annuler une suppression :</b> apr\u00e8s avoir supprim\u00e9 une photo, plusieurs photos, ou un album entier, un message reste affich\u00e9 quelques secondes avec un bouton \"\u21a9\ufe0f Annuler\" \u2014 pass\u00e9 ce d\u00e9lai, la suppression devient d\u00e9finitive.</li>"+"<li><b>L\u00e9gende et favori :</b> ouvre une photo (visionneuse) pour ajouter une l\u00e9gende ou la mettre en favori (\u2764\ufe0f).</li>"+'</ul>' },
+    { icon:"\ud83c\udff7\ufe0f", title:"\u00c9tiquettes libres", body:
+      '<ul>'+"<li>Depuis une photo ouverte (visionneuse), bouton <b>+ \u00e9tiquette</b> sous la l\u00e9gende : ajoute autant de mots-cl\u00e9s que tu veux (ex: \"plage\", \"famille\", \"nourriture\") \u2014 contrairement aux dossiers, une photo peut avoir plusieurs \u00e9tiquettes \u00e0 la fois.</li>"+"<li>Bouton <b>\ud83c\udff7\ufe0f</b> \u00e0 c\u00f4t\u00e9 de la recherche de l'album, pour filtrer tes photos par \u00e9tiquette.</li>"+"<li>Touche la croix sur une \u00e9tiquette (dans la visionneuse) pour la retirer de cette photo.</li>"+'</ul>' },
+    { icon:"\ud83d\udcc1", title:"Dossiers personnalis\u00e9s", body:
+      '<ul>'+"<li>Bouton <b>\ud83d\udcc1</b> \u00e0 c\u00f4t\u00e9 de la recherche : cr\u00e9e, renomme ou supprime des dossiers pour organiser tes photos (par jour, par lieu, comme tu veux).</li>"+"<li>Une fois qu'une photo est rang\u00e9e dans un dossier, elle <b>sort de \"Non rang\u00e9es\"</b> \u2014 une photo n'est jamais \u00e0 deux endroits \u00e0 la fois (contrairement aux \u00e9tiquettes, voir plus haut).</li>"+"<li>Pour ranger des photos : mode s\u00e9lection (\u2611\ufe0f) \u2192 coche les photos \u2192 bouton \ud83d\udcc1 Dossier \u2192 choisis un dossier existant ou cr\u00e9e-en un nouveau directement \u00e0 ce moment.</li>"+"<li><b>R\u00e9ordonner :</b> dans le gestionnaire de dossiers, les fl\u00e8ches \u2b06\ufe0f\u2b07\ufe0f changent l'ordre \u2014 cet ordre influence aussi l'ordre des photos dans le livre automatique.</li>"+'</ul>' },
+    { icon:"\ud83c\udfa8", title:"Filtrer par couleur", body:
+      '<ul>'+"<li>Bouton <b>\ud83c\udfa8</b> \u00e0 c\u00f4t\u00e9 de la recherche : classe automatiquement tes photos par couleur dominante (rouge, bleu, vert, gris...).</li>"+"<li>Une photo avec plusieurs couleurs marqu\u00e9es (ex. plage bleu + jaune) appara\u00eet dans <b>plusieurs filtres \u00e0 la fois</b>.</li>"+"<li>Les compteurs affich\u00e9s respectent le dossier actuellement ouvert \u2014 pas de m\u00e9lange entre dossiers.</li>"+"<li>Le premier calcul peut prendre quelques secondes sur un gros album ; il est ensuite mis en cache et ne se refait plus.</li>"+'</ul>' },
+    { icon:"\ud83d\uddc2\ufe0f", title:"Plusieurs livres par album, dupliquer un album", body:
+      '<ul>'+"<li>Bouton <b>\ud83d\udcda Mes livres</b> depuis un album : cr\u00e9e, renomme, duplique ou supprime autant de livres que tu veux pour le m\u00eame album.</li>"+"<li>Depuis l'int\u00e9rieur d'un livre, le bouton \ud83d\udcda en haut permet de changer de livre sans repasser par l'album.</li>"+"<li>Un livre se rouvre directement sur la <b>derni\u00e8re page que tu modifiais</b>, pas toujours la premi\u00e8re.</li>"+"<li><b>Dupliquer un album entier :</b> bouton \u2398 sur la carte d'un album (page d'accueil) \u2014 copie toutes ses photos et ses dossiers dans un nouvel album ind\u00e9pendant, pratique pour un voyage similaire \u00e0 un pr\u00e9c\u00e9dent.</li>"+"<li><b>Remplissage en masse :</b> depuis un album, s\u00e9lectionne plusieurs photos (\u2611\ufe0f) puis touche \ud83d\udcd6 \u2014 choisis une mise en page \u00e0 plusieurs cases et toutes les photos s\u00e9lectionn\u00e9es s'y r\u00e9partissent d'un coup, dans le premier livre de l'album (nouvelle page ajout\u00e9e \u00e0 la fin).</li>"+'</ul>' },
+    { icon:"\u270f\ufe0f", title:"L'\u00e9diteur de livre", body:
+      '<ul>'+"<li><b>Texte, Photo, Forme, Sticker, Ic\u00f4ne :</b> touche l'outil puis place l'\u00e9l\u00e9ment sur la page, d\u00e9place-le et redimensionne-le avec les poign\u00e9es.</li>"+"<li><b>Mod\u00e8le :</b> plus de 1000 combinaisons (mises en page \u00d7 styles), avec recherche \u2014 dont des formes rondes, hexagonales, octogonales, en arche, et des mosa\u00efques de 1 \u00e0 9 photos.</li>"+"<li><b>Fond de page :</b> palette de 12 couleurs, ou touche \ud83d\uddbc\ufe0f pour mettre une de tes photos en fond de page enti\u00e8re (avec un voile r\u00e9glable \ud83d\udd06\ud83d\udd05 pour garder le texte lisible).</li>"+"<li><b>Style global :</b> bouton \ud83c\udfa8 pour appliquer un style (fond, police, couleurs) \u00e0 TOUTES les pages du livre d'un coup, sans repasser page par page \u2014 le contenu (photos, texte) ne bouge pas, seul l'habillage change.</li>"+"<li><b>Page r\u00e9sum\u00e9 :</b> bouton \ud83d\udcca pour ajouter automatiquement une page avec le nombre de photos, de jours et de lieux du voyage, calcul\u00e9e \u00e0 partir de tes vraies donn\u00e9es.</li>"+"<li><b>Mise en page surprise :</b> bouton \ud83c\udfb2 \u2014 change au hasard la disposition de la page (formes, tailles) en gardant les m\u00eames photos dans le m\u00eame ordre. Le texte et les stickers d\u00e9j\u00e0 en place ne bougent pas. Touche-le plusieurs fois pour voir d'autres id\u00e9es.</li>"+"<li><b>Historique des versions :</b> bouton \ud83d\udd50 \u2014 un point de sauvegarde est gard\u00e9 \u00e0 chaque fois que tu fermes ou changes de livre (jusqu'\u00e0 15 versions), consultable m\u00eame en rouvrant l'appli un autre jour. Va plus loin que \"Annuler\" (\u21a9\ufe0f), qui lui se perd \u00e0 la fermeture de l'appli. Restaurer une version reste lui-m\u00eame annulable juste apr\u00e8s.</li>"+"<li><b>Piocher une couleur dans une photo :</b> bouton \"\ud83c\udfa8 Piocher\" pour le fond de page, ou \"\ud83c\udfa8 Piocher dans une photo\" dans le r\u00e9glage du texte \u2014 choisis une photo, sa couleur moyenne s'applique automatiquement, pour une page assortie \u00e0 l'image.</li>"+"<li><b>Carte :</b> ins\u00e8re une image de carte avec tes lieux visit\u00e9s (voir section carte plus bas).</li>"+"<li><b>Grouper / D\u00e9grouper :</b> s\u00e9lectionne plusieurs \u00e9l\u00e9ments (\ud83d\udd17 Grouper) pour les d\u00e9placer ensemble ; touche le groupe puis \"\ud83d\udd13 D\u00e9grouper\" pour les s\u00e9parer \u00e0 nouveau.</li>"+"<li><b>R\u00e9ordonner les pages :</b> fl\u00e8ches \u2b05\ufe0f\u27a1\ufe0f dans la bande de pages en bas, pour d\u00e9placer la page ouverte.</li>"+"<li><b>Supprimer une ou plusieurs pages :</b> bouton \ud83d\uddd1\ufe0f dans la bande de pages en bas \u2014 coche les pages \u00e0 supprimer, confirme. Impossible de supprimer toutes les pages d'un coup.</li>"+"<li><b>Annuler / R\u00e9tablir :</b> en haut de l'\u00e9diteur, pour revenir en arri\u00e8re \u00e0 tout moment.</li>"+"<li><b>Enregistrer :</b> bouton \ud83d\udcbe pour sauvegarder manuellement \u00e0 tout moment (en plus de la sauvegarde automatique toutes les 20 secondes).</li>"+"<li><b>Recadrage intelligent automatique :</b> quand tu places une photo dans une forme (rond, hexagone...), l'appli rep\u00e8re toute seule la zone la plus \"charg\u00e9e en d\u00e9tails\" pour \u00e9viter de couper b\u00eatement un visage sur le bord \u2014 recadre-la toi-m\u00eame ensuite si le r\u00e9sultat ne te va pas.</li>"+"<li>Sur un \u00e9l\u00e9ment s\u00e9lectionn\u00e9 : filtres, recadrage, suppression de fond, bordure, ombre, d\u00e9grad\u00e9, dupliquer, verrouiller \u2014 selon le type d'\u00e9l\u00e9ment. 20 polices et 12 couleurs de texte disponibles.</li>"+'</ul>' },
+    { icon:"\ud83e\ude84", title:"Livre automatique", body:
+      '<ul>'+"<li>Depuis \"Mes livres\", bouton <b>\ud83e\ude84 Livre automatique</b> : choisis le nombre de pages, un style (19 disponibles, dont des styles par pays comme Italie, Espagne, Gr\u00e8ce...), une police, une couleur, des smileys favoris et jusqu'\u00e0 4 mises en page pr\u00e9f\u00e9r\u00e9es.</li>"+"<li>L'appli r\u00e9partit toutes tes photos automatiquement sur les pages, en respectant l'ordre de tes dossiers si tu en as cr\u00e9\u00e9.</li>"+"<li><b>Mode \"Structure vide\" :</b> g\u00e9n\u00e8re toutes les pages avec leurs cadres, mais sans aucune photo dedans \u2014 pratique pour pr\u00e9parer le livre avant m\u00eame d'avoir import\u00e9 tes photos, ou pour choisir toi-m\u00eame quelle photo va o\u00f9.</li>"+'</ul>' },
+    { icon:"\u2702\ufe0f", title:"Retoucher une photo", body:
+      '<ul>'+"<li><b>Recadrer :</b> zoom et d\u00e9place pour choisir la partie visible de la photo.</li>"+"<li><b>Filtres :</b> luminosit\u00e9, contraste, saturation, noir et blanc.</li>"+"<li><b>Supprimer le fond :</b> basique, par couleur \u2014 marche bien sur un fond uni, moins bien sur un fond complexe.</li>"+"<li><b>Bordure, ombre, d\u00e9grad\u00e9 :</b> disponibles sur les photos et les formes.</li>"+'</ul>' },
+    { icon:"\ud83d\uddfa\ufe0f", title:"Cartes des lieux visit\u00e9s", body:
+      '<ul>'+"<li>Depuis un album, bouton <b>\ud83d\uddfa\ufe0f Carte</b> : ouvre la liste de tes cartes \u2014 tu peux en cr\u00e9er <b>plusieurs pour le m\u00eame album</b> (une par ville, une par \u00e9tape du voyage...).</li>"+"<li>Dans une carte : cherche un lieu par son nom, ou touche directement la carte pour poser un point et lui donner un nom.</li>"+"<li><b>Itin\u00e9raire reli\u00e9 :</b> d\u00e8s que tu as 2 lieux ou plus, une ligne en pointill\u00e9s les relie dans l'ordre \u2014 sur la carte interactive ET sur l'image ins\u00e9r\u00e9e dans le livre.</li>"+"<li><b>R\u00e9ordonner les lieux :</b> fl\u00e8ches \u2b06\ufe0f\u2b07\ufe0f \u00e0 c\u00f4t\u00e9 de chaque lieu dans la liste, pour changer l'ordre de l'itin\u00e9raire.</li>"+"<li><b>Style du trait :</b> pointill\u00e9s, plein, avec fl\u00e8ches indiquant le sens, ou aucun trait \u2014 choisis juste en dessous de la barre de recherche de la carte.</li>"+"<li>Depuis l'\u00e9diteur de livre, l'outil <b>Carte</b> ins\u00e8re une image de la carte avec tous ses points, comme n'importe quelle photo (d\u00e9pla\u00e7able, redimensionnable) \u2014 si tu as plusieurs cartes, l'appli te demande laquelle ins\u00e9rer.</li>"+"<li>N\u00e9cessite une connexion internet pour charger les rues ; sans r\u00e9seau, la carte garde un fond uni.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd5", title:"Exporter, partager, vue d'ensemble", body:
+      '<ul>'+"<li><b>Depuis l'\u00e9diteur de livre :</b> bouton \"Exporter PDF\" en haut, exporte le livre tel que tu l'as construit page par page.</li>"+"<li><b>Depuis un album :</b> bouton \"Export PDF\" pour une grille rapide de toutes tes photos, sans passer par l'\u00e9diteur.</li>"+"<li><b>Format story :</b> bouton \ud83d\udcf1 dans l'\u00e9diteur \u2014 exporte la page actuelle en image verticale 1080\u00d71920 (le format Instagram/Snapchat/TikTok Stories).</li>"+"<li><b>Partage direct :</b> sur t\u00e9l\u00e9phone, chaque export (PDF, image, story) ouvre directement le menu de partage natif (WhatsApp, Mail, Messages...) au lieu de juste t\u00e9l\u00e9charger \u2014 l'option d'enregistrer le fichier reste disponible dans ce m\u00eame menu.</li>"+"<li><b>Vue d'ensemble :</b> bouton \ud83d\udd32 dans l'\u00e9diteur \u2014 toutes les pages du livre en miniatures sur une seule planche, pour rep\u00e9rer une page vide ou un souci avant d'exporter. Touche une vignette pour y aller directement.</li>"+'</ul>' },
+    { icon:"\ud83c\udf19", title:"Th\u00e8me clair / sombre", body:
+      '<ul>'+"<li>Bouton \ud83c\udf19 (ou \u2600\ufe0f) en haut de l'\u00e9cran d'accueil : bascule l'interface de l'appli entre clair et sombre. Ton choix est m\u00e9moris\u00e9 pour les prochaines fois.</li>"+"<li>C'est diff\u00e9rent des styles de <b>livre</b> (Nuit violette, Noir intense...) qui restent ind\u00e9pendants \u2014 un livre garde ses propres couleurs choisies page par page, peu importe le th\u00e8me de l'appli.</li>"+'</ul>' },
+    { icon:"\ud83c\udf0d", title:"Langue de l'interface", body:
+      '<ul>'+"<li>Bouton (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) en haut de l'\u00e9cran d'accueil \u2014 touche pour faire d\u00e9filer entre fran\u00e7ais, anglais, italien et espagnol.</li>"+"<li>Concerne UNIQUEMENT les boutons et menus de l'appli \u2014 jamais le contenu de tes livres (l\u00e9gendes, titres d'album, texte que tu tapes), qui reste toujours exactement ce que tu as \u00e9crit.</li>"+"<li>Couverture cibl\u00e9e sur ce qui est visible en permanence (\u00e9cran d'accueil, album, barre principale de l'\u00e9diteur) \u2014 l'aide d\u00e9taill\u00e9e que tu es en train de lire est maintenant disponible dans les 4 langues.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd1", title:"Table des mati\u00e8res et autocollants personnalis\u00e9s", body:
+      '<ul>'+"<li><b>Sommaire automatique :</b> bouton \ud83d\udcd1 dans l'\u00e9diteur \u2014 g\u00e9n\u00e8re une page listant toutes les pages du livre (avec leur titre repris automatiquement), toujours ins\u00e9r\u00e9e en premi\u00e8re page.</li>"+"<li><b>Autocollants personnalis\u00e9s :</b> dans le s\u00e9lecteur d'autocollants (\u2728 Sticker), bouton \"\u2795 Importer une image\" \u2014 ton logo, dessin ou tampon devient r\u00e9utilisable sur n'importe quelle page, gard\u00e9 dans une biblioth\u00e8que propre \u00e0 l'album (jamais m\u00e9lang\u00e9 \u00e0 tes photos).</li>"+'</ul>' },
+    { icon:"\ud83d\udcbe", title:"O\u00f9 sont tes donn\u00e9es ? Sauvegarder / restaurer", body:
+      '<ul>'+"<li>Tout est stock\u00e9 <b>uniquement sur ton t\u00e9l\u00e9phone</b> (dans le navigateur) \u2014 pas de compte, pas de cloud, rien n'est envoy\u00e9 ailleurs.</li>"+"<li>Un PDF export\u00e9 part dans le dossier T\u00e9l\u00e9chargements normal de ton t\u00e9l\u00e9phone, comme n'importe quel fichier t\u00e9l\u00e9charg\u00e9.</li>"+"<li><b>Sauvegarde compl\u00e8te :</b> bouton \ud83d\udcbe en haut de l'\u00e9cran d'accueil \u2014 cr\u00e9e un seul fichier avec TOUT (albums, photos, livres, cartes). Garde-le de c\u00f4t\u00e9, ou r\u00e9importe-le si tu changes de t\u00e9l\u00e9phone ou effaces les donn\u00e9es du site.</li>"+"<li><b>Restaurer :</b> depuis ce m\u00eame \u00e9cran, \"\u2b06\ufe0f Restaurer depuis un fichier\" \u2014 les albums du fichier sont <b>ajout\u00e9s</b> \u00e0 ceux d\u00e9j\u00e0 pr\u00e9sents (jamais d'\u00e9crasement), m\u00eame si tu r\u00e9importes plusieurs fois.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd0", title:"Rep\u00e8res pour un imprimeur professionnel", body:
+      '<ul>'+"<li>Bouton <b>\ud83d\udcd0 Rep\u00e8res impression</b> dans l'\u00e9diteur de livre : affiche une zone en pointill\u00e9s \u00e0 5% du bord de la page.</li>"+"<li>Utile si tu comptes envoyer ton livre chez un vrai imprimeur : \u00e9vite de placer du texte ou un visage important trop pr\u00e8s du bord, qui pourrait \u00eatre perdu \u00e0 la d\u00e9coupe ou la reliure.</li>"+"<li>C'est un rep\u00e8re visuel <b>uniquement pour toi pendant l'\u00e9dition</b> \u2014 il n'appara\u00eet jamais dans le PDF export\u00e9, ni dans le format story.</li>"+"<li><b>Ajuster cette page :</b> bouton \ud83d\udd27 \u2014 r\u00e9duit et recentre automatiquement tout le contenu de la page pour qu'il tienne dans la zone de s\u00e9curit\u00e9, en gardant la disposition relative (pas de re-cr\u00e9ation, juste un \"zoom arri\u00e8re\"). Ne fait rien si la page y est d\u00e9j\u00e0.</li>"+"<li><b>Ajuster plusieurs pages :</b> m\u00eame chose, mais en choisissant les pages \u00e0 traiter d'un coup dans une liste \u00e0 cocher \u2014 les pages d\u00e9j\u00e0 dans la zone sont d\u00e9coch\u00e9es par d\u00e9faut.</li>"+'</ul>' },
+  ],
+  "en": [
+    { icon:"\ud83d\udcf8", title:"Add and manage your photos", body:
+      '<ul>'+"<li><b>Add:</b> tap the dotted area in an album, or drag and drop your photos directly.</li>"+"<li><b>Search:</b> type a file name or a date in the album's search bar.</li>"+"<li><b>Automatic date:</b> the app reads the real shooting date embedded in the photo when it exists (\ud83d\udcf7 icon in the viewer); otherwise it uses a fallback date (\ud83d\uddd3\ufe0f or \u2795).</li>"+"<li><b>Multiple selection:</b> \u2611\ufe0f button next to search \u2014 check several photos to delete them, put them in a folder, or add them straight into the book (see below).</li>"+"<li><b>Range selection:</b> in selection mode, \ud83d\udd17 button \u2014 tap a starting photo then an ending photo, and everything in between gets checked at once.</li>"+"<li><b>Reorder:</b> in selection mode, check ONE single photo to reveal \u2b05\ufe0f\u27a1\ufe0f arrows that move it within the displayed order.</li>"+"<li><b>Group by day:</b> \ud83d\udcc5 button to automatically group your photos by shooting date, with collapsible sections.</li>"+"<li><b>View your favorites:</b> \u2764\ufe0f button next to search to only see photos marked as favorite.</li>"+"<li><b>Spot blurry photos:</b> \ud83c\udf2b\ufe0f button \u2014 analyzes your photos and flags ones that look blurry with a small badge. It's an estimate, not a certainty (a perfectly sharp sky photo can be flagged wrongly): always check by eye before deleting.</li>"+"<li><b>Detect duplicates:</b> \ud83d\udc6f button \u2014 spots very similar photos (burst shots, near-identical) and groups them so you can choose which to keep. Also an estimate, check before deleting.</li>"+"<li><b>Choose the album cover:</b> in selection mode (\u2611\ufe0f), check ONE photo then tap \ud83d\uddbc\ufe0f to use it as the cover image (otherwise it's always the first photo added).</li>"+"<li><b>Delete all:</b> \ud83d\uddd1\ufe0f button next to search, with confirmation.</li>"+"<li><b>Undo a deletion:</b> after deleting a photo, several photos, or a whole album, a message stays on screen for a few seconds with an \"\u21a9\ufe0f Undo\" button \u2014 after that delay, the deletion becomes permanent.</li>"+"<li><b>Caption and favorite:</b> open a photo (viewer) to add a caption or mark it as favorite (\u2764\ufe0f).</li>"+'</ul>' },
+    { icon:"\ud83c\udff7\ufe0f", title:"Free tags", body:
+      '<ul>'+"<li>From an open photo (viewer), <b>+ tag</b> button under the caption: add as many keywords as you want (e.g. \"beach\", \"family\", \"food\") \u2014 unlike folders, a photo can have several tags at once.</li>"+"<li><b>\ud83c\udff7\ufe0f</b> button next to the album search, to filter your photos by tag.</li>"+"<li>Tap the cross on a tag (in the viewer) to remove it from that photo.</li>"+'</ul>' },
+    { icon:"\ud83d\udcc1", title:"Custom folders", body:
+      '<ul>'+"<li><b>\ud83d\udcc1</b> button next to search: create, rename or delete folders to organize your photos (by day, by place, however you like).</li>"+"<li>Once a photo is placed in a folder, it <b>leaves \"Unsorted\"</b> \u2014 a photo is never in two places at once (unlike tags, see above).</li>"+"<li>To sort photos: selection mode (\u2611\ufe0f) \u2192 check the photos \u2192 \ud83d\udcc1 Folder button \u2192 pick an existing folder or create a new one right there.</li>"+"<li><b>Reorder:</b> in the folder manager, \u2b06\ufe0f\u2b07\ufe0f arrows change the order \u2014 this order also affects the photo order in the automatic book.</li>"+'</ul>' },
+    { icon:"\ud83c\udfa8", title:"Filter by color", body:
+      '<ul>'+"<li><b>\ud83c\udfa8</b> button next to search: automatically sorts your photos by dominant color (red, blue, green, gray...).</li>"+"<li>A photo with several marked colors (e.g. blue beach + yellow) appears in <b>several filters at once</b>.</li>"+"<li>The counts shown respect the currently open folder \u2014 no mixing between folders.</li>"+"<li>The first calculation can take a few seconds on a large album; it's then cached and never redone.</li>"+'</ul>' },
+    { icon:"\ud83d\uddc2\ufe0f", title:"Multiple books per album, duplicate an album", body:
+      '<ul>'+"<li><b>\ud83d\udcda My books</b> button from an album: create, rename, duplicate or delete as many books as you want for the same album.</li>"+"<li>From inside a book, the \ud83d\udcda button at the top lets you switch books without going back to the album.</li>"+"<li>A book reopens directly on the <b>last page you were editing</b>, not always the first one.</li>"+"<li><b>Duplicate a whole album:</b> \u2398 button on an album card (home screen) \u2014 copies all its photos and folders into a new, independent album, handy for a trip similar to a previous one.</li>"+"<li><b>Bulk fill:</b> from an album, select several photos (\u2611\ufe0f) then tap \ud83d\udcd6 \u2014 choose a multi-slot layout and all selected photos are distributed into it at once, into the album's first book (new page added at the end).</li>"+'</ul>' },
+    { icon:"\u270f\ufe0f", title:"The book editor", body:
+      '<ul>'+"<li><b>Text, Photo, Shape, Sticker, Icon:</b> tap the tool then place the element on the page, move and resize it with the handles.</li>"+"<li><b>Template:</b> over 1000 combinations (layouts \u00d7 styles), with search \u2014 including round, hexagonal, octagonal, arch shapes, and mosaics from 1 to 9 photos.</li>"+"<li><b>Page background:</b> a palette of 12 colors, or tap \ud83d\uddbc\ufe0f to set one of your photos as a full-page background (with an adjustable \ud83d\udd06\ud83d\udd05 overlay to keep text readable).</li>"+"<li><b>Global style:</b> \ud83c\udfa8 button to apply a style (background, font, colors) to ALL pages of the book at once, without going page by page \u2014 the content (photos, text) doesn't move, only the styling changes.</li>"+"<li><b>Summary page:</b> \ud83d\udcca button to automatically add a page with the number of photos, days and places of the trip, calculated from your real data.</li>"+"<li><b>Surprise layout:</b> \ud83c\udfb2 button \u2014 randomly changes the page layout (shapes, sizes) while keeping the same photos in the same order. Text and stickers already in place don't move. Tap it several times to see other ideas.</li>"+"<li><b>Version history:</b> \ud83d\udd50 button \u2014 a save point is kept every time you close or switch books (up to 15 versions), viewable even after reopening the app another day. Goes further than \"Undo\" (\u21a9\ufe0f), which is lost when the app closes. Restoring a version can itself be undone right after.</li>"+"<li><b>Pick a color from a photo:</b> \"\ud83c\udfa8 Pick\" button for the page background, or \"\ud83c\udfa8 Pick from a photo\" in the text settings \u2014 choose a photo, its average color is applied automatically, for a page that matches the image.</li>"+"<li><b>Map:</b> inserts a map image with your visited places (see the map section below).</li>"+"<li><b>Group / Ungroup:</b> select several elements (\ud83d\udd17 Group) to move them together; tap the group then \"\ud83d\udd13 Ungroup\" to separate them again.</li>"+"<li><b>Reorder pages:</b> \u2b05\ufe0f\u27a1\ufe0f arrows in the page strip at the bottom, to move the open page.</li>"+"<li><b>Delete one or more pages:</b> \ud83d\uddd1\ufe0f button in the page strip at the bottom \u2014 check the pages to delete, confirm. You can't delete all pages at once.</li>"+"<li><b>Undo / Redo:</b> at the top of the editor, to go back at any time.</li>"+"<li><b>Save:</b> \ud83d\udcbe button to save manually at any time (on top of the automatic save every 20 seconds).</li>"+"<li><b>Automatic smart cropping:</b> when you place a photo in a shape (circle, hexagon...), the app automatically finds the most \"detail-rich\" area to avoid clumsily cutting off a face at the edge \u2014 crop it manually afterwards if the result doesn't suit you.</li>"+"<li>On a selected element: filters, cropping, background removal, border, shadow, gradient, duplicate, lock \u2014 depending on the element type. 20 fonts and 12 text colors available.</li>"+'</ul>' },
+    { icon:"\ud83e\ude84", title:"Automatic book", body:
+      '<ul>'+"<li>From \"My books\", <b>\ud83e\ude84 Automatic book</b> button: choose the number of pages, a style (19 available, including country styles like Italy, Spain, Greece...), a font, a color, favorite emojis and up to 4 preferred layouts.</li>"+"<li>The app spreads all your photos automatically across the pages, respecting your folder order if you've created any.</li>"+"<li><b>\"Empty structure\" mode:</b> generates all pages with their frames, but with no photo inside \u2014 handy to prepare the book before even importing your photos, or to choose yourself which photo goes where.</li>"+'</ul>' },
+    { icon:"\u2702\ufe0f", title:"Edit a photo", body:
+      '<ul>'+"<li><b>Crop:</b> zoom and move to choose the visible part of the photo.</li>"+"<li><b>Filters:</b> brightness, contrast, saturation, black and white.</li>"+"<li><b>Remove background:</b> basic, color-based \u2014 works well on a plain background, less well on a complex one.</li>"+"<li><b>Border, shadow, gradient:</b> available on photos and shapes.</li>"+'</ul>' },
+    { icon:"\ud83d\uddfa\ufe0f", title:"Maps of visited places", body:
+      '<ul>'+"<li>From an album, <b>\ud83d\uddfa\ufe0f Map</b> button: opens the list of your maps \u2014 you can create <b>several for the same album</b> (one per city, one per leg of the trip...).</li>"+"<li>On a map: search for a place by name, or tap directly on the map to drop a pin and give it a name.</li>"+"<li><b>Connected route:</b> as soon as you have 2 places or more, a dashed line connects them in order \u2014 on the interactive map AND on the image inserted into the book.</li>"+"<li><b>Reorder places:</b> \u2b06\ufe0f\u2b07\ufe0f arrows next to each place in the list, to change the route order.</li>"+"<li><b>Line style:</b> dashed, solid, with arrows showing direction, or no line \u2014 choose just below the map's search bar.</li>"+"<li>From the book editor, the <b>Map</b> tool inserts a map image with all its points, like any other photo (movable, resizable) \u2014 if you have several maps, the app asks which one to insert.</li>"+"<li>Requires an internet connection to load the streets; without a network, the map keeps a plain background.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd5", title:"Export, share, overview", body:
+      '<ul>'+"<li><b>From the book editor:</b> \"Export PDF\" button at the top, exports the book exactly as you built it, page by page.</li>"+"<li><b>From an album:</b> \"Export PDF\" button for a quick grid of all your photos, without going through the editor.</li>"+"<li><b>Story format:</b> \ud83d\udcf1 button in the editor \u2014 exports the current page as a vertical 1080\u00d71920 image (the Instagram/Snapchat/TikTok Stories format).</li>"+"<li><b>Direct sharing:</b> on phones, every export (PDF, image, story) opens the native share menu directly (WhatsApp, Mail, Messages...) instead of just downloading \u2014 the option to save the file is still available in that same menu.</li>"+"<li><b>Overview:</b> \ud83d\udd32 button in the editor \u2014 all the book's pages as thumbnails on a single board, to spot an empty page or an issue before exporting. Tap a thumbnail to jump straight to it.</li>"+'</ul>' },
+    { icon:"\ud83c\udf19", title:"Light / dark theme", body:
+      '<ul>'+"<li>\ud83c\udf19 (or \u2600\ufe0f) button at the top of the home screen: switches the app's interface between light and dark. Your choice is remembered for next time.</li>"+"<li>This is different from <b>book</b> styles (Purple Night, Deep Black...) which stay independent \u2014 a book keeps its own colors chosen page by page, regardless of the app's theme.</li>"+'</ul>' },
+    { icon:"\ud83c\udf0d", title:"Interface language", body:
+      '<ul>'+"<li>Button (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) at the top of the home screen \u2014 tap to cycle between French, English, Italian and Spanish.</li>"+"<li>Applies ONLY to the app's buttons and menus \u2014 never to the content of your books (captions, album titles, text you type), which always stays exactly what you wrote.</li>"+"<li>Coverage focused on what's always visible (home screen, album, editor's main bar) \u2014 this detailed help you're reading is now available in all 4 languages.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd1", title:"Table of contents and custom stickers", body:
+      '<ul>'+"<li><b>Automatic table of contents:</b> \ud83d\udcd1 button in the editor \u2014 generates a page listing all the book's pages (with their title picked up automatically), always inserted as the first page.</li>"+"<li><b>Custom stickers:</b> in the sticker picker (\u2728 Sticker), \"\u2795 Import an image\" button \u2014 your logo, drawing or stamp becomes reusable on any page, kept in a library specific to the album (never mixed with your photos).</li>"+'</ul>' },
+    { icon:"\ud83d\udcbe", title:"Where is your data? Backup / restore", body:
+      '<ul>'+"<li>Everything is stored <b>only on your phone</b> (in the browser) \u2014 no account, no cloud, nothing is sent anywhere else.</li>"+"<li>An exported PDF goes into your phone's normal Downloads folder, like any downloaded file.</li>"+"<li><b>Full backup:</b> \ud83d\udcbe button at the top of the home screen \u2014 creates a single file with EVERYTHING (albums, photos, books, maps). Keep it safe, or reimport it if you change phones or clear the site's data.</li>"+"<li><b>Restore:</b> from that same screen, \"\u2b06\ufe0f Restore from a file\" \u2014 albums from the file are <b>added</b> to those already present (never overwritten), even if you reimport several times.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd0", title:"Guides for a professional printer", body:
+      '<ul>'+"<li><b>\ud83d\udcd0 Print guides</b> button in the book editor: shows a dashed zone 5% in from the page edge.</li>"+"<li>Useful if you plan to send your book to a real printer: avoids placing text or an important face too close to the edge, which could be lost during trimming or binding.</li>"+"<li>This is a visual guide <b>only for you while editing</b> \u2014 it never appears in the exported PDF, nor in the story format.</li>"+"<li><b>Fit this page:</b> \ud83d\udd27 button \u2014 automatically shrinks and re-centers all the page's content so it fits within the safe zone, keeping the relative layout (no re-creation, just a \"zoom out\"). Does nothing if the page already fits.</li>"+"<li><b>Fit several pages:</b> same thing, but choosing which pages to process at once from a checklist \u2014 pages already within the zone are unchecked by default.</li>"+'</ul>' },
+  ],
+  "it": [
+    { icon:"\ud83d\udcf8", title:"Aggiungi e gestisci le tue foto", body:
+      '<ul>'+"<li><b>Aggiungi:</b> tocca l'area tratteggiata in un album, oppure trascina le tue foto direttamente.</li>"+"<li><b>Cerca:</b> digita un nome di file o una data nella barra di ricerca dell'album.</li>"+"<li><b>Data automatica:</b> l'app legge la vera data di scatto della foto quando esiste (icona \ud83d\udcf7 nel visualizzatore); altrimenti usa una data di riserva (\ud83d\uddd3\ufe0f o \u2795).</li>"+"<li><b>Selezione multipla:</b> pulsante \u2611\ufe0f accanto alla ricerca \u2014 seleziona pi\u00f9 foto per eliminarle, metterle in una cartella o aggiungerle direttamente al libro (vedi sotto).</li>"+"<li><b>Selezione a intervallo:</b> in modalit\u00e0 selezione, pulsante \ud83d\udd17 \u2014 tocca una foto di partenza poi una di arrivo, e tutto ci\u00f2 che sta in mezzo viene selezionato in un colpo solo.</li>"+"<li><b>Riordina:</b> in modalit\u00e0 selezione, seleziona UNA sola foto per far comparire le frecce \u2b05\ufe0f\u27a1\ufe0f che la spostano nell'ordine visualizzato.</li>"+"<li><b>Ordina per giorno:</b> pulsante \ud83d\udcc5 per raggruppare automaticamente le foto per data di scatto, con sezioni comprimibili.</li>"+"<li><b>Vedi i tuoi preferiti:</b> pulsante \u2764\ufe0f accanto alla ricerca per vedere solo le foto contrassegnate come preferite.</li>"+"<li><b>Individua le foto sfocate:</b> pulsante \ud83c\udf2b\ufe0f \u2014 analizza le tue foto e segna con un piccolo badge quelle che sembrano sfocate. \u00c8 una stima, non una certezza (una foto di cielo ben nitida pu\u00f2 essere segnata per errore): controlla sempre a occhio prima di eliminare.</li>"+"<li><b>Rileva i doppioni:</b> pulsante \ud83d\udc6f \u2014 individua le foto molto simili (scatti in sequenza, quasi identiche) e le raggruppa per lasciarti scegliere quali tenere. Anche questa \u00e8 una stima, da verificare prima di eliminare.</li>"+"<li><b>Scegli la copertina dell'album:</b> in modalit\u00e0 selezione (\u2611\ufe0f), seleziona UNA foto poi tocca \ud83d\uddbc\ufe0f per usarla come immagine di copertina (altrimenti \u00e8 sempre la prima foto aggiunta).</li>"+"<li><b>Elimina tutto:</b> pulsante \ud83d\uddd1\ufe0f accanto alla ricerca, con conferma.</li>"+"<li><b>Annulla un'eliminazione:</b> dopo aver eliminato una foto, pi\u00f9 foto o un intero album, un messaggio resta visibile per qualche secondo con un pulsante \"\u21a9\ufe0f Annulla\" \u2014 passato questo tempo, l'eliminazione diventa definitiva.</li>"+"<li><b>Didascalia e preferito:</b> apri una foto (visualizzatore) per aggiungere una didascalia o metterla tra i preferiti (\u2764\ufe0f).</li>"+'</ul>' },
+    { icon:"\ud83c\udff7\ufe0f", title:"Etichette libere", body:
+      '<ul>'+"<li>Da una foto aperta (visualizzatore), pulsante <b>+ etichetta</b> sotto la didascalia: aggiungi tutte le parole chiave che vuoi (es: \"spiaggia\", \"famiglia\", \"cibo\") \u2014 a differenza delle cartelle, una foto pu\u00f2 avere pi\u00f9 etichette contemporaneamente.</li>"+"<li>Pulsante <b>\ud83c\udff7\ufe0f</b> accanto alla ricerca dell'album, per filtrare le foto per etichetta.</li>"+"<li>Tocca la crocetta su un'etichetta (nel visualizzatore) per rimuoverla da quella foto.</li>"+'</ul>' },
+    { icon:"\ud83d\udcc1", title:"Cartelle personalizzate", body:
+      '<ul>'+"<li>Pulsante <b>\ud83d\udcc1</b> accanto alla ricerca: crea, rinomina o elimina cartelle per organizzare le tue foto (per giorno, per luogo, come preferisci).</li>"+"<li>Una volta che una foto \u00e8 riposta in una cartella, <b>esce da \"Non ordinate\"</b> \u2014 una foto non \u00e8 mai in due posti contemporaneamente (a differenza delle etichette, vedi sopra).</li>"+"<li>Per ordinare le foto: modalit\u00e0 selezione (\u2611\ufe0f) \u2192 seleziona le foto \u2192 pulsante \ud83d\udcc1 Cartella \u2192 scegli una cartella esistente o creane una nuova sul momento.</li>"+"<li><b>Riordina:</b> nel gestore delle cartelle, le frecce \u2b06\ufe0f\u2b07\ufe0f cambiano l'ordine \u2014 questo ordine influenza anche l'ordine delle foto nel libro automatico.</li>"+'</ul>' },
+    { icon:"\ud83c\udfa8", title:"Filtra per colore", body:
+      '<ul>'+"<li>Pulsante <b>\ud83c\udfa8</b> accanto alla ricerca: ordina automaticamente le tue foto per colore dominante (rosso, blu, verde, grigio...).</li>"+"<li>Una foto con pi\u00f9 colori marcati (es. spiaggia blu + giallo) appare in <b>pi\u00f9 filtri contemporaneamente</b>.</li>"+"<li>I conteggi mostrati rispettano la cartella attualmente aperta \u2014 nessuna mescolanza tra cartelle.</li>"+"<li>Il primo calcolo pu\u00f2 richiedere qualche secondo su un album grande; viene poi memorizzato nella cache e non rifatto.</li>"+'</ul>' },
+    { icon:"\ud83d\uddc2\ufe0f", title:"Pi\u00f9 libri per album, duplica un album", body:
+      '<ul>'+"<li>Pulsante <b>\ud83d\udcda I miei libri</b> da un album: crea, rinomina, duplica o elimina tutti i libri che vuoi per lo stesso album.</li>"+"<li>Dall'interno di un libro, il pulsante \ud83d\udcda in alto permette di cambiare libro senza tornare all'album.</li>"+"<li>Un libro si riapre direttamente sull'<b>ultima pagina che stavi modificando</b>, non sempre la prima.</li>"+"<li><b>Duplica un intero album:</b> pulsante \u2398 sulla scheda di un album (schermata principale) \u2014 copia tutte le sue foto e cartelle in un nuovo album indipendente, utile per un viaggio simile a uno precedente.</li>"+"<li><b>Riempimento in blocco:</b> da un album, seleziona pi\u00f9 foto (\u2611\ufe0f) poi tocca \ud83d\udcd6 \u2014 scegli un modello a pi\u00f9 caselle e tutte le foto selezionate vengono distribuite in una volta, nel primo libro dell'album (nuova pagina aggiunta alla fine).</li>"+'</ul>' },
+    { icon:"\u270f\ufe0f", title:"L'editor del libro", body:
+      '<ul>'+"<li><b>Testo, Foto, Forma, Adesivo, Icona:</b> tocca lo strumento poi posiziona l'elemento sulla pagina, spostalo e ridimensionalo con le maniglie.</li>"+"<li><b>Modello:</b> oltre 1000 combinazioni (modelli \u00d7 stili), con ricerca \u2014 comprese forme rotonde, esagonali, ottagonali, ad arco, e mosaici da 1 a 9 foto.</li>"+"<li><b>Sfondo pagina:</b> tavolozza di 12 colori, oppure tocca \ud83d\uddbc\ufe0f per mettere una delle tue foto come sfondo dell'intera pagina (con un velo regolabile \ud83d\udd06\ud83d\udd05 per mantenere il testo leggibile).</li>"+"<li><b>Stile globale:</b> pulsante \ud83c\udfa8 per applicare uno stile (sfondo, font, colori) a TUTTE le pagine del libro in una volta, senza passare pagina per pagina \u2014 il contenuto (foto, testo) non si muove, cambia solo la veste grafica.</li>"+"<li><b>Pagina riepilogo:</b> pulsante \ud83d\udcca per aggiungere automaticamente una pagina con il numero di foto, giorni e luoghi del viaggio, calcolata dai tuoi dati reali.</li>"+"<li><b>Modello a sorpresa:</b> pulsante \ud83c\udfb2 \u2014 cambia a caso la disposizione della pagina (forme, dimensioni) mantenendo le stesse foto nello stesso ordine. Il testo e gli adesivi gi\u00e0 presenti non si spostano. Toccalo pi\u00f9 volte per vedere altre idee.</li>"+"<li><b>Cronologia versioni:</b> pulsante \ud83d\udd50 \u2014 un punto di salvataggio viene mantenuto ogni volta che chiudi o cambi libro (fino a 15 versioni), consultabile anche riaprendo l'app un altro giorno. Va oltre \"Annulla\" (\u21a9\ufe0f), che invece si perde alla chiusura dell'app. Ripristinare una versione \u00e8 a sua volta annullabile subito dopo.</li>"+"<li><b>Pesca un colore da una foto:</b> pulsante \"\ud83c\udfa8 Scegli\" per lo sfondo della pagina, oppure \"\ud83c\udfa8 Scegli da una foto\" nelle impostazioni del testo \u2014 scegli una foto, il suo colore medio si applica automaticamente, per una pagina abbinata all'immagine.</li>"+"<li><b>Mappa:</b> inserisce un'immagine di mappa con i tuoi luoghi visitati (vedi la sezione mappa pi\u00f9 sotto).</li>"+"<li><b>Raggruppa / Separa:</b> seleziona pi\u00f9 elementi (\ud83d\udd17 Raggruppa) per spostarli insieme; tocca il gruppo poi \"\ud83d\udd13 Separa\" per dividerli di nuovo.</li>"+"<li><b>Riordina le pagine:</b> frecce \u2b05\ufe0f\u27a1\ufe0f nella striscia delle pagine in basso, per spostare la pagina aperta.</li>"+"<li><b>Elimina una o pi\u00f9 pagine:</b> pulsante \ud83d\uddd1\ufe0f nella striscia delle pagine in basso \u2014 seleziona le pagine da eliminare, conferma. Non \u00e8 possibile eliminare tutte le pagine in una volta.</li>"+"<li><b>Annulla / Ripeti:</b> in alto nell'editor, per tornare indietro in qualsiasi momento.</li>"+"<li><b>Salva:</b> pulsante \ud83d\udcbe per salvare manualmente in qualsiasi momento (oltre al salvataggio automatico ogni 20 secondi).</li>"+"<li><b>Ritaglio intelligente automatico:</b> quando metti una foto in una forma (cerchio, esagono...), l'app individua da sola la zona pi\u00f9 \"ricca di dettagli\" per evitare di tagliare goffamente un volto sul bordo \u2014 ritagliala tu stesso in seguito se il risultato non ti convince.</li>"+"<li>Su un elemento selezionato: filtri, ritaglio, rimozione sfondo, bordo, ombra, sfumatura, duplica, blocca \u2014 a seconda del tipo di elemento. 20 font e 12 colori di testo disponibili.</li>"+'</ul>' },
+    { icon:"\ud83e\ude84", title:"Libro automatico", body:
+      '<ul>'+"<li>Da \"I miei libri\", pulsante <b>\ud83e\ude84 Libro automatico</b>: scegli il numero di pagine, uno stile (19 disponibili, compresi stili per paese come Italia, Spagna, Grecia...), un font, un colore, emoji preferite e fino a 4 modelli preferiti.</li>"+"<li>L'app distribuisce automaticamente tutte le tue foto sulle pagine, rispettando l'ordine delle cartelle se ne hai create.</li>"+"<li><b>Modalit\u00e0 \"Struttura vuota\":</b> genera tutte le pagine con le loro cornici, ma senza alcuna foto dentro \u2014 utile per preparare il libro prima ancora di aver importato le foto, o per scegliere tu stesso quale foto va dove.</li>"+'</ul>' },
+    { icon:"\u2702\ufe0f", title:"Modifica una foto", body:
+      '<ul>'+"<li><b>Ritaglia:</b> ingrandisci e sposta per scegliere la parte visibile della foto.</li>"+"<li><b>Filtri:</b> luminosit\u00e0, contrasto, saturazione, bianco e nero.</li>"+"<li><b>Rimuovi lo sfondo:</b> di base, per colore \u2014 funziona bene su uno sfondo uniforme, meno bene su uno sfondo complesso.</li>"+"<li><b>Bordo, ombra, sfumatura:</b> disponibili su foto e forme.</li>"+'</ul>' },
+    { icon:"\ud83d\uddfa\ufe0f", title:"Mappe dei luoghi visitati", body:
+      '<ul>'+"<li>Da un album, pulsante <b>\ud83d\uddfa\ufe0f Mappa</b>: apre l'elenco delle tue mappe \u2014 puoi crearne <b>pi\u00f9 di una per lo stesso album</b> (una per citt\u00e0, una per tappa del viaggio...).</li>"+"<li>In una mappa: cerca un luogo per nome, oppure tocca direttamente la mappa per posizionare un punto e dargli un nome.</li>"+"<li><b>Itinerario collegato:</b> non appena hai 2 o pi\u00f9 luoghi, una linea tratteggiata li collega in ordine \u2014 sulla mappa interattiva E sull'immagine inserita nel libro.</li>"+"<li><b>Riordina i luoghi:</b> frecce \u2b06\ufe0f\u2b07\ufe0f accanto a ogni luogo nell'elenco, per cambiare l'ordine dell'itinerario.</li>"+"<li><b>Stile della linea:</b> tratteggiata, continua, con frecce che indicano il senso, o nessuna linea \u2014 scegli subito sotto la barra di ricerca della mappa.</li>"+"<li>Dall'editor del libro, lo strumento <b>Mappa</b> inserisce un'immagine della mappa con tutti i suoi punti, come qualsiasi altra foto (spostabile, ridimensionabile) \u2014 se hai pi\u00f9 mappe, l'app chiede quale inserire.</li>"+"<li>Richiede una connessione internet per caricare le strade; senza rete, la mappa mantiene uno sfondo uniforme.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd5", title:"Esporta, condividi, panoramica", body:
+      '<ul>'+"<li><b>Dall'editor del libro:</b> pulsante \"Esporta PDF\" in alto, esporta il libro esattamente come lo hai costruito, pagina per pagina.</li>"+"<li><b>Da un album:</b> pulsante \"Esporta PDF\" per una griglia rapida di tutte le tue foto, senza passare dall'editor.</li>"+"<li><b>Formato story:</b> pulsante \ud83d\udcf1 nell'editor \u2014 esporta la pagina attuale come immagine verticale 1080\u00d71920 (il formato Instagram/Snapchat/TikTok Stories).</li>"+"<li><b>Condivisione diretta:</b> su telefono, ogni esportazione (PDF, immagine, story) apre direttamente il menu di condivisione nativo (WhatsApp, Mail, Messaggi...) invece di limitarsi a scaricare \u2014 l'opzione di salvare il file resta disponibile nello stesso menu.</li>"+"<li><b>Panoramica:</b> pulsante \ud83d\udd32 nell'editor \u2014 tutte le pagine del libro in miniatura su un'unica tavola, per individuare una pagina vuota o un problema prima di esportare. Tocca una miniatura per andarci direttamente.</li>"+'</ul>' },
+    { icon:"\ud83c\udf19", title:"Tema chiaro / scuro", body:
+      '<ul>'+"<li>Pulsante \ud83c\udf19 (o \u2600\ufe0f) in alto nella schermata principale: alterna l'interfaccia dell'app tra chiara e scura. La tua scelta viene ricordata per le prossime volte.</li>"+"<li>\u00c8 diverso dagli stili di <b>libro</b> (Notte viola, Nero intenso...) che restano indipendenti \u2014 un libro mantiene i propri colori scelti pagina per pagina, indipendentemente dal tema dell'app.</li>"+'</ul>' },
+    { icon:"\ud83c\udf0d", title:"Lingua dell'interfaccia", body:
+      '<ul>'+"<li>Pulsante (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) in alto nella schermata principale \u2014 tocca per scorrere tra francese, inglese, italiano e spagnolo.</li>"+"<li>Riguarda SOLO i pulsanti e i menu dell'app \u2014 mai il contenuto dei tuoi libri (didascalie, titoli degli album, testo che digiti), che resta sempre esattamente ci\u00f2 che hai scritto.</li>"+"<li>Copertura mirata su ci\u00f2 che \u00e8 sempre visibile (schermata principale, album, barra principale dell'editor) \u2014 questa guida dettagliata che stai leggendo \u00e8 ora disponibile in tutte e 4 le lingue.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd1", title:"Sommario e adesivi personalizzati", body:
+      '<ul>'+"<li><b>Sommario automatico:</b> pulsante \ud83d\udcd1 nell'editor \u2014 genera una pagina che elenca tutte le pagine del libro (con il loro titolo ripreso automaticamente), sempre inserita come prima pagina.</li>"+"<li><b>Adesivi personalizzati:</b> nel selettore di adesivi (\u2728 Adesivo), pulsante \"\u2795 Importa un'immagine\" \u2014 il tuo logo, disegno o timbro diventa riutilizzabile su qualsiasi pagina, conservato in una libreria propria dell'album (mai mescolato alle tue foto).</li>"+'</ul>' },
+    { icon:"\ud83d\udcbe", title:"Dove sono i tuoi dati? Backup / ripristino", body:
+      '<ul>'+"<li>Tutto \u00e8 memorizzato <b>solo sul tuo telefono</b> (nel browser) \u2014 nessun account, nessun cloud, niente viene inviato altrove.</li>"+"<li>Un PDF esportato finisce nella normale cartella Download del telefono, come qualsiasi file scaricato.</li>"+"<li><b>Backup completo:</b> pulsante \ud83d\udcbe in alto nella schermata principale \u2014 crea un unico file con TUTTO (album, foto, libri, mappe). Conservalo con cura, o reimportalo se cambi telefono o cancelli i dati del sito.</li>"+"<li><b>Ripristina:</b> dalla stessa schermata, \"\u2b06\ufe0f Ripristina da un file\" \u2014 gli album del file vengono <b>aggiunti</b> a quelli gi\u00e0 presenti (mai sovrascritti), anche se reimporti pi\u00f9 volte.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd0", title:"Guide per una stampa professionale", body:
+      '<ul>'+"<li>Pulsante <b>\ud83d\udcd0 Guide di stampa</b> nell'editor del libro: mostra una zona tratteggiata al 5% dal bordo della pagina.</li>"+"<li>Utile se prevedi di inviare il tuo libro a una vera tipografia: evita di posizionare testo o un volto importante troppo vicino al bordo, che potrebbe andare perso durante il taglio o la rilegatura.</li>"+"<li>\u00c8 un riferimento visivo <b>solo per te durante la modifica</b> \u2014 non appare mai nel PDF esportato, n\u00e9 nel formato story.</li>"+"<li><b>Adatta questa pagina:</b> pulsante \ud83d\udd27 \u2014 riduce e ricentra automaticamente tutto il contenuto della pagina affinch\u00e9 rientri nella zona di sicurezza, mantenendo la disposizione relativa (non ricrea nulla, \u00e8 solo uno \"zoom indietro\"). Non fa nulla se la pagina rientra gi\u00e0.</li>"+"<li><b>Adatta pi\u00f9 pagine:</b> stessa cosa, ma scegliendo le pagine da elaborare in blocco da un elenco selezionabile \u2014 le pagine gi\u00e0 nella zona sono deselezionate di default.</li>"+'</ul>' },
+  ],
+  "es": [
+    { icon:"\ud83d\udcf8", title:"A\u00f1adir y gestionar tus fotos", body:
+      '<ul>'+"<li><b>A\u00f1adir:</b> toca la zona punteada en un \u00e1lbum, o arrastra y suelta tus fotos directamente.</li>"+"<li><b>Buscar:</b> escribe un nombre de archivo o una fecha en la barra de b\u00fasqueda del \u00e1lbum.</li>"+"<li><b>Fecha autom\u00e1tica:</b> la app lee la fecha real de la toma en la foto cuando existe (icono \ud83d\udcf7 en el visor); si no, usa una fecha de respaldo (\ud83d\uddd3\ufe0f o \u2795).</li>"+"<li><b>Selecci\u00f3n m\u00faltiple:</b> bot\u00f3n \u2611\ufe0f junto a la b\u00fasqueda \u2014 marca varias fotos para eliminarlas, moverlas a una carpeta o a\u00f1adirlas directamente al libro (ver m\u00e1s abajo).</li>"+"<li><b>Selecci\u00f3n por rango:</b> en modo selecci\u00f3n, bot\u00f3n \ud83d\udd17 \u2014 toca una foto de inicio y luego una de fin, y todo lo que hay entre medias se marca de una vez.</li>"+"<li><b>Reordenar:</b> en modo selecci\u00f3n, marca UNA sola foto para que aparezcan las flechas \u2b05\ufe0f\u27a1\ufe0f que la mueven dentro del orden mostrado.</li>"+"<li><b>Agrupar por d\u00eda:</b> bot\u00f3n \ud83d\udcc5 para agrupar autom\u00e1ticamente tus fotos por fecha de toma, con secciones plegables.</li>"+"<li><b>Ver tus favoritos:</b> bot\u00f3n \u2764\ufe0f junto a la b\u00fasqueda para ver solo las fotos marcadas como favoritas.</li>"+"<li><b>Detectar fotos borrosas:</b> bot\u00f3n \ud83c\udf2b\ufe0f \u2014 analiza tus fotos y marca con una peque\u00f1a insignia las que parecen borrosas. Es una estimaci\u00f3n, no una certeza (una foto de cielo muy n\u00edtida puede marcarse por error): revisa siempre a simple vista antes de borrar.</li>"+"<li><b>Detectar duplicados:</b> bot\u00f3n \ud83d\udc6f \u2014 localiza fotos muy parecidas (r\u00e1fagas, casi id\u00e9nticas) y las agrupa para que elijas cu\u00e1les conservar. Tambi\u00e9n es una estimaci\u00f3n, revisa antes de borrar.</li>"+"<li><b>Elegir la portada del \u00e1lbum:</b> en modo selecci\u00f3n (\u2611\ufe0f), marca UNA foto y toca \ud83d\uddbc\ufe0f para usarla como imagen de portada (si no, siempre es la primera foto a\u00f1adida).</li>"+"<li><b>Eliminar todo:</b> bot\u00f3n \ud83d\uddd1\ufe0f junto a la b\u00fasqueda, con confirmaci\u00f3n.</li>"+"<li><b>Deshacer un borrado:</b> tras borrar una foto, varias fotos o un \u00e1lbum entero, aparece un mensaje unos segundos con un bot\u00f3n \"\u21a9\ufe0f Deshacer\" \u2014 pasado ese tiempo, el borrado se vuelve definitivo.</li>"+"<li><b>Leyenda y favorito:</b> abre una foto (visor) para a\u00f1adir una leyenda o marcarla como favorita (\u2764\ufe0f).</li>"+'</ul>' },
+    { icon:"\ud83c\udff7\ufe0f", title:"Etiquetas libres", body:
+      '<ul>'+"<li>Desde una foto abierta (visor), bot\u00f3n <b>+ etiqueta</b> debajo de la leyenda: a\u00f1ade tantas palabras clave como quieras (ej: \"playa\", \"familia\", \"comida\") \u2014 a diferencia de las carpetas, una foto puede tener varias etiquetas a la vez.</li>"+"<li>Bot\u00f3n <b>\ud83c\udff7\ufe0f</b> junto a la b\u00fasqueda del \u00e1lbum, para filtrar tus fotos por etiqueta.</li>"+"<li>Toca la cruz sobre una etiqueta (en el visor) para quitarla de esa foto.</li>"+'</ul>' },
+    { icon:"\ud83d\udcc1", title:"Carpetas personalizadas", body:
+      '<ul>'+"<li>Bot\u00f3n <b>\ud83d\udcc1</b> junto a la b\u00fasqueda: crea, renombra o elimina carpetas para organizar tus fotos (por d\u00eda, por lugar, como quieras).</li>"+"<li>Una vez que una foto est\u00e1 guardada en una carpeta, <b>sale de \"Sin ordenar\"</b> \u2014 una foto nunca est\u00e1 en dos sitios a la vez (a diferencia de las etiquetas, ver arriba).</li>"+"<li>Para ordenar fotos: modo selecci\u00f3n (\u2611\ufe0f) \u2192 marca las fotos \u2192 bot\u00f3n \ud83d\udcc1 Carpeta \u2192 elige una carpeta existente o crea una nueva en ese momento.</li>"+"<li><b>Reordenar:</b> en el gestor de carpetas, las flechas \u2b06\ufe0f\u2b07\ufe0f cambian el orden \u2014 este orden tambi\u00e9n influye en el orden de las fotos en el libro autom\u00e1tico.</li>"+'</ul>' },
+    { icon:"\ud83c\udfa8", title:"Filtrar por color", body:
+      '<ul>'+"<li>Bot\u00f3n <b>\ud83c\udfa8</b> junto a la b\u00fasqueda: clasifica autom\u00e1ticamente tus fotos por color dominante (rojo, azul, verde, gris...).</li>"+"<li>Una foto con varios colores marcados (ej. playa azul + amarillo) aparece en <b>varios filtros a la vez</b>.</li>"+"<li>Los contadores mostrados respetan la carpeta actualmente abierta \u2014 sin mezclar carpetas.</li>"+"<li>El primer c\u00e1lculo puede tardar unos segundos en un \u00e1lbum grande; luego queda en cach\u00e9 y no se repite.</li>"+'</ul>' },
+    { icon:"\ud83d\uddc2\ufe0f", title:"Varios libros por \u00e1lbum, duplicar un \u00e1lbum", body:
+      '<ul>'+"<li>Bot\u00f3n <b>\ud83d\udcda Mis libros</b> desde un \u00e1lbum: crea, renombra, duplica o elimina tantos libros como quieras para el mismo \u00e1lbum.</li>"+"<li>Desde dentro de un libro, el bot\u00f3n \ud83d\udcda de arriba permite cambiar de libro sin volver al \u00e1lbum.</li>"+"<li>Un libro se reabre directamente en la <b>\u00faltima p\u00e1gina que estabas editando</b>, no siempre la primera.</li>"+"<li><b>Duplicar un \u00e1lbum entero:</b> bot\u00f3n \u2398 en la tarjeta de un \u00e1lbum (pantalla de inicio) \u2014 copia todas sus fotos y carpetas en un nuevo \u00e1lbum independiente, \u00fatil para un viaje parecido a uno anterior.</li>"+"<li><b>Relleno masivo:</b> desde un \u00e1lbum, selecciona varias fotos (\u2611\ufe0f) y toca \ud83d\udcd6 \u2014 elige una plantilla con varias casillas y todas las fotos seleccionadas se reparten de una vez, en el primer libro del \u00e1lbum (nueva p\u00e1gina a\u00f1adida al final).</li>"+'</ul>' },
+    { icon:"\u270f\ufe0f", title:"El editor del libro", body:
+      '<ul>'+"<li><b>Texto, Foto, Forma, Pegatina, Icono:</b> toca la herramienta y coloca el elemento en la p\u00e1gina, mu\u00e9velo y c\u00e1mbialo de tama\u00f1o con las asas.</li>"+"<li><b>Plantilla:</b> m\u00e1s de 1000 combinaciones (dise\u00f1os \u00d7 estilos), con b\u00fasqueda \u2014 incluidas formas redondas, hexagonales, octogonales, en arco, y mosaicos de 1 a 9 fotos.</li>"+"<li><b>Fondo de p\u00e1gina:</b> paleta de 12 colores, o toca \ud83d\uddbc\ufe0f para poner una de tus fotos como fondo de p\u00e1gina completa (con un velo ajustable \ud83d\udd06\ud83d\udd05 para mantener el texto legible).</li>"+"<li><b>Estilo global:</b> bot\u00f3n \ud83c\udfa8 para aplicar un estilo (fondo, fuente, colores) a TODAS las p\u00e1ginas del libro de una vez, sin pasar p\u00e1gina por p\u00e1gina \u2014 el contenido (fotos, texto) no se mueve, solo cambia la apariencia.</li>"+"<li><b>P\u00e1gina resumen:</b> bot\u00f3n \ud83d\udcca para a\u00f1adir autom\u00e1ticamente una p\u00e1gina con el n\u00famero de fotos, d\u00edas y lugares del viaje, calculada a partir de tus datos reales.</li>"+"<li><b>Dise\u00f1o sorpresa:</b> bot\u00f3n \ud83c\udfb2 \u2014 cambia al azar la disposici\u00f3n de la p\u00e1gina (formas, tama\u00f1os) manteniendo las mismas fotos en el mismo orden. El texto y las pegatinas ya colocados no se mueven. T\u00f3calo varias veces para ver otras ideas.</li>"+"<li><b>Historial de versiones:</b> bot\u00f3n \ud83d\udd50 \u2014 se guarda un punto de recuperaci\u00f3n cada vez que cierras o cambias de libro (hasta 15 versiones), consultable incluso al reabrir la app otro d\u00eda. Va m\u00e1s all\u00e1 de \"Deshacer\" (\u21a9\ufe0f), que se pierde al cerrar la app. Restaurar una versi\u00f3n es a su vez reversible justo despu\u00e9s.</li>"+"<li><b>Elegir un color de una foto:</b> bot\u00f3n \"\ud83c\udfa8 Elegir\" para el fondo de p\u00e1gina, o \"\ud83c\udfa8 Elegir de una foto\" en los ajustes de texto \u2014 elige una foto, su color medio se aplica autom\u00e1ticamente, para una p\u00e1gina a juego con la imagen.</li>"+"<li><b>Mapa:</b> inserta una imagen de mapa con tus lugares visitados (ver la secci\u00f3n de mapa m\u00e1s abajo).</li>"+"<li><b>Agrupar / Desagrupar:</b> selecciona varios elementos (\ud83d\udd17 Agrupar) para moverlos juntos; toca el grupo y luego \"\ud83d\udd13 Desagrupar\" para separarlos de nuevo.</li>"+"<li><b>Reordenar p\u00e1ginas:</b> flechas \u2b05\ufe0f\u27a1\ufe0f en la franja de p\u00e1ginas de abajo, para mover la p\u00e1gina abierta.</li>"+"<li><b>Eliminar una o varias p\u00e1ginas:</b> bot\u00f3n \ud83d\uddd1\ufe0f en la franja de p\u00e1ginas de abajo \u2014 marca las p\u00e1ginas a eliminar, confirma. No se pueden eliminar todas las p\u00e1ginas a la vez.</li>"+"<li><b>Deshacer / Rehacer:</b> en la parte superior del editor, para retroceder en cualquier momento.</li>"+"<li><b>Guardar:</b> bot\u00f3n \ud83d\udcbe para guardar manualmente en cualquier momento (adem\u00e1s del guardado autom\u00e1tico cada 20 segundos).</li>"+"<li><b>Recorte inteligente autom\u00e1tico:</b> cuando colocas una foto en una forma (c\u00edrculo, hex\u00e1gono...), la app localiza sola la zona con m\u00e1s \"detalle\" para evitar cortar torpemente una cara en el borde \u2014 rec\u00f3rtala t\u00fa mismo despu\u00e9s si el resultado no te convence.</li>"+"<li>Sobre un elemento seleccionado: filtros, recorte, eliminar fondo, borde, sombra, degradado, duplicar, bloquear \u2014 seg\u00fan el tipo de elemento. 20 fuentes y 12 colores de texto disponibles.</li>"+'</ul>' },
+    { icon:"\ud83e\ude84", title:"Libro autom\u00e1tico", body:
+      '<ul>'+"<li>Desde \"Mis libros\", bot\u00f3n <b>\ud83e\ude84 Libro autom\u00e1tico</b>: elige el n\u00famero de p\u00e1ginas, un estilo (19 disponibles, incluidos estilos por pa\u00eds como Italia, Espa\u00f1a, Grecia...), una fuente, un color, emojis favoritos y hasta 4 dise\u00f1os preferidos.</li>"+"<li>La app reparte todas tus fotos autom\u00e1ticamente en las p\u00e1ginas, respetando el orden de tus carpetas si has creado alguna.</li>"+"<li><b>Modo \"Estructura vac\u00eda\":</b> genera todas las p\u00e1ginas con sus marcos, pero sin ninguna foto dentro \u2014 \u00fatil para preparar el libro antes incluso de importar tus fotos, o para elegir t\u00fa mismo qu\u00e9 foto va d\u00f3nde.</li>"+'</ul>' },
+    { icon:"\u2702\ufe0f", title:"Retocar una foto", body:
+      '<ul>'+"<li><b>Recortar:</b> haz zoom y desplaza para elegir la parte visible de la foto.</li>"+"<li><b>Filtros:</b> brillo, contraste, saturaci\u00f3n, blanco y negro.</li>"+"<li><b>Quitar el fondo:</b> b\u00e1sico, por color \u2014 funciona bien sobre un fondo liso, menos bien sobre uno complejo.</li>"+"<li><b>Borde, sombra, degradado:</b> disponibles en fotos y formas.</li>"+'</ul>' },
+    { icon:"\ud83d\uddfa\ufe0f", title:"Mapas de los lugares visitados", body:
+      '<ul>'+"<li>Desde un \u00e1lbum, bot\u00f3n <b>\ud83d\uddfa\ufe0f Mapa</b>: abre la lista de tus mapas \u2014 puedes crear <b>varios para el mismo \u00e1lbum</b> (uno por ciudad, uno por etapa del viaje...).</li>"+"<li>En un mapa: busca un lugar por su nombre, o toca directamente el mapa para colocar un punto y ponerle un nombre.</li>"+"<li><b>Ruta conectada:</b> en cuanto tienes 2 lugares o m\u00e1s, una l\u00ednea discontinua los conecta en orden \u2014 en el mapa interactivo Y en la imagen insertada en el libro.</li>"+"<li><b>Reordenar lugares:</b> flechas \u2b06\ufe0f\u2b07\ufe0f junto a cada lugar en la lista, para cambiar el orden de la ruta.</li>"+"<li><b>Estilo de l\u00ednea:</b> discontinua, continua, con flechas que indican el sentido, o sin l\u00ednea \u2014 elige justo debajo de la barra de b\u00fasqueda del mapa.</li>"+"<li>Desde el editor del libro, la herramienta <b>Mapa</b> inserta una imagen del mapa con todos sus puntos, como cualquier otra foto (movible, redimensionable) \u2014 si tienes varios mapas, la app pregunta cu\u00e1l insertar.</li>"+"<li>Requiere conexi\u00f3n a internet para cargar las calles; sin red, el mapa mantiene un fondo liso.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd5", title:"Exportar, compartir, vista general", body:
+      '<ul>'+"<li><b>Desde el editor del libro:</b> bot\u00f3n \"Exportar PDF\" arriba, exporta el libro tal como lo has construido, p\u00e1gina por p\u00e1gina.</li>"+"<li><b>Desde un \u00e1lbum:</b> bot\u00f3n \"Exportar PDF\" para una cuadr\u00edcula r\u00e1pida de todas tus fotos, sin pasar por el editor.</li>"+"<li><b>Formato story:</b> bot\u00f3n \ud83d\udcf1 en el editor \u2014 exporta la p\u00e1gina actual como imagen vertical 1080\u00d71920 (el formato de Instagram/Snapchat/TikTok Stories).</li>"+"<li><b>Compartir directo:</b> en el tel\u00e9fono, cada exportaci\u00f3n (PDF, imagen, story) abre directamente el men\u00fa de compartir nativo (WhatsApp, Correo, Mensajes...) en lugar de solo descargar \u2014 la opci\u00f3n de guardar el archivo sigue disponible en ese mismo men\u00fa.</li>"+"<li><b>Vista general:</b> bot\u00f3n \ud83d\udd32 en el editor \u2014 todas las p\u00e1ginas del libro en miniatura en un solo panel, para detectar una p\u00e1gina vac\u00eda o un problema antes de exportar. Toca una miniatura para ir directamente a ella.</li>"+'</ul>' },
+    { icon:"\ud83c\udf19", title:"Tema claro / oscuro", body:
+      '<ul>'+"<li>Bot\u00f3n \ud83c\udf19 (o \u2600\ufe0f) en la parte superior de la pantalla de inicio: alterna la interfaz de la app entre claro y oscuro. Tu elecci\u00f3n se recuerda para la pr\u00f3xima vez.</li>"+"<li>Esto es distinto de los estilos de <b>libro</b> (Noche violeta, Negro intenso...) que siguen siendo independientes \u2014 un libro conserva sus propios colores elegidos p\u00e1gina por p\u00e1gina, sin importar el tema de la app.</li>"+'</ul>' },
+    { icon:"\ud83c\udf0d", title:"Idioma de la interfaz", body:
+      '<ul>'+"<li>Bot\u00f3n (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) en la parte superior de la pantalla de inicio \u2014 toca para pasar entre franc\u00e9s, ingl\u00e9s, italiano y espa\u00f1ol.</li>"+"<li>Afecta \u00daNICAMENTE a los botones y men\u00fas de la app \u2014 nunca al contenido de tus libros (leyendas, t\u00edtulos de \u00e1lbum, texto que escribes), que siempre sigue siendo exactamente lo que escribiste.</li>"+"<li>Cobertura centrada en lo que siempre es visible (pantalla de inicio, \u00e1lbum, barra principal del editor) \u2014 esta ayuda detallada que est\u00e1s leyendo ya est\u00e1 disponible en los 4 idiomas.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd1", title:"\u00cdndice y pegatinas personalizadas", body:
+      '<ul>'+"<li><b>\u00cdndice autom\u00e1tico:</b> bot\u00f3n \ud83d\udcd1 en el editor \u2014 genera una p\u00e1gina que lista todas las p\u00e1ginas del libro (con su t\u00edtulo recogido autom\u00e1ticamente), siempre insertada como primera p\u00e1gina.</li>"+"<li><b>Pegatinas personalizadas:</b> en el selector de pegatinas (\u2728 Pegatina), bot\u00f3n \"\u2795 Importar una imagen\" \u2014 tu logo, dibujo o sello se vuelve reutilizable en cualquier p\u00e1gina, guardado en una biblioteca propia del \u00e1lbum (nunca mezclado con tus fotos).</li>"+'</ul>' },
+    { icon:"\ud83d\udcbe", title:"\u00bfD\u00f3nde est\u00e1n tus datos? Copia de seguridad / restaurar", body:
+      '<ul>'+"<li>Todo se guarda <b>\u00fanicamente en tu tel\u00e9fono</b> (en el navegador) \u2014 sin cuenta, sin nube, no se env\u00eda nada a ning\u00fan otro sitio.</li>"+"<li>Un PDF exportado va a la carpeta de Descargas normal de tu tel\u00e9fono, como cualquier archivo descargado.</li>"+"<li><b>Copia de seguridad completa:</b> bot\u00f3n \ud83d\udcbe en la parte superior de la pantalla de inicio \u2014 crea un \u00fanico archivo con TODO (\u00e1lbumes, fotos, libros, mapas). Gu\u00e1rdalo a buen recaudo, o vuelve a importarlo si cambias de tel\u00e9fono o borras los datos del sitio.</li>"+"<li><b>Restaurar:</b> desde esa misma pantalla, \"\u2b06\ufe0f Restaurar desde un archivo\" \u2014 los \u00e1lbumes del archivo se <b>a\u00f1aden</b> a los que ya est\u00e1n presentes (nunca se sobrescriben), incluso si vuelves a importar varias veces.</li>"+'</ul>' },
+    { icon:"\ud83d\udcd0", title:"Gu\u00edas para una imprenta profesional", body:
+      '<ul>'+"<li>Bot\u00f3n <b>\ud83d\udcd0 Gu\u00edas de impresi\u00f3n</b> en el editor del libro: muestra una zona discontinua al 5% del borde de la p\u00e1gina.</li>"+"<li>\u00datil si piensas enviar tu libro a una imprenta de verdad: evita colocar texto o una cara importante demasiado cerca del borde, que podr\u00eda perderse al cortar o encuadernar.</li>"+"<li>Es una gu\u00eda visual <b>solo para ti durante la edici\u00f3n</b> \u2014 nunca aparece en el PDF exportado, ni en el formato story.</li>"+"<li><b>Ajustar esta p\u00e1gina:</b> bot\u00f3n \ud83d\udd27 \u2014 reduce y recentra autom\u00e1ticamente todo el contenido de la p\u00e1gina para que quepa en la zona segura, manteniendo la disposici\u00f3n relativa (no recrea nada, solo un \"alejar zoom\"). No hace nada si la p\u00e1gina ya encaja.</li>"+"<li><b>Ajustar varias p\u00e1ginas:</b> lo mismo, pero eligiendo qu\u00e9 p\u00e1ginas procesar de una vez en una lista de casillas \u2014 las p\u00e1ginas que ya est\u00e1n dentro de la zona aparecen desmarcadas por defecto.</li>"+'</ul>' },
+  ],
+};
+function getHelpSections(){ return HELP_SECTIONS_I18N[BK_LANG] || HELP_SECTIONS_I18N.fr; }
 function bkRenderHelpAccordion(){
   var h='';
-  HELP_SECTIONS.forEach(function(s,i){
+  getHelpSections().forEach(function(s,i){
     h+='<div class="help-item" id="help-item-'+i+'">'
       +'<div class="help-q" onclick="toggleHelpItem('+i+')"><span class="ic">'+s.icon+'</span><span class="t">'+s.title+'</span><span class="chev">▼</span></div>'
       +'<div class="help-a">'+s.body+'</div>'
@@ -1796,6 +1812,90 @@ function bkApplyTheme(mode){
 function bkToggleTheme(){
   var current=document.documentElement.getAttribute('data-theme')==='dark' ? 'dark' : 'light';
   bkApplyTheme(current==='dark' ? 'light' : 'dark');
+}
+/* ══════════════════ LANGUE DE L'INTERFACE (fr / en / it / es) ══════════════════
+   Concerne UNIQUEMENT l'habillage de l'appli elle-même (boutons, titres
+   d'écran, menus) — jamais le contenu de tes livres (texte que TU tapes,
+   légendes, noms d'album), qui reste toujours exactement ce que tu as écrit.
+   Couverture volontairement ciblée sur ce qui est visible en permanence
+   (écran d'accueil, album, barre principale de l'éditeur) plutôt
+   qu'exhaustive sur chaque recoin (l'aide détaillée reste en français). */
+var BK_LANGS=['fr','en','it','es'];
+var BK_LANG_LABELS={fr:'🇫🇷 FR', en:'🇬🇧 EN', it:'🇮🇹 IT', es:'🇪🇸 ES'};
+var BK_I18N={
+  app_title:{fr:'Mes Voyages',en:'My Trips',it:'I Miei Viaggi',es:'Mis Viajes'},
+  search_placeholder:{fr:'Rechercher un voyage...',en:'Search a trip...',it:'Cerca un viaggio...',es:'Buscar un viaje...'},
+  empty_title:{fr:'Aucun voyage pour l\'instant',en:'No trips yet',it:'Nessun viaggio per ora',es:'Todavía no hay viajes'},
+  empty_sub:{fr:'Crée ton premier album !',en:'Create your first album!',it:'Crea il tuo primo album!',es:'¡Crea tu primer álbum!'},
+  create_album:{fr:'Créer un album',en:'Create an album',it:'Crea un album',es:'Crear un álbum'},
+  photo_search_placeholder:{fr:'Rechercher par nom de fichier ou date...',en:'Search by file name or date...',it:'Cerca per nome file o data...',es:'Buscar por nombre de archivo o fecha...'},
+  btn_favorites:{fr:'Voir mes favoris',en:'View my favorites',it:'Vedi i miei preferiti',es:'Ver mis favoritos'},
+  btn_blur:{fr:'Repérer les photos possiblement floues',en:'Spot possibly blurry photos',it:'Individua le foto forse sfocate',es:'Detectar fotos posiblemente borrosas'},
+  btn_color:{fr:'Filtrer par couleur',en:'Filter by color',it:'Filtra per colore',es:'Filtrar por color'},
+  btn_tags:{fr:'Filtrer par étiquette',en:'Filter by tag',it:'Filtra per etichetta',es:'Filtrar por etiqueta'},
+  btn_duplicates:{fr:'Détecter les doublons',en:'Detect duplicates',it:'Rileva i doppioni',es:'Detectar duplicados'},
+  btn_group_day:{fr:'Ranger par jour',en:'Group by day',it:'Ordina per giorno',es:'Ordenar por día'},
+  btn_select:{fr:'Sélectionner',en:'Select',it:'Seleziona',es:'Seleccionar'},
+  btn_delete_all:{fr:'Tout supprimer',en:'Delete all',it:'Elimina tutto',es:'Eliminar todo'},
+  btn_folders:{fr:'Gérer les dossiers',en:'Manage folders',it:'Gestisci cartelle',es:'Gestionar carpetas'},
+  btn_close:{fr:'✕ Fermer',en:'✕ Close',it:'✕ Chiudi',es:'✕ Cerrar'},
+  btn_save_now:{fr:'Enregistrer maintenant',en:'Save now',it:'Salva ora',es:'Guardar ahora'},
+  btn_my_books:{fr:'Mes livres',en:'My books',it:'I miei libri',es:'Mis libros'},
+  btn_overview:{fr:'Vue d\'ensemble de toutes les pages',en:'Overview of all pages',it:'Panoramica di tutte le pagine',es:'Vista general de todas las páginas'},
+  btn_history:{fr:'Historique des versions',en:'Version history',it:'Cronologia versioni',es:'Historial de versiones'},
+  btn_undo:{fr:'Annuler',en:'Undo',it:'Annulla',es:'Deshacer'},
+  btn_redo:{fr:'Rétablir',en:'Redo',it:'Ripeti',es:'Rehacer'},
+  btn_export_image:{fr:'Exporter la page en image',en:'Export page as image',it:'Esporta la pagina come immagine',es:'Exportar la página como imagen'},
+  btn_share_story:{fr:'Exporter en format story (vertical, réseaux sociaux)',en:'Export as story format (vertical, social media)',it:'Esporta in formato story (verticale, social)',es:'Exportar en formato story (vertical, redes sociales)'},
+  btn_export_pdf:{fr:'Exporter PDF',en:'Export PDF',it:'Esporta PDF',es:'Exportar PDF'},
+  tool_text:{fr:'Texte',en:'Text',it:'Testo',es:'Texto'},
+  tool_photo:{fr:'Photo',en:'Photo',it:'Foto',es:'Foto'},
+  tool_shape:{fr:'Forme',en:'Shape',it:'Forma',es:'Forma'},
+  tool_sticker:{fr:'Sticker',en:'Sticker',it:'Adesivo',es:'Pegatina'},
+  tool_icon:{fr:'Icône',en:'Icon',it:'Icona',es:'Icono'},
+  tool_template:{fr:'Modèle',en:'Template',it:'Modello',es:'Plantilla'},
+  tool_map:{fr:'Carte',en:'Map',it:'Mappa',es:'Mapa'},
+  tool_summary:{fr:'Résumé',en:'Summary',it:'Riepilogo',es:'Resumen'},
+  tool_toc:{fr:'Sommaire',en:'Contents',it:'Sommario',es:'Índice'},
+  tool_global_style:{fr:'Style global',en:'Global style',it:'Stile globale',es:'Estilo global'},
+  tool_group:{fr:'Grouper',en:'Group',it:'Raggruppa',es:'Agrupar'},
+  tool_format:{fr:'Format',en:'Format',it:'Formato',es:'Formato'},
+  tool_safe_margin:{fr:'Repères impression',en:'Print guides',it:'Guide di stampa',es:'Guías de impresión'},
+  tool_fit_page:{fr:'Ajuster cette page',en:'Fit this page',it:'Adatta questa pagina',es:'Ajustar esta página'},
+  tool_fit_pages:{fr:'Ajuster plusieurs pages',en:'Fit several pages',it:'Adatta più pagine',es:'Ajustar varias páginas'},
+  tool_surprise:{fr:'Surprise',en:'Surprise',it:'Sorpresa',es:'Sorpresa'},
+  btn_ok:{fr:'OK',en:'OK',it:'OK',es:'OK'},
+  btn_cancel:{fr:'Annuler',en:'Cancel',it:'Annulla',es:'Cancelar'},
+  btn_close_sheet:{fr:'Fermer',en:'Close',it:'Chiudi',es:'Cerrar'}
+};
+var BK_LANG='fr';
+function t(key){
+  var entry=BK_I18N[key];
+  if(!entry) return key;
+  return entry[BK_LANG]||entry.fr||key;
+}
+function bkApplyLanguage(lang){
+  if(BK_LANGS.indexOf(lang)===-1) lang='fr';
+  BK_LANG=lang;
+  try{ localStorage.setItem('mv_lang', lang); }catch(e){}
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    el.textContent=t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(function(el){
+    el.title=t(el.getAttribute('data-i18n-title'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+    el.placeholder=t(el.getAttribute('data-i18n-placeholder'));
+  });
+  var btn=document.getElementById('lang-toggle-btn');
+  if(btn) btn.textContent=BK_LANG_LABELS[lang];
+  if(typeof albums!=='undefined' && document.getElementById('pg-home').classList.contains('on')) renderHome();
+  if(document.getElementById('help-sheet').classList.contains('on')) bkRenderHelpAccordion();
+}
+function bkCycleLanguage(){
+  var i=BK_LANGS.indexOf(BK_LANG);
+  var next=BK_LANGS[(i+1)%BK_LANGS.length];
+  bkApplyLanguage(next);
 }
 function openBackupSheet(){
   document.getElementById('backup-export-progress').style.display='none';
@@ -4327,6 +4427,38 @@ function bkApplySmartCropsOnPage(){
     });
   });
 }
+/* ══════════════════ TABLE DES MATIÈRES AUTOMATIQUE ══════════════════
+   Génère une page listant toutes les pages existantes du livre, avec un
+   titre repris de chaque page (le plus grand texte qui s'y trouve) ou
+   "Page N" à défaut — insérée tout au début du livre, comme un vrai
+   sommaire. Se recalcule entièrement à chaque utilisation (ne se mnet pas
+   à jour toute seule si tu modifies des pages ensuite, il faut retoucher au
+   bouton pour la régénérer). */
+function bkGuessPageTitle(page, idx){
+  var textEls=page.elements.filter(function(el){ return el.type==='text' && el.text && el.text.trim(); });
+  if(!textEls.length) return 'Page '+(idx+1);
+  var biggest=textEls.reduce(function(a,b){ return (b.fontSize||0)>(a.fontSize||0) ? b : a; });
+  var t=biggest.text.trim();
+  return t.length>40 ? t.slice(0,40)+'…' : t;
+}
+function bkAddTableOfContents(){
+  bkSnapshot();
+  var entries=bkBook.pages.map(function(pg,i){ return {num:i+1, title:bkGuessPageTitle(pg,i)}; });
+  var elements=[
+    {id:gid(), type:'text', text:'Sommaire', x:50,y:14,w:88,h:14,rot:0,fontSize:32,color:'#241E38',fontFamily:'Playfair Display'}
+  ];
+  var startY=30, rowH=Math.min(8, 62/Math.max(entries.length,1));
+  entries.forEach(function(e,i){
+    var y=startY+i*rowH;
+    if(y>96) return; // au-delà d'une page, on s'arrête proprement plutôt que déborder
+    elements.push({id:gid(), type:'text', text:e.num+'.  '+e.title, x:50,y:y,w:88,h:rowH,rot:0,fontSize:Math.max(11,Math.min(17,rowH*1.7)),color:'#241E38',fontFamily:'Poppins'});
+  });
+  var page={bg:'#F7F5FC', elements:elements};
+  bkBook.pages.unshift(page); // toujours en toute première page, comme un vrai sommaire
+  bkPageIdx=0; bkSelId=null;
+  bkRenderPage(); bkRenderPages();
+  toast('📑 Sommaire ajouté en première page');
+}
 function bkAddSummaryPage(){
   bkAlbum=al(curAlbum);
   var stats=bkComputeTripStats(bkAlbum);
@@ -5034,7 +5166,7 @@ function bkElementInnerHTML(el){
   else if(el.arch) clipStyle='clip-path:'+bkShapeClipPath('arch')+';';
   if(el.type==='photo'){
     var ph=bkPhotoById(el.photoId);
-    var src = el.mapSnapshot || el.bgRemoved || (ph?bkPhotoSrc(ph,'full'):'');
+    var src = el.customImg || el.mapSnapshot || el.bgRemoved || (ph?bkPhotoSrc(ph,'full'):'');
     if(!src){
       // cadre intentionnellement vide (livre "structure vide") : invite claire à
       // ajouter une photo plutôt qu'une icône d'image cassée
@@ -5533,10 +5665,25 @@ function closeBorderSheet(){ document.getElementById('bk-border-sheet').classLis
 
 /* ── Stickers (emoji) ── */
 function openStickerPicker(){
+  bkAlbum=al(curAlbum);
+  if(!Array.isArray(bkAlbum.customStickers)) bkAlbum.customStickers=[];
   var h='';
   BK_STICKERS.forEach(function(s){
     h+='<div style="font-size:2rem;text-align:center;cursor:pointer" onclick="bkAddSticker(\''+s+'\')">'+s+'</div>';
   });
+  if(bkAlbum.customStickers.length){
+    h+='<div style="grid-column:1/-1;font-size:.72rem;font-weight:800;color:var(--ink-soft);margin-top:6px">Tes autocollants</div>';
+    bkAlbum.customStickers.forEach(function(cs){
+      h+='<div style="position:relative">'
+        +'<img src="'+cs.dataUrl+'" style="width:100%;aspect-ratio:1;object-fit:contain;cursor:pointer" onclick="bkAddCustomSticker(\''+cs.id+'\')">'
+        +'<button onclick="event.stopPropagation();bkDeleteCustomSticker(\''+cs.id+'\')" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#E53935;color:#fff;border:none;font-size:.55rem">✕</button>'
+        +'</div>';
+    });
+  }
+  h+='<label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:2px dashed var(--border);border-radius:10px;aspect-ratio:1;cursor:pointer;font-size:.62rem;font-weight:800;color:var(--ink-soft);text-align:center">'
+    +'➕<span>Importer<br>une image</span>'
+    +'<input type="file" id="bk-sticker-import-input" accept="image/*" style="display:none" onchange="bkImportCustomSticker(this.files[0])">'
+    +'</label>';
   document.getElementById('bk-sticker-grid').innerHTML=h;
   document.getElementById('bk-sticker-sheet').classList.add('on');
 }
@@ -5549,6 +5696,55 @@ function bkAddSticker(emoji){
   bkSelId=el.id;
   closeBkStickerSheet();
   bkRenderPage();
+}
+/* ══════════════════ AUTOCOLLANTS PERSONNALISÉS ══════════════════
+   Importe une image (logo, dessin, tampon...) réutilisable ensuite sur
+   n'importe quelle page — gardée par album, PAS mélangée aux photos de
+   l'album (bibliothèque à part). Toujours en PNG (pas JPEG) pour garder la
+   transparence, essentielle pour un logo ou un tampon détouré. */
+function resizeToPngDataURL(img,maxSize){
+  var w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+  var scale=Math.min(1, maxSize/Math.max(w,h));
+  var tw=Math.max(1,Math.round(w*scale)), th=Math.max(1,Math.round(h*scale));
+  var c=document.createElement('canvas');
+  c.width=tw; c.height=th;
+  var ctx=c.getContext('2d');
+  ctx.drawImage(img,0,0,tw,th);
+  return c.toDataURL('image/png');
+}
+function bkImportCustomSticker(file){
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var dataUrl=resizeToPngDataURL(img, 500); // largement assez pour un autocollant, garde l'album léger
+      var cs={id:gid(), dataUrl:dataUrl};
+      bkAlbum.customStickers.push(cs);
+      saveAlbumMeta(bkAlbum);
+      bkAddCustomSticker(cs.id);
+      openStickerPicker(); // réaffiche la grille avec le nouvel autocollant disponible pour la prochaine fois
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function bkAddCustomSticker(stickerId){
+  var cs=bkAlbum.customStickers.find(function(s){ return s.id===stickerId; });
+  if(!cs) return;
+  bkSnapshot();
+  var page=bkBook.pages[bkPageIdx];
+  var el={id:gid(), type:'photo', customImg:cs.dataUrl, x:50,y:50,w:26,h:26,rot:0};
+  page.elements.push(el);
+  bkSelId=el.id;
+  closeBkStickerSheet();
+  bkRenderPage();
+}
+function bkDeleteCustomSticker(stickerId){
+  if(!confirm('Supprimer cet autocollant de ta bibliothèque ? Il restera visible sur les pages où tu l\'as déjà utilisé.')) return;
+  bkAlbum.customStickers=bkAlbum.customStickers.filter(function(s){ return s.id!==stickerId; });
+  saveAlbumMeta(bkAlbum);
+  openStickerPicker();
 }
 
 /* ── Icônes (vectorielles, recolorables) ── */
@@ -6160,7 +6356,7 @@ function bkRenderPageToCanvas(page, orient, customPXW, customPXH){
     var imgMap=new Map();
     var loads=leaves.map(function(el){
       if(el.type==='photo'){
-        var ph=bkPhotoById(el.photoId); var src=el.mapSnapshot||el.bgRemoved||(ph?bkPhotoSrc(ph,'full'):null);
+        var ph=bkPhotoById(el.photoId); var src=el.customImg||el.mapSnapshot||el.bgRemoved||(ph?bkPhotoSrc(ph,'full'):null);
         if(!src) return Promise.resolve();
         return bkLoadImg(src).then(function(img){ imgMap.set(el, img); });
       }
@@ -6441,6 +6637,10 @@ initDB(function(){
   if(btn && document.documentElement.getAttribute('data-theme')==='dark'){
     btn.textContent='☀️'; btn.title='Basculer en clair';
   }
+  try{
+    var savedLang=localStorage.getItem('mv_lang');
+    if(savedLang) bkApplyLanguage(savedLang);
+  }catch(e){}
   dbGetAll('albums', function(albumRows){
     dbGetAll('photos', function(photoRows){
       var photoById={};
@@ -6488,7 +6688,7 @@ initDB(function(){
           id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
           createdAt:a.createdAt||0,
           photos:photos,
-          books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders
+          books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders, customStickers:a.customStickers
         };
       }).sort(function(x,y){ return y.createdAt-x.createdAt; });
 
