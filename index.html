@@ -327,6 +327,10 @@ img{-webkit-user-drag:none;}
 .dup-group{margin-bottom:16px;}
 .overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .overview-cell{position:relative;border-radius:10px;overflow:hidden;border:2px solid var(--border);cursor:pointer;background:var(--surface);aspect-ratio:210/297;}
+.version-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.version-info{display:flex;flex-direction:column;gap:2px;}
+.version-info b{font-size:.85rem;}
+.version-info span{font-size:.72rem;color:var(--ink-soft);}
 .overview-cell img{width:100%;height:100%;object-fit:cover;display:block;}
 .overview-cell .num{position:absolute;bottom:4px;right:5px;background:rgba(20,14,36,.65);color:#fff;font-size:.62rem;font-weight:800;padding:2px 6px;border-radius:8px;}
 .overview-cell.loading{display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:.7rem;}
@@ -411,6 +415,16 @@ img{-webkit-user-drag:none;}
   </div>
 </div>
 
+<!-- Feuille: historique des versions du livre -->
+<div class="bk-sheet" id="version-history-sheet">
+  <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🕐 Historique des versions</h3>
+    <div class="modal-sub" style="margin-bottom:10px">Un point de sauvegarde à chaque fois que tu quittes l'éditeur. Restaurer reste lui-même annulable avec ↩️.</div>
+    <div id="version-history-list"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeVersionHistory()">Fermer</button></div>
+  </div>
+</div>
+
 <!-- ══════════ HOME ══════════ -->
 <div class="page on" id="pg-home">
   <div class="hdr">
@@ -430,7 +444,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.7.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.8.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -582,6 +596,7 @@ img{-webkit-user-drag:none;}
     <button class="bk-btn" onclick="bkManualSave()" title="Enregistrer maintenant">💾</button>
     <button class="bk-btn" onclick="bkSwitchBook()" title="Mes livres">📚</button>
     <button class="bk-btn" onclick="openBookOverview()" title="Vue d'ensemble de toutes les pages">🔲</button>
+    <button class="bk-btn" onclick="openVersionHistory()" title="Historique des versions">🕐</button>
     <div style="display:flex;gap:6px;align-items:center">
       <button class="bk-btn" id="bk-undo-btn" onclick="bkUndo()" disabled title="Annuler">↩️</button>
       <button class="bk-btn" id="bk-redo-btn" onclick="bkRedo()" disabled title="Rétablir">↪️</button>
@@ -605,7 +620,7 @@ img{-webkit-user-drag:none;}
     <button class="bk-tool" id="bk-group-btn" onclick="bkToggleMultiSelectMode()"><span class="ic">🔗</span>Grouper</button>
     <button class="bk-tool" onclick="bkToggleOrient()"><span class="ic">🔄</span>Format</button>
     <button class="bk-tool" id="bk-safe-margin-btn" onclick="bkToggleSafeMargin()"><span class="ic">📐</span>Repères impression</button>
-    <div id="bk-bgswatches" style="display:flex;gap:8px;align-items:center;padding-left:4px"></div>
+    <div id="bk-bgswatches" style="display:flex;gap:8px;align-items:center;padding-left:4px;overflow-x:auto;padding-bottom:2px"></div>
   </div>
   <div class="bk-stage-wrap">
     <div id="bk-canvas" class="portrait"></div>
@@ -868,7 +883,8 @@ img{-webkit-user-drag:none;}
       <button onclick="bkChangeFontSize(2)">+</button>
       <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700;margin-left:6px">taille du texte</span>
     </div>
-    <div style="display:flex;gap:8px;margin-top:14px" id="bk-text-colors"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap" id="bk-text-colors"></div>
+    <button class="bk-btn" style="margin-top:8px" onclick="openColorPickPhotoPicker('text')">🎨 Piocher dans une photo</button>
     <div style="display:flex;gap:8px;margin-top:14px;overflow-x:auto" id="bk-text-fonts"></div>
     <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeBkTextSheet()">OK</button></div>
   </div>
@@ -1660,6 +1676,8 @@ var HELP_SECTIONS=[
     +'<li><b>Style global :</b> bouton 🎨 pour appliquer un style (fond, police, couleurs) à TOUTES les pages du livre d\'un coup, sans repasser page par page — le contenu (photos, texte) ne bouge pas, seul l\'habillage change.</li>'
     +'<li><b>Page résumé :</b> bouton 📊 pour ajouter automatiquement une page avec le nombre de photos, de jours et de lieux du voyage, calculée à partir de tes vraies données.</li>'
     +'<li><b>Mise en page surprise :</b> bouton 🎲 — change au hasard la disposition de la page (formes, tailles) en gardant les mêmes photos dans le même ordre. Le texte et les stickers déjà en place ne bougent pas. Touche-le plusieurs fois pour voir d\'autres idées.</li>'
+    +'<li><b>Historique des versions :</b> bouton 🕐 — un point de sauvegarde est gardé à chaque fois que tu fermes ou changes de livre (jusqu\'à 15 versions), consultable même en rouvrant l\'appli un autre jour. Va plus loin que "Annuler" (↩️), qui lui se perd à la fermeture de l\'appli. Restaurer une version reste lui-même annulable juste après.</li>'
+    +'<li><b>Piocher une couleur dans une photo :</b> bouton "🎨 Piocher" pour le fond de page, ou "🎨 Piocher dans une photo" dans le réglage du texte — choisis une photo, sa couleur moyenne s\'applique automatiquement, pour une page assortie à l\'image.</li>'
     +'<li><b>Carte :</b> insère une image de carte avec tes lieux visités (voir section carte plus bas).</li>'
     +'<li><b>Grouper / Dégrouper :</b> sélectionne plusieurs éléments (🔗 Grouper) pour les déplacer ensemble ; touche le groupe puis "🔓 Dégrouper" pour les séparer à nouveau.</li>'
     +'<li><b>Réordonner les pages :</b> flèches ⬅️➡️ dans la bande de pages en bas, pour déplacer la page ouverte.</li>'
@@ -4606,15 +4624,66 @@ function bkOpenSpecificBook(id){
   }, 20000);
 }
 function closeBook(){
+  bkSaveVersionSnapshot();
   saveBook();
   if(bkAutoSaveTimer){ clearInterval(bkAutoSaveTimer); bkAutoSaveTimer=null; }
   document.getElementById('pg-book').classList.remove('on');
   document.getElementById('pg-book').style.display='none';
 }
 function bkSwitchBook(){
+  bkSaveVersionSnapshot();
   saveBook();
   bkRenderBookList();
   document.getElementById('bk-booklist-sheet').classList.add('on');
+}
+/* ══════════════════ HISTORIQUE DE VERSIONS DU LIVRE ══════════════════
+   Va plus loin que "Annuler" (↩️), qui se perd à la fermeture de l'appli :
+   un point de sauvegarde est gardé à chaque fois qu'on quitte l'éditeur
+   (fermer ou changer de livre), et reste consultable même en rouvrant
+   l'appli un autre jour. Les pages ne référencent que des identifiants de
+   photo (pas les images elles-mêmes), donc chaque version reste légère —
+   les 15 dernières sont gardées, les plus anciennes sont supprimées.
+   AUCUNE version n'est créée si rien n'a changé depuis la dernière (livre
+   ouvert juste pour regarder, jamais modifié). */
+function bkSaveVersionSnapshot(){
+  if(!bkBook) return;
+  if(!Array.isArray(bkBook.versionHistory)) bkBook.versionHistory=[];
+  var pagesCopy=JSON.parse(JSON.stringify(bkBook.pages));
+  var last=bkBook.versionHistory[bkBook.versionHistory.length-1];
+  if(last && JSON.stringify(last.pages)===JSON.stringify(pagesCopy)) return; // rien de changé, pas de doublon inutile
+  bkBook.versionHistory.push({ at: Date.now(), pages: pagesCopy });
+  if(bkBook.versionHistory.length>15) bkBook.versionHistory.shift();
+}
+function openVersionHistory(){
+  if(!bkBook.versionHistory || !bkBook.versionHistory.length){
+    toast('Aucun historique pour l\'instant — reviens après avoir fermé le livre au moins une fois');
+    return;
+  }
+  var h='';
+  bkBook.versionHistory.slice().reverse().forEach(function(v, ri){
+    var i=bkBook.versionHistory.length-1-ri;
+    var d=new Date(v.at);
+    var label=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    var photoCount=v.pages.reduce(function(sum,p){ return sum+p.elements.filter(function(e){ return e.type==='photo'; }).length; },0);
+    h+='<div class="version-row">'
+      +'<div class="version-info"><b>'+label+'</b><span>'+v.pages.length+' page'+(v.pages.length!==1?'s':'')+' · '+photoCount+' photo'+(photoCount!==1?'s':'')+'</span></div>'
+      +'<button class="mbtn mbtn-ok" style="flex:none;padding:8px 16px" onclick="bkRestoreVersion('+i+')">Restaurer</button>'
+      +'</div>';
+  });
+  document.getElementById('version-history-list').innerHTML=h;
+  document.getElementById('version-history-sheet').classList.add('on');
+}
+function closeVersionHistory(){ document.getElementById('version-history-sheet').classList.remove('on'); }
+function bkRestoreVersion(i){
+  var v=bkBook.versionHistory[i];
+  if(!v) return;
+  if(!confirm('Restaurer cette version du '+new Date(v.at).toLocaleString('fr-FR')+' ? La version actuelle sera remplacée (mais reste annulable juste après avec ↩️).')) return;
+  bkSnapshot(); // pour pouvoir annuler la restauration elle-même avec ↩️ si besoin
+  bkBook.pages=JSON.parse(JSON.stringify(v.pages));
+  bkPageIdx=0; bkSelId=null;
+  closeVersionHistory();
+  bkRenderPage(); bkRenderPages();
+  toast('🕐 Version restaurée');
 }
 /* ══════════════════ VUE D'ENSEMBLE DU LIVRE ══════════════════
    Une planche avec toutes les pages en miniature, pour repérer un problème
@@ -4673,6 +4742,7 @@ function renderBkSwatches(){
   } else {
     h+='<div class="bk-bgphoto-btn" onclick="openBgPhotoPicker()">🖼️</div>';
   }
+  h+='<button class="bk-btn" style="padding:4px 10px;font-size:.68rem;flex-shrink:0;white-space:nowrap" onclick="openColorPickPhotoPicker(\'bg\')" title="Piocher la couleur de fond dans une photo">🎨 Piocher</button>';
   document.getElementById('bk-bgswatches').innerHTML=h;
 }
 function bkSetBg(c){
@@ -4688,6 +4758,61 @@ function openBgPhotoPicker(){
   bkPickerSelectFn='bkSetBgPhoto';
   bkRenderPickerGrid();
   document.getElementById('bk-photo-sheet').classList.add('on');
+}
+/* ══════════════════ PIOCHER UNE COULEUR DANS UNE PHOTO ══════════════════
+   Couleur moyenne de la photo (testée sur une vraie image avant intégration :
+   une photo à dominante bleue donne bien un bleu cohérent) — appliquée soit
+   au TEXTE sélectionné, soit au FOND de la page actuelle, selon d'où on
+   vient. Réutilise le même sélecteur de photo (avec dossiers) que partout
+   ailleurs dans l'éditeur. */
+var bkColorPickTarget=null; // 'text' ou 'bg'
+function openColorPickPhotoPicker(target){
+  bkColorPickTarget=target;
+  bkPickerFolderId=null;
+  bkPickerSelectFn='bkPickColorFromPhoto';
+  bkRenderPickerGrid();
+  document.getElementById('bk-photo-sheet').classList.add('on');
+}
+function bkExtractDominantColor(img){
+  var N=30;
+  var c=document.createElement('canvas'); c.width=N; c.height=N;
+  var ctx=c.getContext('2d');
+  ctx.drawImage(img,0,0,N,N);
+  var data;
+  try{ data=ctx.getImageData(0,0,N,N).data; }catch(e){ return null; }
+  var r=0,g=0,b=0,n=0;
+  for(var i=0;i<N*N;i++){ r+=data[i*4]; g+=data[i*4+1]; b+=data[i*4+2]; n++; }
+  r=Math.round(r/n); g=Math.round(g/n); b=Math.round(b/n);
+  return '#'+[r,g,b].map(function(v){ return v.toString(16).padStart(2,'0'); }).join('');
+}
+function bkPickColorFromPhoto(photoId){
+  var ph=bkPhotoById(photoId);
+  var src=ph?bkPhotoSrc(ph,'thumb'):null;
+  if(!src){ closeBkPhotoSheet(); return; }
+  var img=new Image();
+  img.crossOrigin='anonymous';
+  img.onload=function(){
+    var color=bkExtractDominantColor(img);
+    closeBkPhotoSheet();
+    if(!color){ toast('❌ Impossible d\'analyser cette photo'); return; }
+    if(bkColorPickTarget==='bg'){
+      bkSnapshot();
+      var page=bkBook.pages[bkPageIdx];
+      page.bg=color; page.bgPhotoId=null;
+      bkRenderPage(); renderBkSwatches();
+    } else {
+      var el=bkCurEl();
+      if(el && el.type==='text'){
+        bkSnapshot();
+        el.color=color;
+        bkRenderPage();
+        openBkTextSheet(); // reconstruit l'affichage des couleurs (celle piochée n'est pas forcément une des pastilles prédéfinies)
+      }
+    }
+    toast('🎨 Couleur '+color+' appliquée');
+  };
+  img.onerror=function(){ closeBkPhotoSheet(); toast('❌ Impossible d\'analyser cette photo'); };
+  img.src=src;
 }
 function bkSetBgPhoto(photoId){
   bkSnapshot();
