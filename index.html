@@ -328,6 +328,12 @@ img{-webkit-user-drag:none;}
 .overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .overview-cell{position:relative;border-radius:10px;overflow:hidden;border:2px solid var(--border);cursor:pointer;background:var(--surface);aspect-ratio:210/297;}
 .version-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.storage-row{margin-bottom:10px;}
+.storage-row-top{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;margin-bottom:4px;}
+.storage-row-top span{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;}
+.storage-row-top b{color:var(--ink-soft);}
+.storage-bar-bg{height:8px;border-radius:6px;background:var(--border);overflow:hidden;}
+.storage-bar-fill{height:100%;background:linear-gradient(90deg,#7B2FF7,#9B5CFF);border-radius:6px;}
 .version-info{display:flex;flex-direction:column;gap:2px;}
 .version-info b{font-size:.85rem;}
 .version-info span{font-size:.72rem;color:var(--ink-soft);}
@@ -381,17 +387,22 @@ img{-webkit-user-drag:none;}
 
 <!-- Feuille: sauvegarde / restauration complète -->
 <div class="bk-sheet" id="backup-sheet">
-  <div class="bk-sheet-box">
+  <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">💾 <span data-i18n="title_backup">Sauvegarder / restaurer</span></h3>
-    <div class="modal-sub" style="margin-bottom:14px">Un seul fichier avec TOUT (albums, photos, livres, cartes) — à garder de côté, ou à réimporter si tu changes de téléphone.</div>
-    <button class="bk-btn primary" style="width:100%;margin-bottom:10px" onclick="exportFullBackup()">⬇️ Créer une sauvegarde complète</button>
+    <div class="modal-sub" style="margin-bottom:14px" data-i18n="backup_intro">Un seul fichier avec TOUT (albums, photos, livres, cartes) — à garder de côté, ou à réimporter si tu changes de téléphone.</div>
+    <button class="bk-btn primary" style="width:100%;margin-bottom:10px" onclick="exportFullBackup()" data-i18n="backup_create">⬇️ Créer une sauvegarde complète</button>
     <div id="backup-export-progress" class="modal-sub" style="display:none;margin-bottom:10px"></div>
     <label class="bk-btn" style="width:100%;display:block;text-align:center;box-sizing:border-box;cursor:pointer;margin-bottom:4px">
-      ⬆️ Restaurer depuis un fichier
+      <span data-i18n="backup_restore_file">⬆️ Restaurer depuis un fichier</span>
       <input type="file" id="backup-file-input" accept="application/json,.json" style="display:none" onchange="importFullBackup(this.files[0])">
     </label>
     <div id="backup-import-progress" class="modal-sub" style="display:none;margin-bottom:10px"></div>
-    <div class="modal-sub" style="margin-top:10px">La restauration <b>ajoute</b> les albums du fichier (jamais d'écrasement) — utile aussi pour transférer vers un nouveau téléphone.</div>
+    <div class="modal-sub" style="margin-top:10px" data-i18n="backup_note">La restauration <b>ajoute</b> les albums du fichier (jamais d'écrasement) — utile aussi pour transférer vers un nouveau téléphone.</div>
+    <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:14px">
+      <div style="font-size:.85rem;font-weight:800;margin-bottom:2px" data-i18n="storage_gauge_title">Espace utilisé par album</div>
+      <div id="storage-gauge-total" style="font-size:.72rem;color:var(--ink-soft);font-weight:700;margin-bottom:10px"></div>
+      <div id="storage-gauge-list"></div>
+    </div>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBackupSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
@@ -458,7 +469,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.14.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.15.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -617,6 +628,7 @@ img{-webkit-user-drag:none;}
     </div>
     <button class="bk-btn" onclick="exportPageAsImage()" data-i18n-title="btn_export_image" title="Exporter la page en image">🖼️</button>
     <button class="bk-btn" onclick="exportBookStory()" data-i18n-title="btn_share_story" title="Exporter en format story (vertical, réseaux sociaux)">📱</button>
+    <button class="bk-btn" onclick="exportBookStrip()" data-i18n-title="export_strip" title="Exporter en bande">📏</button>
     <button class="bk-btn primary" onclick="exportBookPDF()" data-i18n="btn_export_pdf">Exporter PDF</button>
   </div>
   <div id="bk-pagelabel" style="font-weight:800;font-size:.78rem;text-align:center;padding:4px 0;color:var(--ink-soft)"></div>
@@ -1667,6 +1679,10 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Bouton (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) en haut de l'\u00e9cran d'accueil \u2014 touche pour faire d\u00e9filer entre fran\u00e7ais, anglais, italien et espagnol.</li>"+"<li>Concerne UNIQUEMENT les boutons et menus de l'appli \u2014 jamais le contenu de tes livres (l\u00e9gendes, titres d'album, texte que tu tapes), qui reste toujours exactement ce que tu as \u00e9crit.</li>"+"<li>Couverture cibl\u00e9e sur ce qui est visible en permanence (\u00e9cran d'accueil, album, barre principale de l'\u00e9diteur) \u2014 l'aide d\u00e9taill\u00e9e que tu es en train de lire est maintenant disponible dans les 4 langues.</li>"+'</ul>' },
     { icon:"\ud83d\udcd1", title:"Table des mati\u00e8res et autocollants personnalis\u00e9s", body:
       '<ul>'+"<li><b>Sommaire automatique :</b> bouton \ud83d\udcd1 dans l'\u00e9diteur \u2014 g\u00e9n\u00e8re une page listant toutes les pages du livre (avec leur titre repris automatiquement), toujours ins\u00e9r\u00e9e en premi\u00e8re page.</li>"+"<li><b>Autocollants personnalis\u00e9s :</b> dans le s\u00e9lecteur d'autocollants (\u2728 Sticker), bouton \"\u2795 Importer une image\" \u2014 ton logo, dessin ou tampon devient r\u00e9utilisable sur n'importe quelle page, gard\u00e9 dans une biblioth\u00e8que propre \u00e0 l'album (jamais m\u00e9lang\u00e9 \u00e0 tes photos).</li>"+'</ul>' },
+        { icon:"\ud83d\udcca", title:"Jauge d'espace utilis\u00e9", body:
+      '<ul>'+"<li>Bouton \ud83d\udcbe en haut de l'\u00e9cran d'accueil : en plus de la sauvegarde, une jauge affiche l'espace utilis\u00e9 par chaque album sur ton t\u00e9l\u00e9phone (tout \u00e9tant stock\u00e9 en local, jamais dans un cloud).</li>"+"<li>Les albums sont class\u00e9s du plus lourd au plus l\u00e9ger, avec une barre visuelle et un total g\u00e9n\u00e9ral en bas.</li>"+"<li>Pratique pour rep\u00e9rer quel album all\u00e9ger (grosses photos, doublons...) si ton t\u00e9l\u00e9phone commence \u00e0 manquer de place.</li>"+'</ul>' },
+    { icon:"\ud83d\udccf", title:"Exporter en bande", body:
+      '<ul>'+"<li>Bouton \ud83d\udccf dans l'\u00e9diteur de livre : assemble toutes les pages du livre bout \u00e0 bout dans une seule image verticale.</li>"+"<li>Pratique pour partager un aper\u00e7u complet du livre dans une conversation (WhatsApp, Mail...) sans avoir \u00e0 envoyer un PDF entier.</li>"+"<li>Sur un livre avec beaucoup de pages, l'image est automatiquement r\u00e9duite pour rester dans une taille raisonnable \u2014 la qualit\u00e9 de chaque page baisse l\u00e9g\u00e8rement en cons\u00e9quence.</li>"+'</ul>' },
     { icon:"\ud83d\udcbe", title:"O\u00f9 sont tes donn\u00e9es ? Sauvegarder / restaurer", body:
       '<ul>'+"<li>Tout est stock\u00e9 <b>uniquement sur ton t\u00e9l\u00e9phone</b> (dans le navigateur) \u2014 pas de compte, pas de cloud, rien n'est envoy\u00e9 ailleurs.</li>"+"<li>Un PDF export\u00e9 part dans le dossier T\u00e9l\u00e9chargements normal de ton t\u00e9l\u00e9phone, comme n'importe quel fichier t\u00e9l\u00e9charg\u00e9.</li>"+"<li><b>Sauvegarde compl\u00e8te :</b> bouton \ud83d\udcbe en haut de l'\u00e9cran d'accueil \u2014 cr\u00e9e un seul fichier avec TOUT (albums, photos, livres, cartes). Garde-le de c\u00f4t\u00e9, ou r\u00e9importe-le si tu changes de t\u00e9l\u00e9phone ou effaces les donn\u00e9es du site.</li>"+"<li><b>Restaurer :</b> depuis ce m\u00eame \u00e9cran, \"\u2b06\ufe0f Restaurer depuis un fichier\" \u2014 les albums du fichier sont <b>ajout\u00e9s</b> \u00e0 ceux d\u00e9j\u00e0 pr\u00e9sents (jamais d'\u00e9crasement), m\u00eame si tu r\u00e9importes plusieurs fois.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Rep\u00e8res pour un imprimeur professionnel", body:
@@ -1699,6 +1715,10 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Button (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) at the top of the home screen \u2014 tap to cycle between French, English, Italian and Spanish.</li>"+"<li>Applies ONLY to the app's buttons and menus \u2014 never to the content of your books (captions, album titles, text you type), which always stays exactly what you wrote.</li>"+"<li>Coverage focused on what's always visible (home screen, album, editor's main bar) \u2014 this detailed help you're reading is now available in all 4 languages.</li>"+'</ul>' },
     { icon:"\ud83d\udcd1", title:"Table of contents and custom stickers", body:
       '<ul>'+"<li><b>Automatic table of contents:</b> \ud83d\udcd1 button in the editor \u2014 generates a page listing all the book's pages (with their title picked up automatically), always inserted as the first page.</li>"+"<li><b>Custom stickers:</b> in the sticker picker (\u2728 Sticker), \"\u2795 Import an image\" button \u2014 your logo, drawing or stamp becomes reusable on any page, kept in a library specific to the album (never mixed with your photos).</li>"+'</ul>' },
+        { icon:"\ud83d\udcca", title:"Storage gauge", body:
+      '<ul>'+"<li>\ud83d\udcbe button at the top of the home screen: alongside backup, a gauge shows how much space each album takes up on your phone (everything stored locally, never in a cloud).</li>"+"<li>Albums are ranked from heaviest to lightest, with a visual bar and an overall total at the bottom.</li>"+"<li>Handy to spot which album to lighten (large photos, duplicates...) if your phone starts running low on space.</li>"+'</ul>' },
+    { icon:"\ud83d\udccf", title:"Export as strip", body:
+      '<ul>'+"<li>\ud83d\udccf button in the book editor: stitches all the book's pages end to end into a single vertical image.</li>"+"<li>Handy for sharing a full preview of the book in a conversation (WhatsApp, Mail...) without sending an entire PDF.</li>"+"<li>On a book with many pages, the image is automatically shrunk to stay a reasonable size \u2014 each page's quality drops slightly as a result.</li>"+'</ul>' },
     { icon:"\ud83d\udcbe", title:"Where is your data? Backup / restore", body:
       '<ul>'+"<li>Everything is stored <b>only on your phone</b> (in the browser) \u2014 no account, no cloud, nothing is sent anywhere else.</li>"+"<li>An exported PDF goes into your phone's normal Downloads folder, like any downloaded file.</li>"+"<li><b>Full backup:</b> \ud83d\udcbe button at the top of the home screen \u2014 creates a single file with EVERYTHING (albums, photos, books, maps). Keep it safe, or reimport it if you change phones or clear the site's data.</li>"+"<li><b>Restore:</b> from that same screen, \"\u2b06\ufe0f Restore from a file\" \u2014 albums from the file are <b>added</b> to those already present (never overwritten), even if you reimport several times.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Guides for a professional printer", body:
@@ -1731,6 +1751,10 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Pulsante (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) in alto nella schermata principale \u2014 tocca per scorrere tra francese, inglese, italiano e spagnolo.</li>"+"<li>Riguarda SOLO i pulsanti e i menu dell'app \u2014 mai il contenuto dei tuoi libri (didascalie, titoli degli album, testo che digiti), che resta sempre esattamente ci\u00f2 che hai scritto.</li>"+"<li>Copertura mirata su ci\u00f2 che \u00e8 sempre visibile (schermata principale, album, barra principale dell'editor) \u2014 questa guida dettagliata che stai leggendo \u00e8 ora disponibile in tutte e 4 le lingue.</li>"+'</ul>' },
     { icon:"\ud83d\udcd1", title:"Sommario e adesivi personalizzati", body:
       '<ul>'+"<li><b>Sommario automatico:</b> pulsante \ud83d\udcd1 nell'editor \u2014 genera una pagina che elenca tutte le pagine del libro (con il loro titolo ripreso automaticamente), sempre inserita come prima pagina.</li>"+"<li><b>Adesivi personalizzati:</b> nel selettore di adesivi (\u2728 Adesivo), pulsante \"\u2795 Importa un'immagine\" \u2014 il tuo logo, disegno o timbro diventa riutilizzabile su qualsiasi pagina, conservato in una libreria propria dell'album (mai mescolato alle tue foto).</li>"+'</ul>' },
+        { icon:"\ud83d\udcca", title:"Indicatore di spazio utilizzato", body:
+      '<ul>'+"<li>Pulsante \ud83d\udcbe in alto nella schermata principale: oltre al backup, un indicatore mostra lo spazio occupato da ogni album sul telefono (tutto memorizzato in locale, mai su un cloud).</li>"+"<li>Gli album sono classificati dal pi\u00f9 pesante al pi\u00f9 leggero, con una barra visiva e un totale generale in basso.</li>"+"<li>Utile per individuare quale album alleggerire (foto pesanti, doppioni...) se il telefono inizia a scarseggiare di spazio.</li>"+'</ul>' },
+    { icon:"\ud83d\udccf", title:"Esporta come striscia", body:
+      '<ul>'+"<li>Pulsante \ud83d\udccf nell'editor del libro: unisce tutte le pagine del libro una dopo l'altra in un'unica immagine verticale.</li>"+"<li>Utile per condividere un'anteprima completa del libro in una conversazione (WhatsApp, Mail...) senza dover inviare un PDF intero.</li>"+"<li>Su un libro con molte pagine, l'immagine viene ridotta automaticamente per restare di dimensioni ragionevoli \u2014 la qualit\u00e0 di ogni pagina diminuisce leggermente di conseguenza.</li>"+'</ul>' },
     { icon:"\ud83d\udcbe", title:"Dove sono i tuoi dati? Backup / ripristino", body:
       '<ul>'+"<li>Tutto \u00e8 memorizzato <b>solo sul tuo telefono</b> (nel browser) \u2014 nessun account, nessun cloud, niente viene inviato altrove.</li>"+"<li>Un PDF esportato finisce nella normale cartella Download del telefono, come qualsiasi file scaricato.</li>"+"<li><b>Backup completo:</b> pulsante \ud83d\udcbe in alto nella schermata principale \u2014 crea un unico file con TUTTO (album, foto, libri, mappe). Conservalo con cura, o reimportalo se cambi telefono o cancelli i dati del sito.</li>"+"<li><b>Ripristina:</b> dalla stessa schermata, \"\u2b06\ufe0f Ripristina da un file\" \u2014 gli album del file vengono <b>aggiunti</b> a quelli gi\u00e0 presenti (mai sovrascritti), anche se reimporti pi\u00f9 volte.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Guide per una stampa professionale", body:
@@ -1763,6 +1787,10 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Bot\u00f3n (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) en la parte superior de la pantalla de inicio \u2014 toca para pasar entre franc\u00e9s, ingl\u00e9s, italiano y espa\u00f1ol.</li>"+"<li>Afecta \u00daNICAMENTE a los botones y men\u00fas de la app \u2014 nunca al contenido de tus libros (leyendas, t\u00edtulos de \u00e1lbum, texto que escribes), que siempre sigue siendo exactamente lo que escribiste.</li>"+"<li>Cobertura centrada en lo que siempre es visible (pantalla de inicio, \u00e1lbum, barra principal del editor) \u2014 esta ayuda detallada que est\u00e1s leyendo ya est\u00e1 disponible en los 4 idiomas.</li>"+'</ul>' },
     { icon:"\ud83d\udcd1", title:"\u00cdndice y pegatinas personalizadas", body:
       '<ul>'+"<li><b>\u00cdndice autom\u00e1tico:</b> bot\u00f3n \ud83d\udcd1 en el editor \u2014 genera una p\u00e1gina que lista todas las p\u00e1ginas del libro (con su t\u00edtulo recogido autom\u00e1ticamente), siempre insertada como primera p\u00e1gina.</li>"+"<li><b>Pegatinas personalizadas:</b> en el selector de pegatinas (\u2728 Pegatina), bot\u00f3n \"\u2795 Importar una imagen\" \u2014 tu logo, dibujo o sello se vuelve reutilizable en cualquier p\u00e1gina, guardado en una biblioteca propia del \u00e1lbum (nunca mezclado con tus fotos).</li>"+'</ul>' },
+        { icon:"\ud83d\udcca", title:"Indicador de espacio usado", body:
+      '<ul>'+"<li>Bot\u00f3n \ud83d\udcbe en la parte superior de la pantalla de inicio: junto a la copia de seguridad, un indicador muestra el espacio que ocupa cada \u00e1lbum en tu tel\u00e9fono (todo guardado en local, nunca en una nube).</li>"+"<li>Los \u00e1lbumes se clasifican de m\u00e1s pesado a m\u00e1s ligero, con una barra visual y un total general abajo.</li>"+"<li>\u00datil para detectar qu\u00e9 \u00e1lbum aligerar (fotos pesadas, duplicados...) si tu tel\u00e9fono empieza a quedarse sin espacio.</li>"+'</ul>' },
+    { icon:"\ud83d\udccf", title:"Exportar como tira", body:
+      '<ul>'+"<li>Bot\u00f3n \ud83d\udccf en el editor del libro: une todas las p\u00e1ginas del libro una tras otra en una sola imagen vertical.</li>"+"<li>\u00datil para compartir una vista previa completa del libro en una conversaci\u00f3n (WhatsApp, Correo...) sin tener que enviar un PDF entero.</li>"+"<li>En un libro con muchas p\u00e1ginas, la imagen se reduce autom\u00e1ticamente para mantener un tama\u00f1o razonable \u2014 la calidad de cada p\u00e1gina baja ligeramente como consecuencia.</li>"+'</ul>' },
     { icon:"\ud83d\udcbe", title:"\u00bfD\u00f3nde est\u00e1n tus datos? Copia de seguridad / restaurar", body:
       '<ul>'+"<li>Todo se guarda <b>\u00fanicamente en tu tel\u00e9fono</b> (en el navegador) \u2014 sin cuenta, sin nube, no se env\u00eda nada a ning\u00fan otro sitio.</li>"+"<li>Un PDF exportado va a la carpeta de Descargas normal de tu tel\u00e9fono, como cualquier archivo descargado.</li>"+"<li><b>Copia de seguridad completa:</b> bot\u00f3n \ud83d\udcbe en la parte superior de la pantalla de inicio \u2014 crea un \u00fanico archivo con TODO (\u00e1lbumes, fotos, libros, mapas). Gu\u00e1rdalo a buen recaudo, o vuelve a importarlo si cambias de tel\u00e9fono o borras los datos del sitio.</li>"+"<li><b>Restaurar:</b> desde esa misma pantalla, \"\u2b06\ufe0f Restaurar desde un archivo\" \u2014 los \u00e1lbumes del archivo se <b>a\u00f1aden</b> a los que ya est\u00e1n presentes (nunca se sobrescriben), incluso si vuelves a importar varias veces.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Gu\u00edas para una imprenta profesional", body:
@@ -1954,7 +1982,21 @@ var BK_I18N={
   autobook_mode_hint_empty:{fr:'📐 Toutes les pages et cadres sont créés, sans aucune photo dedans — tu les places toi-même ensuite, à ton rythme.',en:'📐 All pages and frames are created, with no photo inside — you place them yourself afterwards, at your own pace.',it:'📐 Tutte le pagine e le cornici vengono create, senza alcuna foto dentro — le posizioni tu stesso in seguito, con calma.',es:'📐 Se crean todas las páginas y marcos, sin ninguna foto dentro — las colocas tú mismo después, a tu ritmo.'},
   autobook_mode_hint_full:{fr:'🖼️ Tes photos sont placées automatiquement, dans l\'ordre, sur toutes les pages.',en:'🖼️ Your photos are placed automatically, in order, across all pages.',it:'🖼️ Le tue foto vengono posizionate automaticamente, in ordine, su tutte le pagine.',es:'🖼️ Tus fotos se colocan automáticamente, en orden, en todas las páginas.'},
   autobook_suggestion:{fr:'suggestion :',en:'suggestion:',it:'suggerimento:',es:'sugerencia:'},
-  autobook_layouts_hint:{fr:'⬇️ Fais défiler pour tout voir ({n} mises en page : carrées, rondes, hexagonales, octogonales, décagonales, arche, trapèze, mosaïques 1 à 9 photos...). Aucune sélection = l\'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l\'ordre).',en:'⬇️ Scroll to see them all ({n} layouts: square, round, hexagonal, octagonal, decagonal, arch, trapeze, 1 to 9-photo mosaics...). No selection = the app varies automatically. If you pick some, ONLY those will be used (cycled in order).',it:'⬇️ Scorri per vederli tutti ({n} modelli: quadrati, rotondi, esagonali, ottagonali, decagonali, ad arco, trapezio, mosaici da 1 a 9 foto...). Nessuna selezione = l\'app varia automaticamente. Se ne scegli alcuni, verranno usati SOLO quelli (in ciclo, nell\'ordine).',es:'⬇️ Desplázate para verlos todos ({n} diseños: cuadrados, redondos, hexagonales, octogonales, decagonales, en arco, trapecio, mosaicos de 1 a 9 fotos...). Sin selección = la app varía automáticamente. Si eliges algunos, SOLO se usarán esos (en ciclo, en orden).'}
+  autobook_layouts_hint:{fr:'⬇️ Fais défiler pour tout voir ({n} mises en page : carrées, rondes, hexagonales, octogonales, décagonales, arche, trapèze, mosaïques 1 à 9 photos...). Aucune sélection = l\'appli varie automatiquement. Si tu en choisis, SEULES celles-ci seront utilisées (cyclées dans l\'ordre).',en:'⬇️ Scroll to see them all ({n} layouts: square, round, hexagonal, octagonal, decagonal, arch, trapeze, 1 to 9-photo mosaics...). No selection = the app varies automatically. If you pick some, ONLY those will be used (cycled in order).',it:'⬇️ Scorri per vederli tutti ({n} modelli: quadrati, rotondi, esagonali, ottagonali, decagonali, ad arco, trapezio, mosaici da 1 a 9 foto...). Nessuna selezione = l\'app varia automaticamente. Se ne scegli alcuni, verranno usati SOLO quelli (in ciclo, nell\'ordine).',es:'⬇️ Desplázate para verlos todos ({n} diseños: cuadrados, redondos, hexagonales, octogonales, decagonales, en arco, trapecio, mosaicos de 1 a 9 fotos...). Sin selección = la app varía automáticamente. Si eliges algunos, SOLO se usarán esos (en ciclo, en orden).'},
+  no_albums_yet:{fr:'Pas encore d\'album',en:'No albums yet',it:'Ancora nessun album',es:'Todavía no hay álbumes'},
+  storage_total:{fr:'Total :',en:'Total:',it:'Totale:',es:'Total:'},
+  storage_gauge_title:{fr:'Espace utilisé par album',en:'Storage used per album',it:'Spazio usato per album',es:'Espacio usado por álbum'},
+  export_strip:{fr:'Exporter en bande',en:'Export as strip',it:'Esporta come striscia',es:'Exportar como tira'},
+  strip_generating:{fr:'Génération de la bande…',en:'Generating the strip…',it:'Generazione della striscia…',es:'Generando la tira…'},
+  strip_exported:{fr:'📏 Bande exportée avec toutes les pages',en:'📏 Strip exported with all pages',it:'📏 Striscia esportata con tutte le pagine',es:'📏 Tira exportada con todas las páginas'},
+  strip_error:{fr:'Erreur pendant l\'export en bande',en:'Error during strip export',it:'Errore durante l\'esportazione della striscia',es:'Error al exportar la tira'},
+  unit_byte:{fr:'o',en:'B',it:'B',es:'B'},
+  unit_kb:{fr:'Ko',en:'KB',it:'KB',es:'KB'},
+  unit_mb:{fr:'Mo',en:'MB',it:'MB',es:'MB'},
+  backup_intro:{fr:'Un seul fichier avec TOUT (albums, photos, livres, cartes) — à garder de côté, ou à réimporter si tu changes de téléphone.',en:'A single file with EVERYTHING (albums, photos, books, maps) — keep it safe, or reimport it if you change phones.',it:'Un unico file con TUTTO (album, foto, libri, mappe) — conservalo con cura, o reimportalo se cambi telefono.',es:'Un único archivo con TODO (álbumes, fotos, libros, mapas) — guárdalo a buen recaudo, o vuelve a importarlo si cambias de teléfono.'},
+  backup_create:{fr:'⬇️ Créer une sauvegarde complète',en:'⬇️ Create a full backup',it:'⬇️ Crea un backup completo',es:'⬇️ Crear una copia de seguridad completa'},
+  backup_restore_file:{fr:'⬆️ Restaurer depuis un fichier',en:'⬆️ Restore from a file',it:'⬆️ Ripristina da un file',es:'⬆️ Restaurar desde un archivo'},
+  backup_note:{fr:'La restauration <b>ajoute</b> les albums du fichier (jamais d\'écrasement) — utile aussi pour transférer vers un nouveau téléphone.',en:'Restoring <b>adds</b> the albums from the file (never overwrites) — also handy to transfer to a new phone.',it:'Il ripristino <b>aggiunge</b> gli album dal file (mai sovrascrittura) — utile anche per trasferire a un nuovo telefono.',es:'Restaurar <b>añade</b> los álbumes del archivo (nunca sobrescribe) — también útil para transferir a un teléfono nuevo.'}
 };
 var BK_LANG='fr';
 function t(key){
@@ -1985,9 +2027,59 @@ function bkCycleLanguage(){
   var next=BK_LANGS[(i+1)%BK_LANGS.length];
   bkApplyLanguage(next);
 }
+/* ══════════════════ JAUGE D'ESPACE UTILISÉ ══════════════════
+   Taille RÉELLE de chaque album (photos en Blob = taille exacte disponible
+   directement ; les rares photos encore au format texte "dataURL", d'avant
+   ce changement, sont estimées à partir de leur longueur — testé sur de
+   vraies photos avant intégration : chiffres cohérents). Aide à repérer
+   quel album alourdit le plus le téléphone. */
+function bkFormatBytes(bytes){
+  // "octet" (o/Ko/Mo) est propre au français ; l'anglais/italien/espagnol
+  // utilisent "byte" (B/KB/MB) — vrai texte d'unité, pas juste un habillage,
+  // donc traduit comme le reste plutôt que laissé tel quel.
+  var unitByte=t('unit_byte'), unitKB=t('unit_kb'), unitMB=t('unit_mb');
+  if(bytes<1024) return bytes+' '+unitByte;
+  if(bytes<1024*1024) return (bytes/1024).toFixed(1)+' '+unitKB;
+  return (bytes/(1024*1024)).toFixed(1)+' '+unitMB;
+}
+function bkEstimatePhotoBytes(p){
+  var total=0;
+  [p.full, p.thumb].forEach(function(v){
+    if(!v) return;
+    if(v instanceof Blob) total+=v.size;
+    else if(typeof v==='string') total+=Math.round(v.length*0.75); // dataURL base64 -> octets réels (approximatif)
+  });
+  return total;
+}
+function bkEstimateAlbumBytes(a){
+  var total=0;
+  a.photos.forEach(function(p){ total+=bkEstimatePhotoBytes(p); });
+  (a.customStickers||[]).forEach(function(cs){ if(cs.dataUrl) total+=Math.round(cs.dataUrl.length*0.75); });
+  return total;
+}
+function bkRenderStorageGauge(){
+  var rows=albums.map(function(a){ return {a:a, bytes:bkEstimateAlbumBytes(a)}; });
+  rows.sort(function(x,y){ return y.bytes-x.bytes; });
+  var totalBytes=rows.reduce(function(s,r){ return s+r.bytes; },0);
+  var h='';
+  if(!rows.length){
+    h='<p style="color:var(--ink-soft);font-size:.8rem;text-align:center;padding:10px 0">'+t('no_albums_yet')+'</p>';
+  } else {
+    rows.forEach(function(r){
+      var pct=totalBytes>0 ? Math.round(r.bytes/totalBytes*100) : 0;
+      h+='<div class="storage-row">'
+        +'<div class="storage-row-top"><span>'+esc(r.a.title)+'</span><b>'+bkFormatBytes(r.bytes)+'</b></div>'
+        +'<div class="storage-bar-bg"><div class="storage-bar-fill" style="width:'+pct+'%"></div></div>'
+        +'</div>';
+    });
+  }
+  document.getElementById('storage-gauge-list').innerHTML=h;
+  document.getElementById('storage-gauge-total').textContent=t('storage_total')+' '+bkFormatBytes(totalBytes);
+}
 function openBackupSheet(){
   document.getElementById('backup-export-progress').style.display='none';
   document.getElementById('backup-import-progress').style.display='none';
+  bkRenderStorageGauge();
   document.getElementById('backup-sheet').classList.add('on');
 }
 function closeBackupSheet(){ document.getElementById('backup-sheet').classList.remove('on'); }
@@ -6539,6 +6631,52 @@ function exportBookStory(){
   }).catch(function(err){
     console.error('Erreur export story', err);
     toast('❌ Erreur pendant l\'export story');
+  });
+}
+/* ══════════════════ EXPORT EN BANDE (toutes les pages bout à bout) ══════════════════
+   Une seule image verticale avec toutes les pages du livre empilées, pratique
+   pour montrer un aperçu complet dans une conversation sans envoyer un PDF.
+   Largeur fixe, hauteur plafonnée pour rester dans les limites d'un canevas
+   (réduit proportionnellement si le livre a beaucoup de pages). */
+function exportBookStrip(){
+  var pages=bkBook.pages;
+  if(!pages.length) return;
+  toast(t('strip_generating'));
+  var stripW=800;
+  var pageH = bkBook.orient==='portrait' ? Math.round(stripW*(297/210)) : Math.round(stripW*(210/297));
+  var totalH=pageH*pages.length;
+  var maxSafeHeight=14000; // marge de sécurité sous les limites de hauteur de canevas des navigateurs
+  var scale=totalH>maxSafeHeight ? maxSafeHeight/totalH : 1;
+  var finalW=Math.round(stripW*scale), finalPageH=Math.round(pageH*scale);
+  var finalTotalH=finalPageH*pages.length;
+
+  var fontsReady=(document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+  var chain=fontsReady.then(function(){ return null; });
+  var renders=[];
+  pages.forEach(function(page){
+    chain=chain.then(function(){ return bkRenderPageToCanvas(page, bkBook.orient, finalW, finalPageH); }).then(function(dataUrl){
+      renders.push(dataUrl);
+    });
+  });
+  chain.then(function(){
+    var bigCanvas=document.createElement('canvas');
+    bigCanvas.width=finalW; bigCanvas.height=finalTotalH;
+    var ctx=bigCanvas.getContext('2d');
+    var loads=renders.map(function(durl, i){
+      return bkLoadImg(durl).then(function(img){ ctx.drawImage(img,0,i*finalPageH,finalW,finalPageH); });
+    });
+    return Promise.all(loads).then(function(){
+      return new Promise(function(resolve){
+        bigCanvas.toBlob(function(blob){
+          var fname=(bkAlbum.title||'mon-voyage').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-bande.jpg';
+          bkShareOrDownloadBlob(blob, fname, t('strip_exported'));
+          resolve();
+        }, 'image/jpeg', 0.88);
+      });
+    });
+  }).catch(function(err){
+    console.error('Erreur export bande', err);
+    toast('❌ '+t('strip_error'));
   });
 }
 function exportBookPDF(){
