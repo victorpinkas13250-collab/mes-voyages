@@ -392,7 +392,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.3.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.3.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -5804,24 +5804,21 @@ function exportPageAsImage(){
    grâce au positionnement en pourcentages déjà utilisé partout dans l'éditeur,
    peu importe le format d'origine du livre (portrait ou paysage). */
 function exportBookStory(){
-  var pages=bkBook.pages;
-  if(!pages.length) return;
-  toast('Génération du format story… ('+pages.length+' page'+(pages.length>1?'s':'')+')');
+  // N'exporte QUE la page actuellement affichée (comme "🖼️ Exporter la page
+  // en image"), pas tout le livre d'un coup — seul le format change (vertical
+  // 1080×1920 au lieu du format classique du livre).
+  var page=bkBook.pages[bkPageIdx];
+  if(!page) return;
+  toast('Génération du format story…');
   var fontsReady=(document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
   var baseName=(bkAlbum.title||'mon-voyage').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
-  var chain=fontsReady.then(function(){ return null; });
-  pages.forEach(function(page, i){
-    chain=chain.then(function(){ return bkRenderPageToCanvas(page, bkBook.orient, 1080, 1920); }).then(function(dataUrl){
-      var link=document.createElement('a');
-      link.href=dataUrl; link.download=baseName+'-story-'+(i+1)+'.jpg';
-      document.body.appendChild(link); link.click(); document.body.removeChild(link);
-      // petite pause entre chaque téléchargement : certains navigateurs mobiles
-      // bloquent ou ratent des téléchargements trop rapprochés
-      return new Promise(function(res){ setTimeout(res, 400); });
-    });
-  });
-  chain.then(function(){
-    toast('📱 '+pages.length+' image'+(pages.length>1?'s':'')+' au format story exportée'+(pages.length>1?'s':''));
+  fontsReady.then(function(){
+    return bkRenderPageToCanvas(page, bkBook.orient, 1080, 1920);
+  }).then(function(dataUrl){
+    var link=document.createElement('a');
+    link.href=dataUrl; link.download=baseName+'-story-page'+(bkPageIdx+1)+'.jpg';
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    toast('📱 Page exportée au format story');
   }).catch(function(err){
     console.error('Erreur export story', err);
     toast('❌ Erreur pendant l\'export story');
