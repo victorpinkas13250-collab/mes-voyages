@@ -457,7 +457,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.9.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.9.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -4896,16 +4896,11 @@ function bkToggleSafeMargin(){
    elle n'est pas touchée. */
 var BK_SAFE_MARGIN_PCT=5;
 function bkElementBBox(el){
-  // gère aussi les groupes, en cherchant l'étendue de tous leurs enfants
-  if(el.type==='group'){
-    var boxes=el.children.map(bkElementBBox);
-    return {
-      minX:Math.min.apply(null, boxes.map(function(b){return b.minX;})),
-      maxX:Math.max.apply(null, boxes.map(function(b){return b.maxX;})),
-      minY:Math.min.apply(null, boxes.map(function(b){return b.minY;})),
-      maxY:Math.max.apply(null, boxes.map(function(b){return b.maxY;}))
-    };
-  }
+  // Un groupe a déjà ses PROPRES x,y,w,h (posés au moment du groupement) qui
+  // représentent son étendue exacte sur la page — inutile et FAUX de
+  // redescendre dans ses enfants, qui eux utilisent des coordonnées
+  // RELATIVES (cx,cy,cw,ch, 0-100 à l'intérieur du groupe), pas x,y,w,h.
+  // Les confondre corrompait les enfants du groupe (bug réel trouvé en test).
   return { minX:el.x-el.w/2, maxX:el.x+el.w/2, minY:el.y-el.h/2, maxY:el.y+el.h/2 };
 }
 function bkPageFitsSafeMargin(page){
@@ -4918,6 +4913,7 @@ function bkPageFitsSafeMargin(page){
 }
 function bkFitPageToSafeMargin(page){
   if(!page.elements.length) return false;
+  if(bkPageFitsSafeMargin(page)) return false; // déjà bien positionné ET de la bonne taille : rien à faire
   var boxes=page.elements.map(bkElementBBox);
   var minX=Math.min.apply(null, boxes.map(function(b){return b.minX;}));
   var maxX=Math.max.apply(null, boxes.map(function(b){return b.maxX;}));
@@ -4925,12 +4921,18 @@ function bkFitPageToSafeMargin(page){
   var maxY=Math.max.apply(null, boxes.map(function(b){return b.maxY;}));
   var lo=BK_SAFE_MARGIN_PCT, hi=100-BK_SAFE_MARGIN_PCT, target=hi-lo; // 90% de large/haut, cadre disponible
   var bboxW=maxX-minX, bboxH=maxY-minY;
-  if(bboxW<=target+0.5 && bboxH<=target+0.5) return false; // déjà dans le cadre, rien à faire
+  // Important : même si la boîte combinée est déjà assez PETITE pour tenir
+  // dans le cadre, elle peut être mal POSITIONNÉE (ex. débordant en haut sans
+  // déborder en bas) — on recentre donc toujours, et on ne réduit QUE si la
+  // taille elle-même dépasse le cadre disponible (jamais de zoom si ce n'est
+  // qu'un repositionnement qui est nécessaire).
   var scale=Math.min(target/bboxW, target/bboxH, 1); // ne jamais AGRANDIR, seulement réduire si besoin
   var bboxCx=(minX+maxX)/2, bboxCy=(minY+maxY)/2;
   var targetCx=50, targetCy=50; // centré dans la page (le cadre de sécurité est lui-même centré)
   function scaleEl(el){
-    if(el.type==='group'){ el.children.forEach(scaleEl); return; }
+    // un groupe se traite exactement comme un élément normal ici : on ne
+    // touche qu'à SES x,y,w,h — ses enfants restent en coordonnées relatives
+    // et n'ont besoin d'aucun ajustement, ils suivent automatiquement.
     el.x=targetCx+(el.x-bboxCx)*scale;
     el.y=targetCy+(el.y-bboxCy)*scale;
     el.w=el.w*scale;
