@@ -61,7 +61,7 @@ img{-webkit-user-drag:none;}
 
 /* ── TOAST ── */
 #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:50px;font-weight:700;font-size:.85rem;opacity:0;pointer-events:none;transition:.25s;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:88vw;text-align:center;}
-#toast.on{pointer-events:auto;}
+#toast.on.has-action{pointer-events:auto;}
 .toast-undo-btn{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:20px;padding:5px 12px;font-weight:800;font-size:.78rem;margin-left:6px;}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 
@@ -77,6 +77,7 @@ img{-webkit-user-drag:none;}
 .mf input:focus{outline:none;border-color:var(--primary-2);background:#fff;}
 .modal-btns{display:flex;gap:10px;margin-top:22px;}
 .mbtn{flex:1;padding:14px;border:none;border-radius:50px;font-weight:800;font-size:.95rem;}
+.mbtn.active{background:var(--primary);color:#fff;}
 .mbtn-ok{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 6px 18px rgba(123,47,247,.35);}
 .mbtn-danger{background:#FF5A6E;color:#fff;}
 .mbtn-danger:disabled{opacity:.4;}
@@ -179,6 +180,8 @@ img{-webkit-user-drag:none;}
 .photo-day-section.collapsed .photos-grid{display:none;}
 .pi.selected .pi-selcheck{background:var(--primary);border-color:var(--primary);color:#fff;}
 .pi.selected{outline:3px solid var(--primary);outline-offset:-3px;}
+.pi.range-start .pi-selcheck{background:#FFD93D;border-color:#FFD93D;color:#241E38;}
+.pi.range-start{outline:3px dashed #FFD93D;outline-offset:-3px;}
 .photo-search-row input:focus{outline:none;border-color:var(--primary-2);}
 .upload-z .cam{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:1.3rem;}
 .upload-z p{color:var(--ink);font-weight:800;font-size:.88rem;}
@@ -427,7 +430,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.5.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.6.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -473,6 +476,7 @@ img{-webkit-user-drag:none;}
   <div class="photo-multi-actionbar" id="photo-multi-actionbar">
     <span id="photo-multi-count">0 sélectionnée(s)</span>
     <button class="mbtn mbtn-cancel" onclick="togglePhotoSelectMode()">Annuler</button>
+    <button class="mbtn" id="photo-multi-range-btn" onclick="togglePhotoRangeMode()" title="Sélectionner une gamme (du début à la fin)">🔗</button>
     <button class="mbtn" id="photo-multi-left-btn" onclick="moveSelectedPhoto(-1)" disabled title="Déplacer plus tôt">⬅️</button>
     <button class="mbtn" id="photo-multi-right-btn" onclick="moveSelectedPhoto(1)" disabled title="Déplacer plus tard">➡️</button>
     <button class="mbtn" id="photo-multi-cover-btn" onclick="setSelectedAsCover()" disabled title="Utiliser comme couverture de l'album">🖼️</button>
@@ -977,6 +981,7 @@ function savePhoto(albumId, p){
 }
 function toast(msg){
   var t=document.getElementById('toast');
+  t.classList.remove('has-action'); // un toast simple ne doit JAMAIS bloquer les clics sur ce qu'il y a en dessous
   t.innerHTML=esc(msg); t.classList.add('on');
   clearTimeout(t._h);
   t._h=setTimeout(function(){ t.classList.remove('on'); },2400);
@@ -984,18 +989,21 @@ function toast(msg){
 function toastUndo(msg, onUndo, delayMs){
   // Suppression "douce" : le message reste affiché plus longtemps et propose
   // "Annuler" — la vraie suppression (IndexedDB) n'a lieu qu'après ce délai,
-  // pas immédiatement, pour laisser une vraie chance de rattrapage.
+  // pas immédiatement, pour laisser une vraie chance de rattrapage. Seul CE
+  // toast (avec un vrai bouton dessus) doit intercepter les clics — pas les
+  // toasts informatifs classiques, qui ne doivent jamais gêner le reste de
+  // l'interface pendant qu'ils s'affichent.
   var t=document.getElementById('toast');
   var undone=false;
   t.innerHTML=esc(msg)+' <button class="toast-undo-btn" id="toast-undo-btn">↩️ Annuler</button>';
-  t.classList.add('on');
+  t.classList.add('on','has-action');
   clearTimeout(t._h);
   document.getElementById('toast-undo-btn').onclick=function(){
     undone=true;
-    t.classList.remove('on');
+    t.classList.remove('on','has-action');
     onUndo();
   };
-  t._h=setTimeout(function(){ t.classList.remove('on'); }, delayMs||5000);
+  t._h=setTimeout(function(){ t.classList.remove('on','has-action'); }, delayMs||5000);
 }
 
 /* ══════════════════ NAVIGATION ══════════════════ */
@@ -1604,6 +1612,7 @@ var HELP_SECTIONS=[
     +'<li><b>Rechercher :</b> tape un nom de fichier ou une date dans la barre de recherche de l\'album.</li>'
     +'<li><b>Date automatique :</b> l\'appli lit la vraie date de prise de vue dans la photo quand elle existe (icône 📷 dans la visionneuse) ; sinon elle utilise une date de repli (🗓️ ou ➕).</li>'
     +'<li><b>Sélection multiple :</b> bouton ☑️ à côté de la recherche — coche plusieurs photos pour les supprimer, les ranger dans un dossier, ou les mettre directement dans le livre (voir plus bas).</li>'
+    +'<li><b>Sélection en gamme :</b> en mode sélection, bouton 🔗 — touche une photo de départ puis une photo d\'arrivée, et tout ce qu\'il y a entre les deux se coche d\'un coup.</li>'
     +'<li><b>Réordonner :</b> en mode sélection, coche UNE seule photo pour faire apparaître des flèches ⬅️➡️ qui la déplacent dans l\'ordre affiché.</li>'
     +'<li><b>Ranger par jour :</b> bouton 📅 pour regrouper automatiquement tes photos par date de prise de vue, avec des sections repliables.</li>'
     +'<li><b>Voir tes favoris :</b> bouton ❤️ à côté de la recherche pour ne voir que les photos mises en favori.</li>'
@@ -2558,9 +2567,10 @@ function renderPhotos(){
       ? '<div class="pi-blur" title="Possiblement floue">🌫️</div>' : '';
     if(photoSelectMode){
       var sel=photoSelected.indexOf(p.id)>-1;
-      return '<div class="pi selectable'+(sel?' selected':'')+'" onclick="togglePhotoSelected(\''+p.id+'\')">'
+      var isRangeStart=bkRangeMode && bkRangeStart===p.id;
+      return '<div class="pi selectable'+(sel?' selected':'')+(isRangeStart?' range-start':'')+'" onclick="togglePhotoSelected(\''+p.id+'\')">'
         +'<img src="'+bkPhotoSrc(p,'thumb')+'" loading="lazy">'
-        +'<div class="pi-selcheck">✓</div>'
+        +'<div class="pi-selcheck">'+(isRangeStart?'🔗':'✓')+'</div>'
         +blurBadge
         +(p.liked?'<div class="pi-like">❤️</div>':'')
         +(p.cap?'<div class="pi-cap">'+esc(p.cap)+'</div>':'')
@@ -2625,6 +2635,7 @@ var photoSelectMode=false, photoSelected=[];
 function togglePhotoSelectMode(){
   photoSelectMode=!photoSelectMode;
   photoSelected=[];
+  bkRangeMode=false; bkRangeStart=null;
   document.getElementById('photo-select-btn').classList.toggle('active', photoSelectMode);
   document.getElementById('photo-multi-actionbar').classList.toggle('on', photoSelectMode);
   // pousse TOUTE la page (pas juste la fin de la grille) : la barre fixe peut
@@ -2634,7 +2645,37 @@ function togglePhotoSelectMode(){
   updatePhotoMultiBar();
   renderPhotos();
 }
+var bkRangeMode=false, bkRangeStart=null;
+function togglePhotoRangeMode(){
+  bkRangeMode=!bkRangeMode;
+  bkRangeStart=null;
+  document.getElementById('photo-multi-range-btn').classList.toggle('active', bkRangeMode);
+  toast(bkRangeMode ? 'Touche une photo de départ, puis une photo d\'arrivée' : 'Sélection en gamme annulée');
+  renderPhotos();
+}
 function togglePhotoSelected(id){
+  if(bkRangeMode){
+    if(!bkRangeStart){
+      bkRangeStart=id;
+      renderPhotos(); // réaffiche pour surligner la photo de départ
+      return;
+    }
+    var list=bkCurrentPhotoListOrder();
+    var i1=list.findIndex(function(p){ return p.id===bkRangeStart; });
+    var i2=list.findIndex(function(p){ return p.id===id; });
+    if(i1>-1 && i2>-1){
+      var lo=Math.min(i1,i2), hi=Math.max(i1,i2);
+      for(var k=lo;k<=hi;k++){
+        if(photoSelected.indexOf(list[k].id)===-1) photoSelected.push(list[k].id);
+      }
+      toast((hi-lo+1)+' photo'+(hi-lo+1>1?'s':'')+' sélectionnée'+(hi-lo+1>1?'s':'')+' d\'un coup');
+    }
+    bkRangeMode=false; bkRangeStart=null;
+    document.getElementById('photo-multi-range-btn').classList.remove('active');
+    updatePhotoMultiBar();
+    renderPhotos();
+    return;
+  }
   var i=photoSelected.indexOf(id);
   if(i>-1) photoSelected.splice(i,1);
   else photoSelected.push(id);
