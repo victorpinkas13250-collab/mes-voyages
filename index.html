@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mes Voyages</title>
+<script>
+// Applique le thème mémorisé AVANT le reste de la page, pour éviter un flash
+// visible (clair puis sombre) au chargement.
+try{
+  var savedTheme=localStorage.getItem('mv_theme');
+  if(savedTheme==='dark') document.documentElement.setAttribute('data-theme','dark');
+}catch(e){}
+</script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7B2FF7">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,6 +31,17 @@
   --shadow:0 6px 22px rgba(94,45,196,.10); --shadow-sm:0 3px 10px rgba(94,45,196,.08);
   --r-lg:22px; --r-md:16px; --r-sm:12px;
 }
+/* Thème sombre pour l'INTERFACE de l'appli elle-même (écran d'accueil, album,
+   menus...) — distinct des styles de LIVRE (qui ont leurs propres fonds
+   sombres indépendants, choisis page par page). Même jeu de variables déjà
+   utilisé partout dans le reste de la feuille de style, juste redéfini. */
+[data-theme="dark"]{
+  --bg:#15111F; --surface:#211C33; --ink:#F2EFFB; --ink-soft:#A79FC4;
+  --primary:#9B5CFF; --primary-2:#B385FF; --primary-dark:#7B2FF7;
+  --accent:#2DD9BE; --danger:#FF7A8A; --border:#332C4D;
+  --shadow:0 6px 22px rgba(0,0,0,.35); --shadow-sm:0 3px 10px rgba(0,0,0,.25);
+}
+[data-theme="dark"] .modal,[data-theme="dark"] .bk-sheet{background:rgba(0,0,0,.65);}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overscroll-behavior-y:none;}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;}
@@ -383,6 +402,7 @@ img{-webkit-user-drag:none;}
         <div class="t">Mes Voyages</div>
         <div class="hdr-stats" id="hstats">0 album · 0 photo</div>
       </div>
+      <button class="hdr-help-btn" id="theme-toggle-btn" onclick="bkToggleTheme()" style="margin-right:6px" title="Basculer clair/sombre">🌙</button>
       <button class="hdr-help-btn" onclick="openBackupSheet()" style="margin-right:6px" title="Sauvegarder / restaurer">💾</button>
       <button class="hdr-help-btn" onclick="openHelpSheet()">❔</button>
     </div>
@@ -392,7 +412,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.3.1</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.4.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1651,6 +1671,11 @@ var HELP_SECTIONS=[
     +'<li><b>Depuis un album :</b> bouton "Export PDF" pour une grille rapide de toutes tes photos, sans passer par l\'éditeur.</li>'
     +'<li><b>Format story :</b> bouton 📱 dans l\'éditeur — exporte chaque page en image verticale 1080×1920 (le format Instagram/Snapchat/TikTok Stories), une image par page, prêtes à poster directement.</li>'
     +'</ul>' },
+  { icon:'🌙', title:'Thème clair / sombre', body:
+    '<ul>'
+    +'<li>Bouton 🌙 (ou ☀️) en haut de l\'écran d\'accueil : bascule l\'interface de l\'appli entre clair et sombre. Ton choix est mémorisé pour les prochaines fois.</li>'
+    +'<li>C\'est différent des styles de <b>livre</b> (Nuit violette, Noir intense...) qui restent indépendants — un livre garde ses propres couleurs choisies page par page, peu importe le thème de l\'appli.</li>'
+    +'</ul>' },
   { icon:'💾', title:'Où sont tes données ? Sauvegarder / restaurer', body:
     '<ul>'
     +'<li>Tout est stocké <b>uniquement sur ton téléphone</b> (dans le navigateur) — pas de compte, pas de cloud, rien n\'est envoyé ailleurs.</li>'
@@ -1693,6 +1718,21 @@ function closeHelpSheet(){
    nouvelle dépendance (pas de zip) : juste du JSON, lisible par n'importe
    quel outil si besoin, au prix d'un fichier un peu plus gros (~33% de plus
    que les photos d'origine, inhérent à l'encodage base64). */
+/* ══════════════════ THÈME CLAIR / SOMBRE (interface de l'appli) ══════════════════
+   Distinct des styles de LIVRE : ceux-ci ont leurs propres fonds sombres au
+   choix, page par page, indépendants de ce réglage qui ne concerne que
+   l'interface générale (écran d'accueil, album, menus). */
+function bkApplyTheme(mode){
+  if(mode==='dark') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+  var btn=document.getElementById('theme-toggle-btn');
+  if(btn){ btn.textContent = mode==='dark' ? '☀️' : '🌙'; btn.title = mode==='dark' ? 'Basculer en clair' : 'Basculer en sombre'; }
+  try{ localStorage.setItem('mv_theme', mode); }catch(e){}
+}
+function bkToggleTheme(){
+  var current=document.documentElement.getAttribute('data-theme')==='dark' ? 'dark' : 'light';
+  bkApplyTheme(current==='dark' ? 'light' : 'dark');
+}
 function openBackupSheet(){
   document.getElementById('backup-export-progress').style.display='none';
   document.getElementById('backup-import-progress').style.display='none';
@@ -6015,6 +6055,11 @@ function generatePDFBody(a, photos, fullById, goBtn, wrap, msgEl, barEl){
    l'album, sans photoIds) sont automatiquement convertis vers le nouveau format,
    sans perte de données. */
 initDB(function(){
+  // synchronise l'icône du bouton avec le thème déjà appliqué tôt (dans <head>)
+  var btn=document.getElementById('theme-toggle-btn');
+  if(btn && document.documentElement.getAttribute('data-theme')==='dark'){
+    btn.textContent='☀️'; btn.title='Basculer en clair';
+  }
   dbGetAll('albums', function(albumRows){
     dbGetAll('photos', function(photoRows){
       var photoById={};
