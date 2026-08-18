@@ -425,6 +425,19 @@ img{-webkit-user-drag:none;}
   </div>
 </div>
 
+<!-- Feuille: ajuster plusieurs pages à la zone de sécurité impression -->
+<div class="bk-sheet" id="safe-margin-pages-sheet">
+  <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🔧 Ajuster plusieurs pages</h3>
+    <div class="modal-sub" style="margin-bottom:10px">Coche les pages à ajuster à la zone de sécurité (5% du bord). Les pages qui y sont déjà sont décochées par défaut.</div>
+    <div id="safe-margin-pages-list"></div>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="closeSafeMarginPagePicker()">Annuler</button>
+      <button class="mbtn mbtn-ok" onclick="bkRunFitMultiplePages()">Ajuster</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════ HOME ══════════ -->
 <div class="page on" id="pg-home">
   <div class="hdr">
@@ -444,7 +457,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.8.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.9.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -620,6 +633,8 @@ img{-webkit-user-drag:none;}
     <button class="bk-tool" id="bk-group-btn" onclick="bkToggleMultiSelectMode()"><span class="ic">🔗</span>Grouper</button>
     <button class="bk-tool" onclick="bkToggleOrient()"><span class="ic">🔄</span>Format</button>
     <button class="bk-tool" id="bk-safe-margin-btn" onclick="bkToggleSafeMargin()"><span class="ic">📐</span>Repères impression</button>
+    <button class="bk-tool" onclick="bkFitCurrentPageToSafeMargin()"><span class="ic">🔧</span>Ajuster cette page</button>
+    <button class="bk-tool" onclick="bkFitMultiplePagesToSafeMargin()"><span class="ic">🔧</span>Ajuster plusieurs pages</button>
     <div id="bk-bgswatches" style="display:flex;gap:8px;align-items:center;padding-left:4px;overflow-x:auto;padding-bottom:2px"></div>
   </div>
   <div class="bk-stage-wrap">
@@ -1735,6 +1750,8 @@ var HELP_SECTIONS=[
     +'<li>Bouton <b>📐 Repères impression</b> dans l\'éditeur de livre : affiche une zone en pointillés à 5% du bord de la page.</li>'
     +'<li>Utile si tu comptes envoyer ton livre chez un vrai imprimeur : évite de placer du texte ou un visage important trop près du bord, qui pourrait être perdu à la découpe ou la reliure.</li>'
     +'<li>C\'est un repère visuel <b>uniquement pour toi pendant l\'édition</b> — il n\'apparaît jamais dans le PDF exporté, ni dans le format story.</li>'
+    +'<li><b>Ajuster cette page :</b> bouton 🔧 — réduit et recentre automatiquement tout le contenu de la page pour qu\'il tienne dans la zone de sécurité, en gardant la disposition relative (pas de re-création, juste un "zoom arrière"). Ne fait rien si la page y est déjà.</li>'
+    +'<li><b>Ajuster plusieurs pages :</b> même chose, mais en choisissant les pages à traiter d\'un coup dans une liste à cocher — les pages déjà dans la zone sont décochées par défaut.</li>'
     +'</ul>' }
 ];
 function bkRenderHelpAccordion(){
@@ -4869,6 +4886,96 @@ function bkToggleSafeMargin(){
   bkSafeMarginOn=!bkSafeMarginOn;
   document.getElementById('bk-safe-margin-btn').classList.toggle('active', bkSafeMarginOn);
   bkRenderPage();
+}
+/* ══════════════════ AJUSTER À LA ZONE DE SÉCURITÉ (redimensionnement auto) ══════════════════
+   Recalcule et déplace TOUS les éléments d'une page (photos, formes, texte,
+   stickers, icônes — même groupés) pour qu'ils tiennent dans la zone à 5%
+   du bord, en gardant leur disposition relative les uns par rapport aux
+   autres — comme si on "zoomait arrière" la page entière puis la centrait
+   dans le cadre de sécurité. Si une page est déjà entièrement dans la zone,
+   elle n'est pas touchée. */
+var BK_SAFE_MARGIN_PCT=5;
+function bkElementBBox(el){
+  // gère aussi les groupes, en cherchant l'étendue de tous leurs enfants
+  if(el.type==='group'){
+    var boxes=el.children.map(bkElementBBox);
+    return {
+      minX:Math.min.apply(null, boxes.map(function(b){return b.minX;})),
+      maxX:Math.max.apply(null, boxes.map(function(b){return b.maxX;})),
+      minY:Math.min.apply(null, boxes.map(function(b){return b.minY;})),
+      maxY:Math.max.apply(null, boxes.map(function(b){return b.maxY;}))
+    };
+  }
+  return { minX:el.x-el.w/2, maxX:el.x+el.w/2, minY:el.y-el.h/2, maxY:el.y+el.h/2 };
+}
+function bkPageFitsSafeMargin(page){
+  if(!page.elements.length) return true;
+  var lo=BK_SAFE_MARGIN_PCT, hi=100-BK_SAFE_MARGIN_PCT;
+  return page.elements.every(function(el){
+    var b=bkElementBBox(el);
+    return b.minX>=lo-0.5 && b.maxX<=hi+0.5 && b.minY>=lo-0.5 && b.maxY<=hi+0.5; // petite tolérance pour les arrondis
+  });
+}
+function bkFitPageToSafeMargin(page){
+  if(!page.elements.length) return false;
+  var boxes=page.elements.map(bkElementBBox);
+  var minX=Math.min.apply(null, boxes.map(function(b){return b.minX;}));
+  var maxX=Math.max.apply(null, boxes.map(function(b){return b.maxX;}));
+  var minY=Math.min.apply(null, boxes.map(function(b){return b.minY;}));
+  var maxY=Math.max.apply(null, boxes.map(function(b){return b.maxY;}));
+  var lo=BK_SAFE_MARGIN_PCT, hi=100-BK_SAFE_MARGIN_PCT, target=hi-lo; // 90% de large/haut, cadre disponible
+  var bboxW=maxX-minX, bboxH=maxY-minY;
+  if(bboxW<=target+0.5 && bboxH<=target+0.5) return false; // déjà dans le cadre, rien à faire
+  var scale=Math.min(target/bboxW, target/bboxH, 1); // ne jamais AGRANDIR, seulement réduire si besoin
+  var bboxCx=(minX+maxX)/2, bboxCy=(minY+maxY)/2;
+  var targetCx=50, targetCy=50; // centré dans la page (le cadre de sécurité est lui-même centré)
+  function scaleEl(el){
+    if(el.type==='group'){ el.children.forEach(scaleEl); return; }
+    el.x=targetCx+(el.x-bboxCx)*scale;
+    el.y=targetCy+(el.y-bboxCy)*scale;
+    el.w=el.w*scale;
+    el.h=el.h*scale;
+    if(el.fontSize) el.fontSize=Math.max(8, Math.round(el.fontSize*scale));
+  }
+  page.elements.forEach(scaleEl);
+  return true;
+}
+function bkFitCurrentPageToSafeMargin(){
+  var page=bkBook.pages[bkPageIdx];
+  if(bkPageFitsSafeMargin(page)){ toast('✅ Cette page tient déjà dans la zone de sécurité'); return; }
+  bkSnapshot();
+  bkFitPageToSafeMargin(page);
+  bkSelId=null;
+  bkRenderPage();
+  toast('📐 Page ajustée à la zone de sécurité');
+}
+function bkFitMultiplePagesToSafeMargin(){
+  openSafeMarginPagePicker();
+}
+function openSafeMarginPagePicker(){
+  var h='';
+  bkBook.pages.forEach(function(pg,i){
+    var fits=bkPageFitsSafeMargin(pg);
+    h+='<div class="version-row"><label style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer">'
+      +'<input type="checkbox" class="safe-margin-page-cb" value="'+i+'" '+(fits?'':'checked')+'>'
+      +'<span>Page '+(i+1)+(fits?' <span style="color:var(--ink-soft);font-size:.72rem">(déjà dans la zone)</span>':'')+'</span>'
+      +'</label></div>';
+  });
+  document.getElementById('safe-margin-pages-list').innerHTML=h;
+  document.getElementById('safe-margin-pages-sheet').classList.add('on');
+}
+function closeSafeMarginPagePicker(){ document.getElementById('safe-margin-pages-sheet').classList.remove('on'); }
+function bkRunFitMultiplePages(){
+  var checked=Array.from(document.querySelectorAll('.safe-margin-page-cb:checked')).map(function(cb){ return parseInt(cb.value,10); });
+  if(!checked.length){ toast('Aucune page cochée'); return; }
+  bkSnapshot();
+  var changed=0;
+  checked.forEach(function(i){
+    if(bkFitPageToSafeMargin(bkBook.pages[i])) changed++;
+  });
+  closeSafeMarginPagePicker();
+  bkRenderPage();
+  toast(changed ? ('📐 '+changed+' page'+(changed>1?'s':'')+' ajustée'+(changed>1?'s':'')) : 'Toutes les pages cochées tenaient déjà dans la zone');
 }
 function bkSafeMarginNode(){
   // Repère visuel UNIQUEMENT dans l'éditeur (jamais dessiné dans le PDF ou
