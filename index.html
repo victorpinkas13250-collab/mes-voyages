@@ -262,7 +262,10 @@ img{-webkit-user-drag:none;}
 .mp-place-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);}
 .mp-place-row .name{flex:1;font-weight:800;font-size:.85rem;}
 .mp-place-row button{background:none;border:none;font-size:1rem;padding:4px;}
-.bk-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface);box-shadow:var(--shadow-sm);flex-shrink:0;z-index:5;}
+.bk-top{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--surface);box-shadow:var(--shadow-sm);flex-shrink:0;z-index:5;}
+.bk-top-scroll{display:flex;align-items:center;gap:6px;overflow-x:auto;flex:1;min-width:0;}
+.bk-top-scroll>*{flex-shrink:0;}
+.bk-top .bk-btn.primary{flex-shrink:0;}
 .bk-btn{background:var(--bg);border:none;border-radius:50px;color:var(--ink);font-weight:800;font-size:.78rem;padding:9px 14px;}
 .bk-btn:disabled{opacity:.35;}
 .bk-btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;}
@@ -469,7 +472,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.15.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.15.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -617,18 +620,20 @@ img{-webkit-user-drag:none;}
 <!-- ══════════ ÉDITEUR DE LIVRE (pages libres) ══════════ -->
 <div id="pg-book">
   <div class="bk-top">
-    <button class="bk-btn" onclick="closeBook()" data-i18n="btn_close">✕ Fermer</button>
-    <button class="bk-btn" onclick="bkManualSave()" data-i18n-title="btn_save_now" title="Enregistrer maintenant">💾</button>
-    <button class="bk-btn" onclick="bkSwitchBook()" data-i18n-title="btn_my_books" title="Mes livres">📚</button>
-    <button class="bk-btn" onclick="openBookOverview()" data-i18n-title="btn_overview" title="Vue d'ensemble de toutes les pages">🔲</button>
-    <button class="bk-btn" onclick="openVersionHistory()" data-i18n-title="btn_history" title="Historique des versions">🕐</button>
-    <div style="display:flex;gap:6px;align-items:center">
-      <button class="bk-btn" id="bk-undo-btn" onclick="bkUndo()" disabled data-i18n-title="btn_undo" title="Annuler">↩️</button>
-      <button class="bk-btn" id="bk-redo-btn" onclick="bkRedo()" disabled data-i18n-title="btn_redo" title="Rétablir">↪️</button>
+    <div class="bk-top-scroll">
+      <button class="bk-btn" onclick="closeBook()" data-i18n="btn_close">✕ Fermer</button>
+      <button class="bk-btn" onclick="bkManualSave()" data-i18n-title="btn_save_now" title="Enregistrer maintenant">💾</button>
+      <button class="bk-btn" onclick="bkSwitchBook()" data-i18n-title="btn_my_books" title="Mes livres">📚</button>
+      <button class="bk-btn" onclick="openBookOverview()" data-i18n-title="btn_overview" title="Vue d'ensemble de toutes les pages">🔲</button>
+      <button class="bk-btn" onclick="openVersionHistory()" data-i18n-title="btn_history" title="Historique des versions">🕐</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="bk-btn" id="bk-undo-btn" onclick="bkUndo()" disabled data-i18n-title="btn_undo" title="Annuler">↩️</button>
+        <button class="bk-btn" id="bk-redo-btn" onclick="bkRedo()" disabled data-i18n-title="btn_redo" title="Rétablir">↪️</button>
+      </div>
+      <button class="bk-btn" onclick="exportPageAsImage()" data-i18n-title="btn_export_image" title="Exporter la page en image">🖼️</button>
+      <button class="bk-btn" onclick="exportBookStory()" data-i18n-title="btn_share_story" title="Exporter en format story (vertical, réseaux sociaux)">📱</button>
+      <button class="bk-btn" onclick="exportBookStrip()" data-i18n-title="export_strip" title="Exporter en bande">📏</button>
     </div>
-    <button class="bk-btn" onclick="exportPageAsImage()" data-i18n-title="btn_export_image" title="Exporter la page en image">🖼️</button>
-    <button class="bk-btn" onclick="exportBookStory()" data-i18n-title="btn_share_story" title="Exporter en format story (vertical, réseaux sociaux)">📱</button>
-    <button class="bk-btn" onclick="exportBookStrip()" data-i18n-title="export_strip" title="Exporter en bande">📏</button>
     <button class="bk-btn primary" onclick="exportBookPDF()" data-i18n="btn_export_pdf">Exporter PDF</button>
   </div>
   <div id="bk-pagelabel" style="font-weight:800;font-size:.78rem;text-align:center;padding:4px 0;color:var(--ink-soft)"></div>
