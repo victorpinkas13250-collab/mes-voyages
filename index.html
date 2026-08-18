@@ -458,7 +458,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.13.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.13.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -478,8 +478,8 @@ img{-webkit-user-drag:none;}
   </div>
   <div class="upload-z" onclick="document.getElementById('fup').click()" ondragover="event.preventDefault()" ondrop="dropFiles(event)">
     <div class="cam">📸</div>
-    <p>Ajouter des photos</p>
-    <small>Touche pour choisir, ou glisse-dépose</small>
+    <p data-i18n="add_photos">Ajouter des photos</p>
+    <small data-i18n="add_photos_hint">Touche pour choisir, ou glisse-dépose</small>
     <input type="file" id="fup" multiple accept="image/*" style="display:none" onchange="addFiles(this.files)">
   </div>
   <div id="upload-progress-holder"></div>
@@ -530,7 +530,7 @@ img{-webkit-user-drag:none;}
     <div class="lb-meta" id="lb-meta"></div>
     <div class="lb-actions">
       <button class="lb-like" id="lblike" onclick="lblike()">🤍</button>
-      <input class="lb-cap-input" id="lbcap" placeholder="Ajouter une légende..." oninput="lbcaption(this.value)">
+      <input class="lb-cap-input" id="lbcap" placeholder="Ajouter une légende..." data-i18n-placeholder="add_caption_placeholder" oninput="lbcaption(this.value)">
       <button class="lb-del" onclick="lbdel()">🗑️</button>
     </div>
     <div class="lb-tags-row" id="lb-tags-row"></div>
@@ -545,11 +545,11 @@ img{-webkit-user-drag:none;}
     <div class="modal-sub">Donne un nom à ton album souvenir</div>
     <div class="mf">
       <label>Titre</label>
-      <input id="mt" placeholder="Ex: Rome entre amis">
+      <input id="mt" placeholder="Ex: Rome entre amis" data-i18n-placeholder="ph_trip_title">
       <label>Destination</label>
-      <input id="ml" placeholder="Ex: Italie">
+      <input id="ml" placeholder="Ex: Italie" data-i18n-placeholder="ph_trip_loc">
       <label>Date</label>
-      <input id="md" placeholder="Ex: Été 2026">
+      <input id="md" placeholder="Ex: Été 2026" data-i18n-placeholder="ph_trip_date">
     </div>
     <div class="modal-btns">
       <button class="mbtn mbtn-cancel" onclick="closeModal()"><span data-i18n="btn_cancel">Annuler</span></button>
@@ -594,7 +594,7 @@ img{-webkit-user-drag:none;}
     <div style="font-weight:800;font-size:.85rem" id="mp-count"></div>
   </div>
   <div class="mp-search-row">
-    <input type="text" id="mp-search" placeholder="Chercher un lieu (ville, monument...)" onkeydown="if(event.key==='Enter')mpSearchPlace()">
+    <input type="text" id="mp-search" placeholder="Chercher un lieu (ville, monument...)" data-i18n-placeholder="ph_map_search" onkeydown="if(event.key==='Enter')mpSearchPlace()">
     <button class="bk-btn primary" onclick="mpSearchPlace()">🔍</button>
   </div>
   <div id="mp-search-results"></div>
@@ -873,7 +873,7 @@ img{-webkit-user-drag:none;}
 <div class="bk-sheet" id="bk-template-sheet">
   <div class="bk-sheet-box">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px"><span data-i18n="title_templates">Modèles de page</span> <span id="bk-template-count" style="color:var(--ink-soft);font-weight:700;font-size:.8rem"></span></h3>
-    <input type="text" id="bk-template-search" placeholder="Rechercher : mosaïque, violette, citation..." oninput="bkFilterTemplateGrid(this.value)" style="width:100%;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-size:.9rem;font-weight:700;margin-bottom:12px;box-sizing:border-box">
+    <input type="text" id="bk-template-search" placeholder="Rechercher : mosaïque, violette, citation..." data-i18n-placeholder="ph_template_search" oninput="bkFilterTemplateGrid(this.value)" style="width:100%;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-size:.9rem;font-weight:700;margin-bottom:12px;box-sizing:border-box">
     <div class="bk-tpl-grid" id="bk-template-grid"></div>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkTemplateSheet()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
@@ -883,7 +883,7 @@ img{-webkit-user-drag:none;}
 <div class="bk-sheet" id="bk-icon-sheet">
   <div class="bk-sheet-box">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px"><span data-i18n="title_icons">Icônes</span> <span id="bk-icon-count" style="color:var(--ink-soft);font-weight:700;font-size:.8rem"></span></h3>
-    <input type="text" id="bk-icon-search" placeholder="Rechercher : plage, avion, montagne..." oninput="bkFilterIconGrid(this.value)" style="width:100%;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-size:.9rem;font-weight:700;margin-bottom:12px;box-sizing:border-box">
+    <input type="text" id="bk-icon-search" placeholder="Rechercher : plage, avion, montagne..." data-i18n-placeholder="ph_icon_search" oninput="bkFilterIconGrid(this.value)" style="width:100%;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-size:.9rem;font-weight:700;margin-bottom:12px;box-sizing:border-box">
     <div class="bk-icon-grid" id="bk-icon-grid"></div>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkIconSheet()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
@@ -1900,7 +1900,17 @@ var BK_I18N={
   btn_adjust:{fr:'Ajuster',en:'Fit',it:'Adatta',es:'Ajustar'},
   btn_generate_book:{fr:'Générer le livre',en:'Generate the book',it:'Genera il libro',es:'Generar el libro'},
   btn_got_it_close:{fr:'J\'ai compris, fermer',en:'Got it, close',it:'Capito, chiudi',es:'Entendido, cerrar'},
-  count_of:{fr:'sur',en:'of',it:'su',es:'de'}
+  count_of:{fr:'sur',en:'of',it:'su',es:'de'},
+  add_photos:{fr:'Ajouter des photos',en:'Add photos',it:'Aggiungi foto',es:'Añadir fotos'},
+  add_photos_hint:{fr:'Touche pour choisir, ou glisse-dépose',en:'Tap to choose, or drag and drop',it:'Tocca per scegliere, o trascina',es:'Toca para elegir, o arrastra y suelta'},
+  add_caption_placeholder:{fr:'Ajouter une légende...',en:'Add a caption...',it:'Aggiungi una didascalia...',es:'Añadir una leyenda...'},
+  add_photo_frame:{fr:'Ajouter<br>une photo',en:'Add<br>a photo',it:'Aggiungi<br>una foto',es:'Añadir<br>una foto'},
+  ph_trip_title:{fr:'Ex: Rome entre amis',en:'E.g: Rome with friends',it:'Es: Roma con amici',es:'Ej: Roma con amigos'},
+  ph_trip_loc:{fr:'Ex: Italie',en:'E.g: Italy',it:'Es: Italia',es:'Ej: Italia'},
+  ph_trip_date:{fr:'Ex: Été 2026',en:'E.g: Summer 2026',it:'Es: Estate 2026',es:'Ej: Verano 2026'},
+  ph_map_search:{fr:'Chercher un lieu (ville, monument...)',en:'Search a place (city, landmark...)',it:'Cerca un luogo (città, monumento...)',es:'Buscar un lugar (ciudad, monumento...)'},
+  ph_template_search:{fr:'Rechercher : mosaïque, violette, citation...',en:'Search: mosaic, purple, quote...',it:'Cerca: mosaico, viola, citazione...',es:'Buscar: mosaico, morado, cita...'},
+  ph_icon_search:{fr:'Rechercher : plage, avion, montagne...',en:'Search: beach, plane, mountain...',it:'Cerca: spiaggia, aereo, montagna...',es:'Buscar: playa, avión, montaña...'}
 };
 var BK_LANG='fr';
 function t(key){
@@ -5205,7 +5215,7 @@ function bkElementInnerHTML(el){
       // cadre intentionnellement vide (livre "structure vide") : invite claire à
       // ajouter une photo plutôt qu'une icône d'image cassée
       return '<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#F3EEFB;border:2px dashed #C9B8F0;box-sizing:border-box;'+(radiusStyle||clipStyle||'border-radius:4px;')+'color:#9B87C4;font-weight:800;font-size:.75rem;text-align:center;padding:6px">'
-        +'<span style="font-size:1.8rem">🖼️</span><span>Ajouter<br>une photo</span></div>';
+        +'<span style="font-size:1.8rem">🖼️</span><span>'+t('add_photo_frame')+'</span></div>';
     }
     var imgStyle;
     if(el.crop){
