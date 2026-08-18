@@ -322,6 +322,11 @@ img{-webkit-user-drag:none;}
 .bk-fsize-row button{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg);font-weight:900;font-size:1.1rem;color:var(--primary-dark);}
 .bk-photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:50vh;overflow-y:auto;}
 .dup-group{margin-bottom:16px;}
+.overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.overview-cell{position:relative;border-radius:10px;overflow:hidden;border:2px solid var(--border);cursor:pointer;background:var(--surface);aspect-ratio:210/297;}
+.overview-cell img{width:100%;height:100%;object-fit:cover;display:block;}
+.overview-cell .num{position:absolute;bottom:4px;right:5px;background:rgba(20,14,36,.65);color:#fff;font-size:.62rem;font-weight:800;padding:2px 6px;border-radius:8px;}
+.overview-cell.loading{display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:.7rem;}
 .dup-group-h{font-weight:800;font-size:.8rem;color:var(--ink-soft);margin-bottom:8px;}
 .dup-group-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
 .dup-thumb{position:relative;flex-shrink:0;width:88px;height:88px;border-radius:10px;overflow:hidden;}
@@ -393,6 +398,16 @@ img{-webkit-user-drag:none;}
   </div>
 </div>
 
+<!-- Feuille: vue d'ensemble de toutes les pages du livre -->
+<div class="bk-sheet" id="overview-sheet">
+  <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🔲 Vue d'ensemble</h3>
+    <div class="modal-sub" style="margin-bottom:10px">Touche une page pour y aller directement.</div>
+    <div id="overview-grid" class="overview-grid"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBookOverview()">Fermer</button></div>
+  </div>
+</div>
+
 <!-- ══════════ HOME ══════════ -->
 <div class="page on" id="pg-home">
   <div class="hdr">
@@ -412,7 +427,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.4.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.5.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -562,6 +577,7 @@ img{-webkit-user-drag:none;}
     <button class="bk-btn" onclick="closeBook()">✕ Fermer</button>
     <button class="bk-btn" onclick="bkManualSave()" title="Enregistrer maintenant">💾</button>
     <button class="bk-btn" onclick="bkSwitchBook()" title="Mes livres">📚</button>
+    <button class="bk-btn" onclick="openBookOverview()" title="Vue d'ensemble de toutes les pages">🔲</button>
     <div style="display:flex;gap:6px;align-items:center">
       <button class="bk-btn" id="bk-undo-btn" onclick="bkUndo()" disabled title="Annuler">↩️</button>
       <button class="bk-btn" id="bk-redo-btn" onclick="bkRedo()" disabled title="Rétablir">↪️</button>
@@ -1665,11 +1681,13 @@ var HELP_SECTIONS=[
     +'<li>Depuis l\'éditeur de livre, l\'outil <b>Carte</b> insère une image de la carte avec tous ses points, comme n\'importe quelle photo (déplaçable, redimensionnable) — si tu as plusieurs cartes, l\'appli te demande laquelle insérer.</li>'
     +'<li>Nécessite une connexion internet pour charger les rues ; sans réseau, la carte garde un fond uni.</li>'
     +'</ul>' },
-  { icon:'📕', title:'Exporter en PDF ou en story', body:
+  { icon:'📕', title:'Exporter, partager, vue d\'ensemble', body:
     '<ul>'
     +'<li><b>Depuis l\'éditeur de livre :</b> bouton "Exporter PDF" en haut, exporte le livre tel que tu l\'as construit page par page.</li>'
     +'<li><b>Depuis un album :</b> bouton "Export PDF" pour une grille rapide de toutes tes photos, sans passer par l\'éditeur.</li>'
-    +'<li><b>Format story :</b> bouton 📱 dans l\'éditeur — exporte chaque page en image verticale 1080×1920 (le format Instagram/Snapchat/TikTok Stories), une image par page, prêtes à poster directement.</li>'
+    +'<li><b>Format story :</b> bouton 📱 dans l\'éditeur — exporte la page actuelle en image verticale 1080×1920 (le format Instagram/Snapchat/TikTok Stories).</li>'
+    +'<li><b>Partage direct :</b> sur téléphone, chaque export (PDF, image, story) ouvre directement le menu de partage natif (WhatsApp, Mail, Messages...) au lieu de juste télécharger — l\'option d\'enregistrer le fichier reste disponible dans ce même menu.</li>'
+    +'<li><b>Vue d\'ensemble :</b> bouton 🔲 dans l\'éditeur — toutes les pages du livre en miniatures sur une seule planche, pour repérer une page vide ou un souci avant d\'exporter. Touche une vignette pour y aller directement.</li>'
     +'</ul>' },
   { icon:'🌙', title:'Thème clair / sombre', body:
     '<ul>'
@@ -4518,6 +4536,44 @@ function bkSwitchBook(){
   bkRenderBookList();
   document.getElementById('bk-booklist-sheet').classList.add('on');
 }
+/* ══════════════════ VUE D'ENSEMBLE DU LIVRE ══════════════════
+   Une planche avec toutes les pages en miniature, pour repérer un problème
+   (page vide, doublon de mise en page...) avant d'exporter, plutôt que de
+   faire défiler page par page. Rendu progressif : les vignettes se dessinent
+   une par une (petite résolution, donc rapide), pas besoin d'attendre que
+   TOUT le livre soit prêt avant de voir les premières pages. */
+function openBookOverview(){
+  var grid=document.getElementById('overview-grid');
+  var n=bkBook.pages.length;
+  var h='';
+  for(var i=0;i<n;i++){
+    h+='<div class="overview-cell loading" id="overview-cell-'+i+'" onclick="bkGotoPageFromOverview('+i+')">…</div>';
+  }
+  grid.innerHTML=h;
+  document.getElementById('overview-sheet').classList.add('on');
+  var fontsReady=(document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+  fontsReady.then(function(){
+    var i=0;
+    function next(){
+      if(i>=n) return;
+      bkRenderPageToCanvas(bkBook.pages[i], bkBook.orient, 248, 351).then(function(dataUrl){
+        var cell=document.getElementById('overview-cell-'+this.idx);
+        if(cell){
+          cell.classList.remove('loading');
+          cell.innerHTML='<img src="'+dataUrl+'"><span class="num">'+(this.idx+1)+'</span>';
+        }
+      }.bind({idx:i})).finally(function(){ next(); });
+      i++;
+    }
+    // 3 rendus en parallèle à la fois : assez rapide, sans geler l'interface
+    for(var k=0;k<3;k++) next();
+  });
+}
+function closeBookOverview(){ document.getElementById('overview-sheet').classList.remove('on'); }
+function bkGotoPageFromOverview(i){
+  closeBookOverview();
+  bkGotoPage(i);
+}
 function bkToggleOrient(){
   bkBook.orient = bkBook.orient==='portrait' ? 'landscape' : 'portrait';
   bkRenderPage();
@@ -5818,21 +5874,43 @@ function bkRenderPageToCanvas(page, orient, customPXW, customPXH){
     });
   });
 }
+/* ══════════════════ PARTAGE DIRECT / TÉLÉCHARGEMENT ══════════════════
+   Utilise le menu de partage natif du téléphone (WhatsApp, Mail, Messages...)
+   quand c'est possible — l'utilisateur y retrouve AUSSI l'option d'enregistrer
+   le fichier, donc rien n'est perdu par rapport à avant. Si le partage natif
+   n'est pas disponible (certains navigateurs), retombe simplement sur le
+   téléchargement classique, comme précédemment. */
+function bkShareOrDownloadBlob(blob, filename, successMsg){
+  var file;
+  try{ file=new File([blob], filename, {type:blob.type}); }catch(e){ file=null; }
+  if(file && navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file], title:filename}).then(function(){
+      toast(successMsg);
+    }).catch(function(err){
+      if(err && err.name==='AbortError') return; // l'utilisateur a juste fermé le menu de partage, rien à signaler
+      bkDownloadBlob(blob, filename, successMsg);
+    });
+  } else {
+    bkDownloadBlob(blob, filename, successMsg);
+  }
+}
+function bkDownloadBlob(blob, filename, successMsg){
+  var url=URL.createObjectURL(blob);
+  var link=document.createElement('a');
+  link.href=url; link.download=filename;
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+  toast(successMsg);
+}
 function exportPageAsImage(){
   var page=bkBook.pages[bkPageIdx];
   bkRenderPageToCanvas(page, bkBook.orient).then(function(dataUrl){
     var fname=(bkAlbum.title||'ma-page').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-page'+(bkPageIdx+1)+'.jpg';
-    // dataURL -> Blob (comme pour le PDF) : plus fiable pour déclencher un vrai téléchargement
     var byteStr=atob(dataUrl.split(',')[1]);
     var bytes=new Uint8Array(byteStr.length);
     for(var i=0;i<byteStr.length;i++) bytes[i]=byteStr.charCodeAt(i);
     var blob=new Blob([bytes], {type:'image/jpeg'});
-    var url=URL.createObjectURL(blob);
-    var link=document.createElement('a');
-    link.href=url; link.download=fname;
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    setTimeout(function(){ URL.revokeObjectURL(url); },4000);
-    toast('🖼️ Image exportée');
+    bkShareOrDownloadBlob(blob, fname, '🖼️ Image exportée');
   }).catch(function(err){
     console.error('Erreur export image', err);
     toast('❌ Erreur pendant l\'export image');
@@ -5855,10 +5933,11 @@ function exportBookStory(){
   fontsReady.then(function(){
     return bkRenderPageToCanvas(page, bkBook.orient, 1080, 1920);
   }).then(function(dataUrl){
-    var link=document.createElement('a');
-    link.href=dataUrl; link.download=baseName+'-story-page'+(bkPageIdx+1)+'.jpg';
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    toast('📱 Page exportée au format story');
+    var byteStr=atob(dataUrl.split(',')[1]);
+    var bytes=new Uint8Array(byteStr.length);
+    for(var i=0;i<byteStr.length;i++) bytes[i]=byteStr.charCodeAt(i);
+    var blob=new Blob([bytes], {type:'image/jpeg'});
+    bkShareOrDownloadBlob(blob, baseName+'-story-page'+(bkPageIdx+1)+'.jpg', '📱 Page exportée au format story');
   }).catch(function(err){
     console.error('Erreur export story', err);
     toast('❌ Erreur pendant l\'export story');
@@ -5883,12 +5962,7 @@ function exportBookPDF(){
   chain.then(function(){
     var fname=(bkAlbum.title||'mon-livre').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-livre.pdf';
     var blob=doc.output('blob');
-    var url=URL.createObjectURL(blob);
-    var link=document.createElement('a');
-    link.href=url; link.download=fname;
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    setTimeout(function(){ URL.revokeObjectURL(url); },4000);
-    toast('📕 Livre exporté avec succès');
+    bkShareOrDownloadBlob(blob, fname, '📕 Livre exporté avec succès');
   }).catch(function(err){
     console.error('Erreur export livre', err);
     toast('❌ Erreur pendant l\'export du livre');
@@ -6018,18 +6092,11 @@ function generatePDFBody(a, photos, fullById, goBtn, wrap, msgEl, barEl){
       if(idx>=total){
         var fname=(a.title||'mon-voyage').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.pdf';
         var blob=doc.output('blob');
-        var url=URL.createObjectURL(blob);
-        var link=document.createElement('a');
-        link.href=url; link.download=fname;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+        bkShareOrDownloadBlob(blob, fname, '📕 PDF généré avec succès');
         msgEl.textContent='PDF prêt !';
         barEl.style.width='100%';
         setTimeout(function(){
           closePdfSheet();
-          toast('📕 PDF généré avec succès');
         },500);
         return;
       }
