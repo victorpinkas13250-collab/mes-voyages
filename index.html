@@ -372,17 +372,17 @@ img{-webkit-user-drag:none;}
 <!-- ══════════ AIDE ══════════ -->
 <div class="bk-sheet" id="help-sheet">
   <div class="bk-sheet-box" style="max-height:80vh;overflow-y:auto">
-    <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:4px">❔ Comment ça marche</h3>
+    <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:4px">❔ <span data-i18n="title_help">Comment ça marche</span></h3>
     <div class="modal-sub">Touche une section pour la déplier</div>
     <div id="help-accordion"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-ok" style="width:100%" onclick="closeHelpSheet()">J'ai compris, fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-ok" style="width:100%" onclick="closeHelpSheet()"><span data-i18n="btn_got_it_close">J'ai compris, fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: sauvegarde / restauration complète -->
 <div class="bk-sheet" id="backup-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">💾 Sauvegarder / restaurer</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">💾 <span data-i18n="title_backup">Sauvegarder / restaurer</span></h3>
     <div class="modal-sub" style="margin-bottom:14px">Un seul fichier avec TOUT (albums, photos, livres, cartes) — à garder de côté, ou à réimporter si tu changes de téléphone.</div>
     <button class="bk-btn primary" style="width:100%;margin-bottom:10px" onclick="exportFullBackup()">⬇️ Créer une sauvegarde complète</button>
     <div id="backup-export-progress" class="modal-sub" style="display:none;margin-bottom:10px"></div>
@@ -392,48 +392,48 @@ img{-webkit-user-drag:none;}
     </label>
     <div id="backup-import-progress" class="modal-sub" style="display:none;margin-bottom:10px"></div>
     <div class="modal-sub" style="margin-top:10px">La restauration <b>ajoute</b> les albums du fichier (jamais d'écrasement) — utile aussi pour transférer vers un nouveau téléphone.</div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBackupSheet()">Fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBackupSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: détection de doublons -->
 <div class="bk-sheet" id="dup-sheet">
   <div class="bk-sheet-box" style="max-height:80vh;overflow-y:auto">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px">👯 Doublons probables</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px">👯 <span data-i18n="title_duplicates">Doublons probables</span></h3>
     <div id="dup-sheet-body"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeDuplicatesFinder()">Fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeDuplicatesFinder()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: vue d'ensemble de toutes les pages du livre -->
 <div class="bk-sheet" id="overview-sheet">
   <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🔲 Vue d'ensemble</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🔲 <span data-i18n="title_overview">Vue d'ensemble</span></h3>
     <div class="modal-sub" style="margin-bottom:10px">Touche une page pour y aller directement.</div>
     <div id="overview-grid" class="overview-grid"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBookOverview()">Fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBookOverview()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: historique des versions du livre -->
 <div class="bk-sheet" id="version-history-sheet">
   <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🕐 Historique des versions</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🕐 <span data-i18n="title_history">Historique des versions</span></h3>
     <div class="modal-sub" style="margin-bottom:10px">Un point de sauvegarde à chaque fois que tu quittes l'éditeur. Restaurer reste lui-même annulable avec ↩️.</div>
     <div id="version-history-list"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeVersionHistory()">Fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeVersionHistory()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: ajuster plusieurs pages à la zone de sécurité impression -->
 <div class="bk-sheet" id="safe-margin-pages-sheet">
   <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🔧 Ajuster plusieurs pages</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🔧 <span data-i18n="title_fit_pages">Ajuster plusieurs pages</span></h3>
     <div class="modal-sub" style="margin-bottom:10px">Coche les pages à ajuster à la zone de sécurité (5% du bord). Les pages qui y sont déjà sont décochées par défaut.</div>
     <div id="safe-margin-pages-list"></div>
     <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="closeSafeMarginPagePicker()">Annuler</button>
-      <button class="mbtn mbtn-ok" onclick="bkRunFitMultiplePages()">Ajuster</button>
+      <button class="mbtn mbtn-cancel" onclick="closeSafeMarginPagePicker()"><span data-i18n="btn_cancel">Annuler</span></button>
+      <button class="mbtn mbtn-ok" onclick="bkRunFitMultiplePages()"><span data-i18n="btn_adjust">Ajuster</span></button>
     </div>
   </div>
 </div>
@@ -458,7 +458,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.12.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.13.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -503,7 +503,7 @@ img{-webkit-user-drag:none;}
   <div class="photos-grid" id="pgrid"></div>
   <div class="photo-multi-actionbar" id="photo-multi-actionbar">
     <span id="photo-multi-count">0 sélectionnée(s)</span>
-    <button class="mbtn mbtn-cancel" onclick="togglePhotoSelectMode()">Annuler</button>
+    <button class="mbtn mbtn-cancel" onclick="togglePhotoSelectMode()"><span data-i18n="btn_cancel">Annuler</span></button>
     <button class="mbtn" id="photo-multi-range-btn" onclick="togglePhotoRangeMode()" title="Sélectionner une gamme (du début à la fin)">🔗</button>
     <button class="mbtn" id="photo-multi-left-btn" onclick="moveSelectedPhoto(-1)" disabled title="Déplacer plus tôt">⬅️</button>
     <button class="mbtn" id="photo-multi-right-btn" onclick="moveSelectedPhoto(1)" disabled title="Déplacer plus tard">➡️</button>
@@ -541,7 +541,7 @@ img{-webkit-user-drag:none;}
 <!-- ══════════ MODAL: créer album ══════════ -->
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h3>Nouveau voyage</h3>
+    <h3 data-i18n="title_new_trip">Nouveau voyage</h3>
     <div class="modal-sub">Donne un nom à ton album souvenir</div>
     <div class="mf">
       <label>Titre</label>
@@ -552,8 +552,8 @@ img{-webkit-user-drag:none;}
       <input id="md" placeholder="Ex: Été 2026">
     </div>
     <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="closeModal()">Annuler</button>
-      <button class="mbtn mbtn-ok" onclick="createAlbum()">Créer</button>
+      <button class="mbtn mbtn-cancel" onclick="closeModal()"><span data-i18n="btn_cancel">Annuler</span></button>
+      <button class="mbtn mbtn-ok" onclick="createAlbum()"><span data-i18n="btn_create">Créer</span></button>
     </div>
   </div>
 </div>
@@ -561,7 +561,7 @@ img{-webkit-user-drag:none;}
 <!-- ══════════ SHEET: export PDF ══════════ -->
 <div id="pg-pdf">
   <div class="pdf-box">
-    <h3>📕 Export PDF</h3>
+    <h3>📕 <span data-i18n="title_export_pdf">Export PDF</span></h3>
     <div class="modal-sub">Génère un souvenir imprimable de cet album</div>
     <div class="pdf-lbl">Orientation</div>
     <div class="pdf-row">
@@ -582,7 +582,7 @@ img{-webkit-user-drag:none;}
       <div class="bar-track"><div class="bar-fill" id="pdf-progress-bar"></div></div>
     </div>
     <button class="pdf-go" id="pdf-go-btn" onclick="generatePDF()">Générer le PDF</button>
-    <button class="pdf-cancel" onclick="closePdfSheet()">Annuler</button>
+    <button class="pdf-cancel" onclick="closePdfSheet()"><span data-i18n="btn_cancel">Annuler</span></button>
   </div>
 </div>
 
@@ -645,7 +645,7 @@ img{-webkit-user-drag:none;}
   <div class="bk-sel-bar" id="bk-selbar"></div>
   <div class="bk-multi-actionbar" id="bk-multi-actionbar">
     <span id="bk-multi-count" style="font-weight:800;font-size:.85rem;flex:1;display:flex;align-items:center">0 sélectionné(s)</span>
-    <button class="bk-btn" onclick="bkExitMultiSelect()">Annuler</button>
+    <button class="bk-btn" onclick="bkExitMultiSelect()"><span data-i18n="btn_cancel">Annuler</span></button>
     <button class="bk-btn primary" id="bk-group-confirm" onclick="bkGroupSelected()" disabled>Grouper</button>
   </div>
   <div class="bk-pages" id="bk-pages"></div>
@@ -654,7 +654,7 @@ img{-webkit-user-drag:none;}
 <!-- Feuille: choix d'une forme -->
 <div class="bk-sheet" id="bk-shape-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Ajouter une forme</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_add_shape">Ajouter une forme</h3>
     <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px;flex-wrap:wrap">
       <button class="bk-tool" style="padding:14px 18px" onclick="bkAddShape('rect')"><span class="ic">▭</span>Rectangle</button>
       <button class="bk-tool" style="padding:14px 18px" onclick="bkAddShape('ellipse')"><span class="ic">⬤</span>Cercle</button>
@@ -662,14 +662,14 @@ img{-webkit-user-drag:none;}
       <button class="bk-tool" style="padding:14px 18px" onclick="bkAddShape('star')"><span class="ic">★</span>Étoile</button>
       <button class="bk-tool" style="padding:14px 18px" onclick="bkAddShape('line')"><span class="ic">➖</span>Ligne</button>
     </div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkShapeSheet()">Annuler</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkShapeSheet()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: suppression de fond (basique, par couleur) -->
 <div class="bk-sheet" id="bk-bg-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">Supprimer le fond</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px" data-i18n="title_remove_bg">Supprimer le fond</h3>
     <div class="modal-sub">Basique (par couleur) — marche bien sur fond uni, pas sur fond complexe</div>
     <div style="background:repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px;border-radius:14px;overflow:hidden">
       <img id="bk-bg-preview" style="width:100%;display:block">
@@ -681,8 +681,8 @@ img{-webkit-user-drag:none;}
       <span id="bk-bg-tolerance-val" style="font-weight:800;min-width:30px;text-align:center">30</span>
     </div>
     <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="closeBgRemoveSheet()">Annuler</button>
-      <button class="mbtn mbtn-ok" onclick="bkApplyBgRemove()">Appliquer</button>
+      <button class="mbtn mbtn-cancel" onclick="closeBgRemoveSheet()"><span data-i18n="btn_cancel">Annuler</span></button>
+      <button class="mbtn mbtn-ok" onclick="bkApplyBgRemove()"><span data-i18n="btn_apply">Appliquer</span></button>
     </div>
   </div>
 </div>
@@ -690,36 +690,36 @@ img{-webkit-user-drag:none;}
 <!-- Feuille: liste des livres (plusieurs livres possibles par album) -->
 <div class="bk-sheet" id="bk-booklist-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Mes livres</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_my_books">Mes livres</h3>
     <div class="bk-booklist-grid" id="bk-booklist-grid"></div>
     <button class="bk-book-add" style="margin-top:10px;border-color:#7B2FF7" onclick="openAutoBookSheet()"><div class="plus" style="background:linear-gradient(135deg,#FF5A6E,#7B2FF7)">🪄</div><span>Livre automatique</span></button>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBookListSheet()">Fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBookListSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: liste des cartes (plusieurs cartes possibles par album) -->
 <div class="bk-sheet" id="mp-maplist-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" id="mp-maplist-title">Mes cartes</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" id="mp-maplist-title" data-i18n="title_my_maps">Mes cartes</h3>
     <div class="bk-booklist-grid" id="mp-maplist-grid"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeMapListSheet()">Fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeMapListSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: appliquer un style à toutes les pages du livre -->
 <div class="bk-sheet" id="bk-globalstyle-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🎨 Style global</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🎨 <span data-i18n="title_global_style">Style global</span></h3>
     <div class="modal-sub" style="margin-bottom:12px">Change le fond, les couleurs et la police de TOUTES les pages du livre d'un coup (les photos et le contenu restent, seul l'habillage change).</div>
     <div id="bk-globalstyle-choices" style="display:flex;flex-wrap:wrap;gap:8px;max-height:340px;overflow-y:auto"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeGlobalStyleSheet()">Fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeGlobalStyleSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: assistant de livre automatique -->
 <div class="bk-sheet" id="bk-autobook-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🪄 Livre automatique</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🪄 <span data-i18n="title_autobook">Livre automatique</span></h3>
     <div class="modal-sub" id="bk-autobook-photocount"></div>
 
     <div class="pdf-lbl" style="margin-top:14px">Mode</div>
@@ -761,8 +761,8 @@ img{-webkit-user-drag:none;}
     <div id="bk-autobook-emojis" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
 
     <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="closeAutoBookSheet()">Annuler</button>
-      <button class="mbtn mbtn-ok" onclick="bkRunAutoGenerate()">Générer le livre</button>
+      <button class="mbtn mbtn-cancel" onclick="closeAutoBookSheet()"><span data-i18n="btn_cancel">Annuler</span></button>
+      <button class="mbtn mbtn-ok" onclick="bkRunAutoGenerate()"><span data-i18n="btn_generate_book">Générer le livre</span></button>
     </div>
   </div>
 </div>
@@ -770,37 +770,37 @@ img{-webkit-user-drag:none;}
 <!-- Feuille: gestion des dossiers -->
 <div class="bk-sheet" id="folder-manage-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">📁 Mes dossiers</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">📁 <span data-i18n="title_my_folders">Mes dossiers</span></h3>
     <div id="folder-manage-list"></div>
     <div class="bk-book-add" onclick="createFolderPrompt()"><div class="plus">+</div><span>Nouveau dossier</span></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeFolderManageSheet()">Fermer</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeFolderManageSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: déplacer les photos sélectionnées vers un dossier -->
 <div class="bk-sheet" id="folder-move-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">📁 Déplacer vers…</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">📁 <span data-i18n="title_move_to">Déplacer vers…</span></h3>
     <div id="folder-move-list"></div>
     <div class="bk-book-add" onclick="createFolderPrompt(true)"><div class="plus">+</div><span>Nouveau dossier</span></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeMoveToFolderSheet()">Annuler</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeMoveToFolderSheet()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: remplissage en masse (choisir une mise en page pour les photos sélectionnées) -->
 <div class="bk-sheet" id="bulkfill-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">📖 Choisir une mise en page</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">📖 <span data-i18n="title_bulk_fill">Choisir une mise en page</span></h3>
     <div class="modal-sub" style="margin-bottom:10px" id="bulkfill-sub"></div>
     <div id="bulkfill-grid" class="bk-autolayout-grid"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBulkFillPicker()">Annuler</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBulkFillPicker()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: recadrage libre -->
 <div class="bk-sheet" id="bk-crop-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Recadrer</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_crop">Recadrer</h3>
     <div id="bk-crop-viewport" style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:14px;background:#000;touch-action:none">
       <img id="bk-crop-img" style="position:absolute;pointer-events:none">
     </div>
@@ -811,8 +811,8 @@ img{-webkit-user-drag:none;}
       <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700;margin-left:6px">zoom (glisse l'image pour cadrer)</span>
     </div>
     <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="closeBkCropSheet()">Annuler</button>
-      <button class="mbtn mbtn-ok" onclick="bkApplyCrop()">Appliquer</button>
+      <button class="mbtn mbtn-cancel" onclick="closeBkCropSheet()"><span data-i18n="btn_cancel">Annuler</span></button>
+      <button class="mbtn mbtn-ok" onclick="bkApplyCrop()"><span data-i18n="btn_apply">Appliquer</span></button>
     </div>
   </div>
 </div>
@@ -820,14 +820,14 @@ img{-webkit-user-drag:none;}
 <!-- Feuille: filtres photo -->
 <div class="bk-sheet" id="bk-filter-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Filtres photo</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_filters">Filtres photo</h3>
     <div class="bk-slider-row"><label>Luminosité</label><input type="range" min="40" max="180" id="bk-f-brightness" oninput="bkFilterChanged()"></div>
     <div class="bk-slider-row"><label>Contraste</label><input type="range" min="40" max="180" id="bk-f-contrast" oninput="bkFilterChanged()"></div>
     <div class="bk-slider-row"><label>Saturation</label><input type="range" min="0" max="200" id="bk-f-saturate" oninput="bkFilterChanged()"></div>
     <div class="bk-slider-row"><label>Noir & blanc</label><input type="range" min="0" max="100" id="bk-f-grayscale" oninput="bkFilterChanged()"></div>
     <div class="modal-btns">
-      <button class="mbtn mbtn-cancel" onclick="bkResetFilter()">Réinitialiser</button>
-      <button class="mbtn mbtn-ok" onclick="closeFilterSheet()">OK</button>
+      <button class="mbtn mbtn-cancel" onclick="bkResetFilter()"><span data-i18n="btn_reset">Réinitialiser</span></button>
+      <button class="mbtn mbtn-ok" onclick="closeFilterSheet()"><span data-i18n="btn_ok">OK</span></button>
     </div>
   </div>
 </div>
@@ -835,20 +835,20 @@ img{-webkit-user-drag:none;}
 <!-- Feuille: dégradé -->
 <div class="bk-sheet" id="bk-gradient-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Dégradé</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_gradient">Dégradé</h3>
     <button class="bk-btn" id="bk-gradient-toggle" onclick="bkToggleGradient()" style="margin-bottom:14px">Activer le dégradé</button>
     <div class="pdf-lbl">Couleur de départ</div>
     <div style="display:flex;gap:8px;margin-bottom:10px" id="bk-gradient-from"></div>
     <div class="pdf-lbl">Couleur d'arrivée</div>
     <div style="display:flex;gap:8px" id="bk-gradient-to"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeGradientSheet()">OK</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeGradientSheet()"><span data-i18n="btn_ok">OK</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: bordure -->
 <div class="bk-sheet" id="bk-border-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Bordure</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_border">Bordure</h3>
     <div class="bk-fsize-row">
       <button onclick="bkChangeBorderWidth(-1)">−</button>
       <span id="bk-border-val" style="font-weight:800;min-width:34px;text-align:center"></span>
@@ -856,43 +856,43 @@ img{-webkit-user-drag:none;}
       <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700;margin-left:6px">épaisseur (0 = aucune)</span>
     </div>
     <div style="display:flex;gap:8px;margin-top:14px" id="bk-border-colors"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeBorderSheet()">OK</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeBorderSheet()"><span data-i18n="btn_ok">OK</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: choix d'un sticker -->
 <div class="bk-sheet" id="bk-sticker-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Stickers</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_stickers">Stickers</h3>
     <div class="bk-photo-grid" id="bk-sticker-grid" style="grid-template-columns:repeat(5,1fr)"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkStickerSheet()">Annuler</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkStickerSheet()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: choix d'un modèle de page -->
 <div class="bk-sheet" id="bk-template-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px">Modèles de page <span id="bk-template-count" style="color:var(--ink-soft);font-weight:700;font-size:.8rem"></span></h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px"><span data-i18n="title_templates">Modèles de page</span> <span id="bk-template-count" style="color:var(--ink-soft);font-weight:700;font-size:.8rem"></span></h3>
     <input type="text" id="bk-template-search" placeholder="Rechercher : mosaïque, violette, citation..." oninput="bkFilterTemplateGrid(this.value)" style="width:100%;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-size:.9rem;font-weight:700;margin-bottom:12px;box-sizing:border-box">
     <div class="bk-tpl-grid" id="bk-template-grid"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkTemplateSheet()">Annuler</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkTemplateSheet()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: choix d'une icône -->
 <div class="bk-sheet" id="bk-icon-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px">Icônes <span id="bk-icon-count" style="color:var(--ink-soft);font-weight:700;font-size:.8rem"></span></h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px"><span data-i18n="title_icons">Icônes</span> <span id="bk-icon-count" style="color:var(--ink-soft);font-weight:700;font-size:.8rem"></span></h3>
     <input type="text" id="bk-icon-search" placeholder="Rechercher : plage, avion, montagne..." oninput="bkFilterIconGrid(this.value)" style="width:100%;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-size:.9rem;font-weight:700;margin-bottom:12px;box-sizing:border-box">
     <div class="bk-icon-grid" id="bk-icon-grid"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkIconSheet()">Annuler</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkIconSheet()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: édition de texte -->
 <div class="bk-sheet" id="bk-text-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px">Texte</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_text">Texte</h3>
     <textarea id="bk-text-input" oninput="bkTextInputChanged(this.value)"></textarea>
     <div class="bk-fsize-row">
       <button onclick="bkChangeFontSize(-2)">−</button>
@@ -903,17 +903,17 @@ img{-webkit-user-drag:none;}
     <div style="display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap" id="bk-text-colors"></div>
     <button class="bk-btn" style="margin-top:8px" onclick="openColorPickPhotoPicker('text')">🎨 Piocher dans une photo</button>
     <div style="display:flex;gap:8px;margin-top:14px;overflow-x:auto" id="bk-text-fonts"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeBkTextSheet()">OK</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeBkTextSheet()"><span data-i18n="btn_ok">OK</span></button></div>
   </div>
 </div>
 
 <!-- Feuille: choix d'une photo de l'album -->
 <div class="bk-sheet" id="bk-photo-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px">Choisir une photo</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px" data-i18n="title_choose_photo">Choisir une photo</h3>
     <div class="folder-strip" id="bk-picker-folder-strip" style="margin:0 0 12px"></div>
     <div class="bk-photo-grid" id="bk-photo-grid"></div>
-    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkPhotoSheet()">Annuler</button></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeBkPhotoSheet()"><span data-i18n="btn_cancel">Annuler</span></button></div>
   </div>
 </div>
 
@@ -1866,7 +1866,41 @@ var BK_I18N={
   tool_surprise:{fr:'Surprise',en:'Surprise',it:'Sorpresa',es:'Sorpresa'},
   btn_ok:{fr:'OK',en:'OK',it:'OK',es:'OK'},
   btn_cancel:{fr:'Annuler',en:'Cancel',it:'Annulla',es:'Cancelar'},
-  btn_close_sheet:{fr:'Fermer',en:'Close',it:'Chiudi',es:'Cerrar'}
+  btn_close_sheet:{fr:'Fermer',en:'Close',it:'Chiudi',es:'Cerrar'},
+  title_new_trip:{fr:'Nouveau voyage',en:'New trip',it:'Nuovo viaggio',es:'Nuevo viaje'},
+  title_choose_photo:{fr:'Choisir une photo',en:'Choose a photo',it:'Scegli una foto',es:'Elegir una foto'},
+  title_add_shape:{fr:'Ajouter une forme',en:'Add a shape',it:'Aggiungi una forma',es:'Añadir una forma'},
+  title_stickers:{fr:'Stickers',en:'Stickers',it:'Adesivi',es:'Pegatinas'},
+  title_icons:{fr:'Icônes',en:'Icons',it:'Icone',es:'Iconos'},
+  title_templates:{fr:'Modèles de page',en:'Page templates',it:'Modelli di pagina',es:'Plantillas de página'},
+  title_text:{fr:'Texte',en:'Text',it:'Testo',es:'Texto'},
+  title_crop:{fr:'Recadrer',en:'Crop',it:'Ritaglia',es:'Recortar'},
+  title_filters:{fr:'Filtres photo',en:'Photo filters',it:'Filtri foto',es:'Filtros de foto'},
+  title_remove_bg:{fr:'Supprimer le fond',en:'Remove background',it:'Rimuovi sfondo',es:'Quitar fondo'},
+  title_border:{fr:'Bordure',en:'Border',it:'Bordo',es:'Borde'},
+  title_gradient:{fr:'Dégradé',en:'Gradient',it:'Sfumatura',es:'Degradado'},
+  title_my_maps:{fr:'Mes cartes',en:'My maps',it:'Le mie mappe',es:'Mis mapas'},
+  title_my_books:{fr:'Mes livres',en:'My books',it:'I miei libri',es:'Mis libros'},
+  title_help:{fr:'Comment ça marche',en:'How it works',it:'Come funziona',es:'Cómo funciona'},
+  title_global_style:{fr:'Style global',en:'Global style',it:'Stile globale',es:'Estilo global'},
+  title_duplicates:{fr:'Doublons probables',en:'Probable duplicates',it:'Probabili doppioni',es:'Duplicados probables'},
+  title_backup:{fr:'Sauvegarder / restaurer',en:'Backup / restore',it:'Backup / ripristino',es:'Copia de seguridad / restaurar'},
+  title_move_to:{fr:'Déplacer vers…',en:'Move to…',it:'Sposta in…',es:'Mover a…'},
+  title_my_folders:{fr:'Mes dossiers',en:'My folders',it:'Le mie cartelle',es:'Mis carpetas'},
+  title_export_pdf:{fr:'Export PDF',en:'Export PDF',it:'Esporta PDF',es:'Exportar PDF'},
+  title_bulk_fill:{fr:'Choisir une mise en page',en:'Choose a layout',it:'Scegli un modello',es:'Elegir un diseño'},
+  title_fit_pages:{fr:'Ajuster plusieurs pages',en:'Fit several pages',it:'Adatta più pagine',es:'Ajustar varias páginas'},
+  title_overview:{fr:'Vue d\'ensemble',en:'Overview',it:'Panoramica',es:'Vista general'},
+  title_history:{fr:'Historique des versions',en:'Version history',it:'Cronologia versioni',es:'Historial de versiones'},
+  title_autobook:{fr:'Livre automatique',en:'Automatic book',it:'Libro automatico',es:'Libro automático'},
+  btn_apply:{fr:'Appliquer',en:'Apply',it:'Applica',es:'Aplicar'},
+  btn_reset:{fr:'Réinitialiser',en:'Reset',it:'Reimposta',es:'Restablecer'},
+  btn_restore:{fr:'Restaurer',en:'Restore',it:'Ripristina',es:'Restaurar'},
+  btn_create:{fr:'Créer',en:'Create',it:'Crea',es:'Crear'},
+  btn_adjust:{fr:'Ajuster',en:'Fit',it:'Adatta',es:'Ajustar'},
+  btn_generate_book:{fr:'Générer le livre',en:'Generate the book',it:'Genera il libro',es:'Generar el libro'},
+  btn_got_it_close:{fr:'J\'ai compris, fermer',en:'Got it, close',it:'Capito, chiudi',es:'Entendido, cerrar'},
+  count_of:{fr:'sur',en:'of',it:'su',es:'de'}
 };
 var BK_LANG='fr';
 function t(key){
@@ -4205,7 +4239,7 @@ function bkTplCellHTML(tpl, i){
 function bkRenderTemplateGrid(list){
   var grid=document.getElementById('bk-template-grid');
   grid.innerHTML='';
-  document.getElementById('bk-template-count').textContent='('+list.length+' sur '+BK_TEMPLATES.length+')';
+  document.getElementById('bk-template-count').textContent='('+list.length+' '+t('count_of')+' '+BK_TEMPLATES.length+')';
   var myToken=++bkTplGridToken;
   var CHUNK=10, i=0;
   function step(){
@@ -4816,7 +4850,7 @@ function openVersionHistory(){
     var photoCount=v.pages.reduce(function(sum,p){ return sum+p.elements.filter(function(e){ return e.type==='photo'; }).length; },0);
     h+='<div class="version-row">'
       +'<div class="version-info"><b>'+label+'</b><span>'+v.pages.length+' page'+(v.pages.length!==1?'s':'')+' · '+photoCount+' photo'+(photoCount!==1?'s':'')+'</span></div>'
-      +'<button class="mbtn mbtn-ok" style="flex:none;padding:8px 16px" onclick="bkRestoreVersion('+i+')">Restaurer</button>'
+      +'<button class="mbtn mbtn-ok" style="flex:none;padding:8px 16px" onclick="bkRestoreVersion('+i+')"><span data-i18n="btn_restore">Restaurer</span></button>'
       +'</div>';
   });
   document.getElementById('version-history-list').innerHTML=h;
@@ -5466,7 +5500,7 @@ function openShapeColorPicker(){
   });
   var bar=document.getElementById('bk-selbar');
   bar.innerHTML='<span style="font-weight:800;font-size:.78rem;color:var(--ink-soft);margin-right:4px">Couleur :</span>'+h
-    +'<button class="bk-btn" onclick="bkRenderSelBar()">OK</button>';
+    +'<button class="bk-btn" onclick="bkRenderSelBar()"><span data-i18n="btn_ok">OK</span></button>';
 }
 function bkSetShapeColor(c){
   bkSnapshot();
@@ -5760,7 +5794,7 @@ var bkIconGridToken=0;
 function bkRenderIconGrid(names){
   var grid=document.getElementById('bk-icon-grid');
   grid.innerHTML='';
-  document.getElementById('bk-icon-count').textContent='('+names.length+' sur '+BK_ICON_NAMES.length+')';
+  document.getElementById('bk-icon-count').textContent='('+names.length+' '+t('count_of')+' '+BK_ICON_NAMES.length+')';
   var myToken=++bkIconGridToken;
   var CHUNK=40, i=0;
   function cellHTML(name){
