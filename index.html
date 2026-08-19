@@ -86,7 +86,9 @@ img{-webkit-user-drag:none;}
 /* ── HOME ── */
 #pg-home{padding-bottom:36px;}
 .hdr{padding:22px 20px 30px;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-2) 60%,#B98CFF 100%);border-radius:0 0 32px 32px;box-shadow:0 10px 30px rgba(123,47,247,.25);}
-.hdr-top{display:flex;align-items:center;gap:10px;color:#fff;}
+.hdr-top{display:flex;align-items:center;gap:10px;color:#fff;overflow-x:auto;}
+.hdr-top>*{flex-shrink:0;}
+.hdr-top>div:first-of-type{min-width:0;}
 .hdr-help-btn{margin-left:auto;flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.22);border:none;color:#fff;font-size:1.05rem;font-weight:800;}
 .help-item{border-bottom:1px solid var(--border);}
 .help-item:last-child{border-bottom:none;}
@@ -139,7 +141,9 @@ img{-webkit-user-drag:none;}
 .ah-info p{color:rgba(255,255,255,.85);font-weight:700;font-size:.8rem;margin-top:4px;}
 
 .upload-z{margin:16px;border:2px dashed #D9CCF7;border-radius:var(--r-md);padding:20px;text-align:center;background:var(--surface);}
-.photo-search-row{margin:0 16px 14px;display:flex;gap:8px;}
+.photo-search-row{margin:0 16px 14px;display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+.photo-search-row>*{flex-shrink:0;}
+.photo-search-row #photo-search{flex-shrink:1;min-width:90px;}
 .photo-search-row input{flex:1;min-width:0;border:2px solid var(--border);border-radius:50px;padding:11px 16px;font-size:.85rem;font-weight:700;box-sizing:border-box;background:var(--surface);}
 .photo-delall-btn{flex-shrink:0;background:var(--surface);border:2px solid var(--border);border-radius:50%;width:44px;height:44px;font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
 .photo-delall-btn.active{background:var(--primary);border-color:var(--primary);}
@@ -490,7 +494,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.18.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.18.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
