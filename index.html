@@ -486,7 +486,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.17.1</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.17.2</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1712,7 +1712,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83c\udf0d", title:"Langue de l'interface", body:
       '<ul>'+"<li>Bouton (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) en haut de l'\u00e9cran d'accueil \u2014 touche pour faire d\u00e9filer entre fran\u00e7ais, anglais, italien et espagnol.</li>"+"<li>Concerne UNIQUEMENT les boutons et menus de l'appli \u2014 jamais le contenu de tes livres (l\u00e9gendes, titres d'album, texte que tu tapes), qui reste toujours exactement ce que tu as \u00e9crit.</li>"+"<li>Couverture cibl\u00e9e sur ce qui est visible en permanence (\u00e9cran d'accueil, album, barre principale de l'\u00e9diteur) \u2014 l'aide d\u00e9taill\u00e9e que tu es en train de lire est maintenant disponible dans les 4 langues.</li>"+'</ul>' },
     { icon:"\ud83d\udcd1", title:"Table des mati\u00e8res et autocollants personnalis\u00e9s", body:
-      '<ul>'+"<li><b>Sommaire automatique :</b> bouton \ud83d\udcd1 dans l'\u00e9diteur \u2014 rep\u00e8re les pages qui ont un vrai titre (texte assez grand) et les regroupe en sections avec leur plage de pages (ex: \"Jour 1 \u00b7 Barcelone \u2014 pages 3\u201321\"). Les pages sans titre ne sont jamais list\u00e9es une par une. Toujours ins\u00e9r\u00e9 en premi\u00e8re page. Si aucun titre n'est trouv\u00e9, un message te le dit plut\u00f4t que de g\u00e9n\u00e9rer une page inutile.</li>"+"<li><b>Autocollants personnalis\u00e9s :</b> dans le s\u00e9lecteur d'autocollants (\u2728 Sticker), bouton \"\u2795 Importer une image\" \u2014 ton logo, dessin ou tampon devient r\u00e9utilisable sur n'importe quelle page, gard\u00e9 dans une biblioth\u00e8que propre \u00e0 l'album (jamais m\u00e9lang\u00e9 \u00e0 tes photos).</li>"+'</ul>' },
+      '<ul>'+"<li><b>Sommaire automatique :</b> bouton \ud83d\udcd1 dans l'\u00e9diteur \u2014 rep\u00e8re les pages qui ont un vrai titre (texte assez grand) et les regroupe en sections avec leur plage de pages (ex: \"Jour 1 \u00b7 Barcelone \u2014 pages 3\u201321\"). Les pages sans titre ne sont jamais list\u00e9es une par une. Toujours ins\u00e9r\u00e9 en premi\u00e8re page. Si aucun titre n'est trouv\u00e9, un message te le dit plut\u00f4t que de g\u00e9n\u00e9rer une page inutile. Les autocollants (emojis) ne sont jamais pris pour des titres. S'il y a trop de sections pour tenir sur une page, le sommaire continue automatiquement sur les pages suivantes, sans jamais tasser le texte.</li>"+"<li><b>Autocollants personnalis\u00e9s :</b> dans le s\u00e9lecteur d'autocollants (\u2728 Sticker), bouton \"\u2795 Importer une image\" \u2014 ton logo, dessin ou tampon devient r\u00e9utilisable sur n'importe quelle page, gard\u00e9 dans une biblioth\u00e8que propre \u00e0 l'album (jamais m\u00e9lang\u00e9 \u00e0 tes photos).</li>"+'</ul>' },
         { icon:"\ud83d\udcca", title:"Jauge d'espace utilis\u00e9", body:
       '<ul>'+"<li>Bouton \ud83d\udcbe en haut de l'\u00e9cran d'accueil : en plus de la sauvegarde, une jauge affiche l'espace utilis\u00e9 par chaque album sur ton t\u00e9l\u00e9phone (tout \u00e9tant stock\u00e9 en local, jamais dans un cloud).</li>"+"<li>Les albums sont class\u00e9s du plus lourd au plus l\u00e9ger, avec une barre visuelle et un total g\u00e9n\u00e9ral en bas.</li>"+"<li>Pratique pour rep\u00e9rer quel album all\u00e9ger (grosses photos, doublons...) si ton t\u00e9l\u00e9phone commence \u00e0 manquer de place.</li>"+'</ul>' },
     { icon:"\ud83d\udccf", title:"Exporter en bande", body:
@@ -1748,7 +1748,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83c\udf0d", title:"Interface language", body:
       '<ul>'+"<li>Button (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) at the top of the home screen \u2014 tap to cycle between French, English, Italian and Spanish.</li>"+"<li>Applies ONLY to the app's buttons and menus \u2014 never to the content of your books (captions, album titles, text you type), which always stays exactly what you wrote.</li>"+"<li>Coverage focused on what's always visible (home screen, album, editor's main bar) \u2014 this detailed help you're reading is now available in all 4 languages.</li>"+'</ul>' },
     { icon:"\ud83d\udcd1", title:"Table of contents and custom stickers", body:
-      '<ul>'+"<li><b>Automatic table of contents:</b> \ud83d\udcd1 button in the editor \u2014 spots pages with a real title (large enough text) and groups them into sections with their page range (e.g. \"Day 1 \u00b7 Barcelona \u2014 pages 3\u201321\"). Untitled pages are never listed one by one. Always inserted as the first page. If no title is found, a message tells you instead of generating a useless page.</li>"+"<li><b>Custom stickers:</b> in the sticker picker (\u2728 Sticker), \"\u2795 Import an image\" button \u2014 your logo, drawing or stamp becomes reusable on any page, kept in a library specific to the album (never mixed with your photos).</li>"+'</ul>' },
+      '<ul>'+"<li><b>Automatic table of contents:</b> \ud83d\udcd1 button in the editor \u2014 spots pages with a real title (large enough text) and groups them into sections with their page range (e.g. \"Day 1 \u00b7 Barcelona \u2014 pages 3\u201321\"). Untitled pages are never listed one by one. Always inserted as the first page. If no title is found, a message tells you instead of generating a useless page. Stickers (emojis) are never mistaken for titles. If there are too many sections to fit on one page, the table of contents automatically continues on the following pages, without ever cramming the text.</li>"+"<li><b>Custom stickers:</b> in the sticker picker (\u2728 Sticker), \"\u2795 Import an image\" button \u2014 your logo, drawing or stamp becomes reusable on any page, kept in a library specific to the album (never mixed with your photos).</li>"+'</ul>' },
         { icon:"\ud83d\udcca", title:"Storage gauge", body:
       '<ul>'+"<li>\ud83d\udcbe button at the top of the home screen: alongside backup, a gauge shows how much space each album takes up on your phone (everything stored locally, never in a cloud).</li>"+"<li>Albums are ranked from heaviest to lightest, with a visual bar and an overall total at the bottom.</li>"+"<li>Handy to spot which album to lighten (large photos, duplicates...) if your phone starts running low on space.</li>"+'</ul>' },
     { icon:"\ud83d\udccf", title:"Export as strip", body:
@@ -1784,7 +1784,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83c\udf0d", title:"Lingua dell'interfaccia", body:
       '<ul>'+"<li>Pulsante (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) in alto nella schermata principale \u2014 tocca per scorrere tra francese, inglese, italiano e spagnolo.</li>"+"<li>Riguarda SOLO i pulsanti e i menu dell'app \u2014 mai il contenuto dei tuoi libri (didascalie, titoli degli album, testo che digiti), che resta sempre esattamente ci\u00f2 che hai scritto.</li>"+"<li>Copertura mirata su ci\u00f2 che \u00e8 sempre visibile (schermata principale, album, barra principale dell'editor) \u2014 questa guida dettagliata che stai leggendo \u00e8 ora disponibile in tutte e 4 le lingue.</li>"+'</ul>' },
     { icon:"\ud83d\udcd1", title:"Sommario e adesivi personalizzati", body:
-      '<ul>'+"<li><b>Sommario automatico:</b> pulsante \ud83d\udcd1 nell'editor \u2014 individua le pagine con un vero titolo (testo abbastanza grande) e le raggruppa in sezioni con il loro intervallo di pagine (es: \"Giorno 1 \u00b7 Barcellona \u2014 pagine 3\u201321\"). Le pagine senza titolo non vengono mai elencate una per una. Sempre inserito come prima pagina. Se non viene trovato alcun titolo, un messaggio te lo segnala invece di generare una pagina inutile.</li>"+"<li><b>Adesivi personalizzati:</b> nel selettore di adesivi (\u2728 Adesivo), pulsante \"\u2795 Importa un'immagine\" \u2014 il tuo logo, disegno o timbro diventa riutilizzabile su qualsiasi pagina, conservato in una libreria propria dell'album (mai mescolato alle tue foto).</li>"+'</ul>' },
+      '<ul>'+"<li><b>Sommario automatico:</b> pulsante \ud83d\udcd1 nell'editor \u2014 individua le pagine con un vero titolo (testo abbastanza grande) e le raggruppa in sezioni con il loro intervallo di pagine (es: \"Giorno 1 \u00b7 Barcellona \u2014 pagine 3\u201321\"). Le pagine senza titolo non vengono mai elencate una per una. Sempre inserito come prima pagina. Se non viene trovato alcun titolo, un messaggio te lo segnala invece di generare una pagina inutile. Gli adesivi (emoji) non vengono mai scambiati per titoli. Se ci sono troppe sezioni per stare in una pagina, il sommario continua automaticamente sulle pagine successive, senza mai stipare il testo.</li>"+"<li><b>Adesivi personalizzati:</b> nel selettore di adesivi (\u2728 Adesivo), pulsante \"\u2795 Importa un'immagine\" \u2014 il tuo logo, disegno o timbro diventa riutilizzabile su qualsiasi pagina, conservato in una libreria propria dell'album (mai mescolato alle tue foto).</li>"+'</ul>' },
         { icon:"\ud83d\udcca", title:"Indicatore di spazio utilizzato", body:
       '<ul>'+"<li>Pulsante \ud83d\udcbe in alto nella schermata principale: oltre al backup, un indicatore mostra lo spazio occupato da ogni album sul telefono (tutto memorizzato in locale, mai su un cloud).</li>"+"<li>Gli album sono classificati dal pi\u00f9 pesante al pi\u00f9 leggero, con una barra visiva e un totale generale in basso.</li>"+"<li>Utile per individuare quale album alleggerire (foto pesanti, doppioni...) se il telefono inizia a scarseggiare di spazio.</li>"+'</ul>' },
     { icon:"\ud83d\udccf", title:"Esporta come striscia", body:
@@ -1820,7 +1820,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83c\udf0d", title:"Idioma de la interfaz", body:
       '<ul>'+"<li>Bot\u00f3n (\ud83c\uddeb\ud83c\uddf7 FR / \ud83c\uddec\ud83c\udde7 EN / \ud83c\uddee\ud83c\uddf9 IT / \ud83c\uddea\ud83c\uddf8 ES) en la parte superior de la pantalla de inicio \u2014 toca para pasar entre franc\u00e9s, ingl\u00e9s, italiano y espa\u00f1ol.</li>"+"<li>Afecta \u00daNICAMENTE a los botones y men\u00fas de la app \u2014 nunca al contenido de tus libros (leyendas, t\u00edtulos de \u00e1lbum, texto que escribes), que siempre sigue siendo exactamente lo que escribiste.</li>"+"<li>Cobertura centrada en lo que siempre es visible (pantalla de inicio, \u00e1lbum, barra principal del editor) \u2014 esta ayuda detallada que est\u00e1s leyendo ya est\u00e1 disponible en los 4 idiomas.</li>"+'</ul>' },
     { icon:"\ud83d\udcd1", title:"\u00cdndice y pegatinas personalizadas", body:
-      '<ul>'+"<li><b>\u00cdndice autom\u00e1tico:</b> bot\u00f3n \ud83d\udcd1 en el editor \u2014 detecta las p\u00e1ginas con un t\u00edtulo real (texto suficientemente grande) y las agrupa en secciones con su rango de p\u00e1ginas (ej: \"D\u00eda 1 \u00b7 Barcelona \u2014 p\u00e1ginas 3\u201321\"). Las p\u00e1ginas sin t\u00edtulo nunca se listan una por una. Siempre insertado como primera p\u00e1gina. Si no se encuentra ning\u00fan t\u00edtulo, un mensaje te lo indica en vez de generar una p\u00e1gina in\u00fatil.</li>"+"<li><b>Pegatinas personalizadas:</b> en el selector de pegatinas (\u2728 Pegatina), bot\u00f3n \"\u2795 Importar una imagen\" \u2014 tu logo, dibujo o sello se vuelve reutilizable en cualquier p\u00e1gina, guardado en una biblioteca propia del \u00e1lbum (nunca mezclado con tus fotos).</li>"+'</ul>' },
+      '<ul>'+"<li><b>\u00cdndice autom\u00e1tico:</b> bot\u00f3n \ud83d\udcd1 en el editor \u2014 detecta las p\u00e1ginas con un t\u00edtulo real (texto suficientemente grande) y las agrupa en secciones con su rango de p\u00e1ginas (ej: \"D\u00eda 1 \u00b7 Barcelona \u2014 p\u00e1ginas 3\u201321\"). Las p\u00e1ginas sin t\u00edtulo nunca se listan una por una. Siempre insertado como primera p\u00e1gina. Si no se encuentra ning\u00fan t\u00edtulo, un mensaje te lo indica en vez de generar una p\u00e1gina in\u00fatil. Las pegatinas (emojis) nunca se confunden con t\u00edtulos. Si hay demasiadas secciones para caber en una p\u00e1gina, el \u00edndice contin\u00faa autom\u00e1ticamente en las p\u00e1ginas siguientes, sin apretar nunca el texto.</li>"+"<li><b>Pegatinas personalizadas:</b> en el selector de pegatinas (\u2728 Pegatina), bot\u00f3n \"\u2795 Importar una imagen\" \u2014 tu logo, dibujo o sello se vuelve reutilizable en cualquier p\u00e1gina, guardado en una biblioteca propia del \u00e1lbum (nunca mezclado con tus fotos).</li>"+'</ul>' },
         { icon:"\ud83d\udcca", title:"Indicador de espacio usado", body:
       '<ul>'+"<li>Bot\u00f3n \ud83d\udcbe en la parte superior de la pantalla de inicio: junto a la copia de seguridad, un indicador muestra el espacio que ocupa cada \u00e1lbum en tu tel\u00e9fono (todo guardado en local, nunca en una nube).</li>"+"<li>Los \u00e1lbumes se clasifican de m\u00e1s pesado a m\u00e1s ligero, con una barra visual y un total general abajo.</li>"+"<li>\u00datil para detectar qu\u00e9 \u00e1lbum aligerar (fotos pesadas, duplicados...) si tu tel\u00e9fono empieza a quedarse sin espacio.</li>"+'</ul>' },
     { icon:"\ud83d\udccf", title:"Exportar como tira", body:
@@ -1931,6 +1931,7 @@ var BK_I18N={
   toc_pages:{fr:'pages',en:'pages',it:'pagine',es:'páginas'},
   toc_no_titles:{fr:'Aucun titre trouvé sur les pages de ce livre — ajoute un texte assez grand (ex: "Jour 1", "Barcelone") sur les pages qui comptent pour obtenir un sommaire utile.',en:'No titles found on this book\'s pages — add a large enough text (e.g. "Day 1", "Barcelona") on the pages that matter to get a useful table of contents.',it:'Nessun titolo trovato sulle pagine di questo libro — aggiungi un testo abbastanza grande (es: "Giorno 1", "Barcellona") sulle pagine importanti per ottenere un sommario utile.',es:'No se encontraron títulos en las páginas de este libro — añade un texto suficientemente grande (ej: "Día 1", "Barcelona") en las páginas que importan para obtener un índice útil.'},
   toc_added:{fr:'📑 Sommaire ajouté en première page',en:'📑 Table of contents added as the first page',it:'📑 Sommario aggiunto come prima pagina',es:'📑 Índice añadido como primera página'},
+  toc_added_multi:{fr:'📑 Sommaire ajouté ({n} pages, trop de sections pour tenir sur une seule)',en:'📑 Table of contents added ({n} pages, too many sections to fit on one)',it:'📑 Sommario aggiunto ({n} pagine, troppe sezioni per starci in una sola)',es:'📑 Índice añadido ({n} páginas, demasiadas secciones para caber en una)'},
   tool_safe_margin:{fr:'Repères impression',en:'Print guides',it:'Guide di stampa',es:'Guías de impresión'},
   tool_fit_page:{fr:'Ajuster cette page',en:'Fit this page',it:'Adatta questa pagina',es:'Ajustar esta página'},
   tool_fit_pages:{fr:'Ajuster plusieurs pages',en:'Fit several pages',it:'Adatta più pagine',es:'Ajustar varias páginas'},
@@ -4659,12 +4660,22 @@ function bkApplySmartCropsOnPage(){
    à jour toute seule si tu modifies des pages ensuite, il faut retoucher au
    bouton pour la régénérer). */
 function bkGuessPageTitle(page){
-  // Seuls les VRAIS titres comptent (taille de texte assez grande) — une
-  // légende ou un petit texte ne doit jamais générer une entrée "Page N"
-  // sans intérêt dans le sommaire. Une page sans titre net est simplement
-  // ignorée, plutôt que listée avec un numéro qui ne dit rien.
+  // Seuls les VRAIS titres comptent (taille de texte assez grande, et PAS un
+  // simple autocollant emoji décoratif — ceux-ci sont souvent en gros texte
+  // eux aussi et se faisaient passer à tort pour des titres). Une page sans
+  // titre net est simplement ignorée, plutôt que listée avec un numéro qui
+  // ne dit rien.
   var MIN_TITLE_SIZE=20;
-  var textEls=page.elements.filter(function(el){ return el.type==='text' && el.text && el.text.trim() && (el.fontSize||0)>=MIN_TITLE_SIZE; });
+  var textEls=page.elements.filter(function(el){
+    if(el.type!=='text' || el.isSticker || !el.text) return false;
+    var txt=el.text.trim();
+    if(!txt || (el.fontSize||0)<MIN_TITLE_SIZE) return false;
+    // exclut un texte qui n'est QUE des emojis/symboles (aucune lettre ni
+    // chiffre) — un vrai titre de section a toujours au moins un caractère
+    // "lisible", contrairement à un smiley décoratif isolé.
+    if(!/[\p{L}\p{N}]/u.test(txt)) return false;
+    return true;
+  });
   if(!textEls.length) return null;
   var biggest=textEls.reduce(function(a,b){ return (b.fontSize||0)>(a.fontSize||0) ? b : a; });
   var t=biggest.text.trim();
@@ -4678,7 +4689,12 @@ function bkAddTableOfContents(){
   bkBook.pages.forEach(function(pg,i){
     var title=bkGuessPageTitle(pg);
     if(title){
-      sections.push({title:title, startIdx:i, endIdx:i});
+      // une page qui répète le MÊME titre que la section en cours (ex. une
+      // page "Jour 1" suivie d'une autre page "Jour 1") rejoint la section
+      // au lieu d'en ouvrir une nouvelle identique juste en dessous.
+      var last=sections[sections.length-1];
+      if(last && last.title===title){ last.endIdx=i; }
+      else sections.push({title:title, startIdx:i, endIdx:i});
     } else if(sections.length){
       sections[sections.length-1].endIdx=i;
     }
@@ -4690,23 +4706,37 @@ function bkAddTableOfContents(){
     return;
   }
   bkSnapshot();
-  var offset=1; // +1 car le sommaire s'insère lui-même en page 1, décalant tout d'un cran
-  var elements=[
-    {id:gid(), type:'text', text:t('toc_title'), x:50,y:14,w:88,h:14,rot:0,fontSize:32,color:'#241E38',fontFamily:'Playfair Display'}
-  ];
-  var startY=30, rowH=Math.min(9, 62/Math.max(sections.length,1));
-  sections.forEach(function(s,i){
-    var y=startY+i*rowH;
-    if(y>96) return; // au-delà d'une page, on s'arrête proprement plutôt que déborder
-    var pFrom=s.startIdx+1+offset, pTo=s.endIdx+1+offset;
-    var pageLabel = pFrom===pTo ? (t('toc_page')+' '+pFrom) : (t('toc_pages')+' '+pFrom+'–'+pTo);
-    elements.push({id:gid(), type:'text', text:s.title+'  —  '+pageLabel, x:50,y:y,w:88,h:rowH,rot:0,fontSize:Math.max(11,Math.min(16,rowH*1.6)),color:'#241E38',fontFamily:'Poppins'});
-  });
-  var page={bg:'#F7F5FC', elements:elements};
-  bkBook.pages.unshift(page); // toujours en toute première page, comme un vrai sommaire
+  // Jamais de chevauchement : une ligne ne descend jamais sous une taille de
+  // police lisible, donc si tout ne tient pas sur une seule page, le
+  // sommaire continue proprement sur une ou plusieurs pages suivantes —
+  // plutôt que de tasser le texte jusqu'à l'illisible.
+  var MIN_ROWH=8.5, MAX_ROWH=9, startY=30, endY=96;
+  var perPage=Math.max(1, Math.floor((endY-startY)/MIN_ROWH));
+  var pagesNeeded=Math.ceil(sections.length/perPage);
+  var tocPages=[];
+  for(var p=0;p<pagesNeeded;p++){
+    var chunk=sections.slice(p*perPage, (p+1)*perPage);
+    var rowH=Math.min(MAX_ROWH, (endY-startY)/chunk.length);
+    var elements=[
+      {id:gid(), type:'text', text: p===0 ? t('toc_title') : (t('toc_title')+' ('+(p+1)+')'), x:50,y:14,w:88,h:14,rot:0,fontSize:32,color:'#241E38',fontFamily:'Playfair Display'}
+    ];
+    chunk.forEach(function(s,i){
+      var y=startY+i*rowH;
+      // numéro de page FINAL = position d'origine (1-indexée) + le nombre
+      // de pages de sommaire elles-mêmes insérées juste avant tout le reste
+      var pFrom=s.startIdx+1+pagesNeeded, pTo=s.endIdx+1+pagesNeeded;
+      var pageLabel = pFrom===pTo ? (t('toc_page')+' '+pFrom) : (t('toc_pages')+' '+pFrom+'–'+pTo);
+      elements.push({id:gid(), type:'text', text:s.title+'  —  '+pageLabel, x:50,y:y,w:88,h:rowH,rot:0,fontSize:Math.max(11,Math.min(16,rowH*1.6)),color:'#241E38',fontFamily:'Poppins'});
+    });
+    tocPages.push({bg:'#F7F5FC', elements:elements});
+  }
+  // insérées en bloc tout au début, dans l'ordre — le "+pagesNeeded-1" ajouté
+  // aux numéros de page ci-dessus tient compte du fait que TOUTES ces pages
+  // de sommaire elles-mêmes décalent le reste du livre, pas juste une seule.
+  bkBook.pages=tocPages.concat(bkBook.pages);
   bkPageIdx=0; bkSelId=null;
   bkRenderPage(); bkRenderPages();
-  toast(t('toc_added'));
+  toast(pagesNeeded>1 ? t('toc_added_multi').replace('{n}',pagesNeeded) : t('toc_added'));
 }
 function bkAddSummaryPage(){
   bkAlbum=al(curAlbum);
