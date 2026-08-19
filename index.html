@@ -342,6 +342,7 @@ img{-webkit-user-drag:none;}
 .version-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
 .storage-row{margin-bottom:10px;}
 .storage-row-top{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;margin-bottom:4px;}
+.storage-export-btn{background:var(--bg);border:1px solid var(--border);border-radius:8px;width:26px;height:26px;font-size:.72rem;flex-shrink:0;}
 .storage-row-top span{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;}
 .storage-row-top b{color:var(--ink-soft);}
 .storage-bar-bg{height:8px;border-radius:6px;background:var(--border);overflow:hidden;}
@@ -494,7 +495,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.18.1</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.19.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1727,7 +1728,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\udccf", title:"Exporter en bande", body:
       '<ul>'+"<li>Bouton \ud83d\udccf dans l'\u00e9diteur de livre : assemble toutes les pages du livre bout \u00e0 bout dans une seule image verticale.</li>"+"<li>Pratique pour partager un aper\u00e7u complet du livre dans une conversation (WhatsApp, Mail...) sans avoir \u00e0 envoyer un PDF entier.</li>"+"<li>Sur un livre avec beaucoup de pages, l'image est automatiquement r\u00e9duite pour rester dans une taille raisonnable \u2014 la qualit\u00e9 de chaque page baisse l\u00e9g\u00e8rement en cons\u00e9quence.</li>"+'</ul>' },
     { icon:"\ud83d\udcbe", title:"O\u00f9 sont tes donn\u00e9es ? Sauvegarder / restaurer", body:
-      '<ul>'+"<li>Tout est stock\u00e9 <b>uniquement sur ton t\u00e9l\u00e9phone</b> (dans le navigateur) \u2014 pas de compte, pas de cloud, rien n'est envoy\u00e9 ailleurs.</li>"+"<li>Un PDF export\u00e9 part dans le dossier T\u00e9l\u00e9chargements normal de ton t\u00e9l\u00e9phone, comme n'importe quel fichier t\u00e9l\u00e9charg\u00e9.</li>"+"<li><b>Sauvegarde compl\u00e8te :</b> bouton \ud83d\udcbe en haut de l'\u00e9cran d'accueil \u2014 cr\u00e9e un seul fichier avec TOUT (albums, photos, livres, cartes). Garde-le de c\u00f4t\u00e9, ou r\u00e9importe-le si tu changes de t\u00e9l\u00e9phone ou effaces les donn\u00e9es du site.</li>"+"<li><b>Restaurer :</b> depuis ce m\u00eame \u00e9cran, \"\u2b06\ufe0f Restaurer depuis un fichier\" \u2014 les albums du fichier sont <b>ajout\u00e9s</b> \u00e0 ceux d\u00e9j\u00e0 pr\u00e9sents (jamais d'\u00e9crasement), m\u00eame si tu r\u00e9importes plusieurs fois.</li>"+'</ul>' },
+      '<ul>'+"<li>Tout est stock\u00e9 <b>uniquement sur ton t\u00e9l\u00e9phone</b> (dans le navigateur) \u2014 pas de compte, pas de cloud, rien n'est envoy\u00e9 ailleurs.</li>"+"<li>Un PDF export\u00e9 part dans le dossier T\u00e9l\u00e9chargements normal de ton t\u00e9l\u00e9phone, comme n'importe quel fichier t\u00e9l\u00e9charg\u00e9.</li>"+"<li><b>Sauvegarde compl\u00e8te :</b> bouton \ud83d\udcbe en haut de l'\u00e9cran d'accueil \u2014 cr\u00e9e un seul fichier avec TOUT (albums, photos, livres, cartes). Garde-le de c\u00f4t\u00e9, ou r\u00e9importe-le si tu changes de t\u00e9l\u00e9phone ou effaces les donn\u00e9es du site.</li>"+"<li><b>Restaurer :</b> depuis ce m\u00eame \u00e9cran, \"\u2b06\ufe0f Restaurer depuis un fichier\" \u2014 les albums du fichier sont <b>ajout\u00e9s</b> \u00e0 ceux d\u00e9j\u00e0 pr\u00e9sents (jamais d'\u00e9crasement), m\u00eame si tu r\u00e9importes plusieurs fois.</li><li><b>Exporter un seul album :</b> dans cette m\u00eame fen\u00eatre, bouton \u2b06\ufe0f \u00e0 c\u00f4t\u00e9 d'un album pr\u00e9cis dans la liste \u2014 g\u00e9n\u00e8re un fichier avec SEULEMENT cet album (photos incluses), pour le transf\u00e9rer vers un autre t\u00e9l\u00e9phone sans envoyer tous tes voyages. Se restaure ensuite exactement comme une sauvegarde compl\u00e8te.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Rep\u00e8res pour un imprimeur professionnel", body:
       '<ul>'+"<li>Bouton <b>\ud83d\udcd0 Rep\u00e8res impression</b> dans l'\u00e9diteur de livre : affiche une zone en pointill\u00e9s \u00e0 5% du bord de la page.</li>"+"<li>Utile si tu comptes envoyer ton livre chez un vrai imprimeur : \u00e9vite de placer du texte ou un visage important trop pr\u00e8s du bord, qui pourrait \u00eatre perdu \u00e0 la d\u00e9coupe ou la reliure.</li>"+"<li>C'est un rep\u00e8re visuel <b>uniquement pour toi pendant l'\u00e9dition</b> \u2014 il n'appara\u00eet jamais dans le PDF export\u00e9, ni dans le format story.</li>"+"<li><b>Ajuster cette page :</b> bouton \ud83d\udd27 \u2014 r\u00e9duit et recentre automatiquement tout le contenu de la page pour qu'il tienne dans la zone de s\u00e9curit\u00e9, en gardant la disposition relative (pas de re-cr\u00e9ation, juste un \"zoom arri\u00e8re\"). Ne fait rien si la page y est d\u00e9j\u00e0.</li>"+"<li><b>Ajuster plusieurs pages :</b> m\u00eame chose, mais en choisissant les pages \u00e0 traiter d'un coup dans une liste \u00e0 cocher \u2014 les pages d\u00e9j\u00e0 dans la zone sont d\u00e9coch\u00e9es par d\u00e9faut.</li>"+'</ul>' },
   ],
@@ -1763,7 +1764,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\udccf", title:"Export as strip", body:
       '<ul>'+"<li>\ud83d\udccf button in the book editor: stitches all the book's pages end to end into a single vertical image.</li>"+"<li>Handy for sharing a full preview of the book in a conversation (WhatsApp, Mail...) without sending an entire PDF.</li>"+"<li>On a book with many pages, the image is automatically shrunk to stay a reasonable size \u2014 each page's quality drops slightly as a result.</li>"+'</ul>' },
     { icon:"\ud83d\udcbe", title:"Where is your data? Backup / restore", body:
-      '<ul>'+"<li>Everything is stored <b>only on your phone</b> (in the browser) \u2014 no account, no cloud, nothing is sent anywhere else.</li>"+"<li>An exported PDF goes into your phone's normal Downloads folder, like any downloaded file.</li>"+"<li><b>Full backup:</b> \ud83d\udcbe button at the top of the home screen \u2014 creates a single file with EVERYTHING (albums, photos, books, maps). Keep it safe, or reimport it if you change phones or clear the site's data.</li>"+"<li><b>Restore:</b> from that same screen, \"\u2b06\ufe0f Restore from a file\" \u2014 albums from the file are <b>added</b> to those already present (never overwritten), even if you reimport several times.</li>"+'</ul>' },
+      '<ul>'+"<li>Everything is stored <b>only on your phone</b> (in the browser) \u2014 no account, no cloud, nothing is sent anywhere else.</li>"+"<li>An exported PDF goes into your phone's normal Downloads folder, like any downloaded file.</li>"+"<li><b>Full backup:</b> \ud83d\udcbe button at the top of the home screen \u2014 creates a single file with EVERYTHING (albums, photos, books, maps). Keep it safe, or reimport it if you change phones or clear the site's data.</li>"+"<li><b>Restore:</b> from that same screen, \"\u2b06\ufe0f Restore from a file\" \u2014 albums from the file are <b>added</b> to those already present (never overwritten), even if you reimport several times.</li><li><b>Export a single album:</b> in this same window, \u2b06\ufe0f button next to a specific album in the list \u2014 generates a file with ONLY that album (photos included), to transfer it to another phone without sending all your trips. Restores afterwards exactly like a full backup.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Guides for a professional printer", body:
       '<ul>'+"<li><b>\ud83d\udcd0 Print guides</b> button in the book editor: shows a dashed zone 5% in from the page edge.</li>"+"<li>Useful if you plan to send your book to a real printer: avoids placing text or an important face too close to the edge, which could be lost during trimming or binding.</li>"+"<li>This is a visual guide <b>only for you while editing</b> \u2014 it never appears in the exported PDF, nor in the story format.</li>"+"<li><b>Fit this page:</b> \ud83d\udd27 button \u2014 automatically shrinks and re-centers all the page's content so it fits within the safe zone, keeping the relative layout (no re-creation, just a \"zoom out\"). Does nothing if the page already fits.</li>"+"<li><b>Fit several pages:</b> same thing, but choosing which pages to process at once from a checklist \u2014 pages already within the zone are unchecked by default.</li>"+'</ul>' },
   ],
@@ -1799,7 +1800,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\udccf", title:"Esporta come striscia", body:
       '<ul>'+"<li>Pulsante \ud83d\udccf nell'editor del libro: unisce tutte le pagine del libro una dopo l'altra in un'unica immagine verticale.</li>"+"<li>Utile per condividere un'anteprima completa del libro in una conversazione (WhatsApp, Mail...) senza dover inviare un PDF intero.</li>"+"<li>Su un libro con molte pagine, l'immagine viene ridotta automaticamente per restare di dimensioni ragionevoli \u2014 la qualit\u00e0 di ogni pagina diminuisce leggermente di conseguenza.</li>"+'</ul>' },
     { icon:"\ud83d\udcbe", title:"Dove sono i tuoi dati? Backup / ripristino", body:
-      '<ul>'+"<li>Tutto \u00e8 memorizzato <b>solo sul tuo telefono</b> (nel browser) \u2014 nessun account, nessun cloud, niente viene inviato altrove.</li>"+"<li>Un PDF esportato finisce nella normale cartella Download del telefono, come qualsiasi file scaricato.</li>"+"<li><b>Backup completo:</b> pulsante \ud83d\udcbe in alto nella schermata principale \u2014 crea un unico file con TUTTO (album, foto, libri, mappe). Conservalo con cura, o reimportalo se cambi telefono o cancelli i dati del sito.</li>"+"<li><b>Ripristina:</b> dalla stessa schermata, \"\u2b06\ufe0f Ripristina da un file\" \u2014 gli album del file vengono <b>aggiunti</b> a quelli gi\u00e0 presenti (mai sovrascritti), anche se reimporti pi\u00f9 volte.</li>"+'</ul>' },
+      '<ul>'+"<li>Tutto \u00e8 memorizzato <b>solo sul tuo telefono</b> (nel browser) \u2014 nessun account, nessun cloud, niente viene inviato altrove.</li>"+"<li>Un PDF esportato finisce nella normale cartella Download del telefono, come qualsiasi file scaricato.</li>"+"<li><b>Backup completo:</b> pulsante \ud83d\udcbe in alto nella schermata principale \u2014 crea un unico file con TUTTO (album, foto, libri, mappe). Conservalo con cura, o reimportalo se cambi telefono o cancelli i dati del sito.</li>"+"<li><b>Ripristina:</b> dalla stessa schermata, \"\u2b06\ufe0f Ripristina da un file\" \u2014 gli album del file vengono <b>aggiunti</b> a quelli gi\u00e0 presenti (mai sovrascritti), anche se reimporti pi\u00f9 volte.</li><li><b>Esporta un solo album:</b> in questa stessa finestra, pulsante \u2b06\ufe0f accanto a un album specifico nell'elenco \u2014 genera un file con SOLO quell'album (foto incluse), per trasferirlo su un altro telefono senza inviare tutti i tuoi viaggi. Si ripristina poi esattamente come un backup completo.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Guide per una stampa professionale", body:
       '<ul>'+"<li>Pulsante <b>\ud83d\udcd0 Guide di stampa</b> nell'editor del libro: mostra una zona tratteggiata al 5% dal bordo della pagina.</li>"+"<li>Utile se prevedi di inviare il tuo libro a una vera tipografia: evita di posizionare testo o un volto importante troppo vicino al bordo, che potrebbe andare perso durante il taglio o la rilegatura.</li>"+"<li>\u00c8 un riferimento visivo <b>solo per te durante la modifica</b> \u2014 non appare mai nel PDF esportato, n\u00e9 nel formato story.</li>"+"<li><b>Adatta questa pagina:</b> pulsante \ud83d\udd27 \u2014 riduce e ricentra automaticamente tutto il contenuto della pagina affinch\u00e9 rientri nella zona di sicurezza, mantenendo la disposizione relativa (non ricrea nulla, \u00e8 solo uno \"zoom indietro\"). Non fa nulla se la pagina rientra gi\u00e0.</li>"+"<li><b>Adatta pi\u00f9 pagine:</b> stessa cosa, ma scegliendo le pagine da elaborare in blocco da un elenco selezionabile \u2014 le pagine gi\u00e0 nella zona sono deselezionate di default.</li>"+'</ul>' },
   ],
@@ -1835,7 +1836,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\udccf", title:"Exportar como tira", body:
       '<ul>'+"<li>Bot\u00f3n \ud83d\udccf en el editor del libro: une todas las p\u00e1ginas del libro una tras otra en una sola imagen vertical.</li>"+"<li>\u00datil para compartir una vista previa completa del libro en una conversaci\u00f3n (WhatsApp, Correo...) sin tener que enviar un PDF entero.</li>"+"<li>En un libro con muchas p\u00e1ginas, la imagen se reduce autom\u00e1ticamente para mantener un tama\u00f1o razonable \u2014 la calidad de cada p\u00e1gina baja ligeramente como consecuencia.</li>"+'</ul>' },
     { icon:"\ud83d\udcbe", title:"\u00bfD\u00f3nde est\u00e1n tus datos? Copia de seguridad / restaurar", body:
-      '<ul>'+"<li>Todo se guarda <b>\u00fanicamente en tu tel\u00e9fono</b> (en el navegador) \u2014 sin cuenta, sin nube, no se env\u00eda nada a ning\u00fan otro sitio.</li>"+"<li>Un PDF exportado va a la carpeta de Descargas normal de tu tel\u00e9fono, como cualquier archivo descargado.</li>"+"<li><b>Copia de seguridad completa:</b> bot\u00f3n \ud83d\udcbe en la parte superior de la pantalla de inicio \u2014 crea un \u00fanico archivo con TODO (\u00e1lbumes, fotos, libros, mapas). Gu\u00e1rdalo a buen recaudo, o vuelve a importarlo si cambias de tel\u00e9fono o borras los datos del sitio.</li>"+"<li><b>Restaurar:</b> desde esa misma pantalla, \"\u2b06\ufe0f Restaurar desde un archivo\" \u2014 los \u00e1lbumes del archivo se <b>a\u00f1aden</b> a los que ya est\u00e1n presentes (nunca se sobrescriben), incluso si vuelves a importar varias veces.</li>"+'</ul>' },
+      '<ul>'+"<li>Todo se guarda <b>\u00fanicamente en tu tel\u00e9fono</b> (en el navegador) \u2014 sin cuenta, sin nube, no se env\u00eda nada a ning\u00fan otro sitio.</li>"+"<li>Un PDF exportado va a la carpeta de Descargas normal de tu tel\u00e9fono, como cualquier archivo descargado.</li>"+"<li><b>Copia de seguridad completa:</b> bot\u00f3n \ud83d\udcbe en la parte superior de la pantalla de inicio \u2014 crea un \u00fanico archivo con TODO (\u00e1lbumes, fotos, libros, mapas). Gu\u00e1rdalo a buen recaudo, o vuelve a importarlo si cambias de tel\u00e9fono o borras los datos del sitio.</li>"+"<li><b>Restaurar:</b> desde esa misma pantalla, \"\u2b06\ufe0f Restaurar desde un archivo\" \u2014 los \u00e1lbumes del archivo se <b>a\u00f1aden</b> a los que ya est\u00e1n presentes (nunca se sobrescriben), incluso si vuelves a importar varias veces.</li><li><b>Exportar un solo \u00e1lbum:</b> en esta misma ventana, bot\u00f3n \u2b06\ufe0f junto a un \u00e1lbum concreto en la lista \u2014 genera un archivo con SOLO ese \u00e1lbum (fotos incluidas), para transferirlo a otro tel\u00e9fono sin enviar todos tus viajes. Se restaura despu\u00e9s exactamente igual que una copia de seguridad completa.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Gu\u00edas para una imprenta profesional", body:
       '<ul>'+"<li>Bot\u00f3n <b>\ud83d\udcd0 Gu\u00edas de impresi\u00f3n</b> en el editor del libro: muestra una zona discontinua al 5% del borde de la p\u00e1gina.</li>"+"<li>\u00datil si piensas enviar tu libro a una imprenta de verdad: evita colocar texto o una cara importante demasiado cerca del borde, que podr\u00eda perderse al cortar o encuadernar.</li>"+"<li>Es una gu\u00eda visual <b>solo para ti durante la edici\u00f3n</b> \u2014 nunca aparece en el PDF exportado, ni en el formato story.</li>"+"<li><b>Ajustar esta p\u00e1gina:</b> bot\u00f3n \ud83d\udd27 \u2014 reduce y recentra autom\u00e1ticamente todo el contenido de la p\u00e1gina para que quepa en la zona segura, manteniendo la disposici\u00f3n relativa (no recrea nada, solo un \"alejar zoom\"). No hace nada si la p\u00e1gina ya encaja.</li>"+"<li><b>Ajustar varias p\u00e1ginas:</b> lo mismo, pero eligiendo qu\u00e9 p\u00e1ginas procesar de una vez en una lista de casillas \u2014 las p\u00e1ginas que ya est\u00e1n dentro de la zona aparecen desmarcadas por defecto.</li>"+'</ul>' },
   ],
@@ -2051,6 +2052,11 @@ var BK_I18N={
   no_albums_yet:{fr:'Pas encore d\'album',en:'No albums yet',it:'Ancora nessun album',es:'Todavía no hay álbumes'},
   storage_total:{fr:'Total :',en:'Total:',it:'Totale:',es:'Total:'},
   storage_gauge_title:{fr:'Espace utilisé par album',en:'Storage used per album',it:'Spazio usato per album',es:'Espacio usado por álbum'},
+  export_this_album:{fr:'Exporter cet album (pour un autre téléphone)',en:'Export this album (for another phone)',it:'Esporta questo album (per un altro telefono)',es:'Exportar este álbum (para otro teléfono)'},
+  backup_preparing:{fr:'Préparation…',en:'Preparing…',it:'Preparazione…',es:'Preparando…'},
+  backup_photos_word:{fr:'photos',en:'photos',it:'foto',es:'fotos'},
+  backup_writing:{fr:'Écriture du fichier…',en:'Writing the file…',it:'Scrittura del file…',es:'Escribiendo el archivo…'},
+  backup_album_downloaded:{fr:'Album téléchargé',en:'Album downloaded',it:'Album scaricato',es:'Álbum descargado'},
   export_strip:{fr:'Exporter en bande',en:'Export as strip',it:'Esporta come striscia',es:'Exportar como tira'},
   strip_generating:{fr:'Génération de la bande…',en:'Generating the strip…',it:'Generazione della striscia…',es:'Generando la tira…'},
   strip_exported:{fr:'📏 Bande exportée avec toutes les pages',en:'📏 Strip exported with all pages',it:'📏 Striscia esportata con tutte le pagine',es:'📏 Tira exportada con todas las páginas'},
@@ -2087,6 +2093,7 @@ function bkApplyLanguage(lang){
   if(typeof albums!=='undefined' && document.getElementById('pg-home').classList.contains('on')) renderHome();
   if(document.getElementById('help-sheet').classList.contains('on')) bkRenderHelpAccordion();
   if(document.getElementById('pg-book').classList.contains('on') && typeof bkBook!=='undefined' && bkBook) bkRenderPage();
+  if(document.getElementById('backup-sheet').classList.contains('on')) bkRenderStorageGauge();
 }
 function bkCycleLanguage(){
   var i=BK_LANGS.indexOf(BK_LANG);
@@ -2134,7 +2141,10 @@ function bkRenderStorageGauge(){
     rows.forEach(function(r){
       var pct=totalBytes>0 ? Math.round(r.bytes/totalBytes*100) : 0;
       h+='<div class="storage-row">'
-        +'<div class="storage-row-top"><span>'+esc(r.a.title)+'</span><b>'+bkFormatBytes(r.bytes)+'</b></div>'
+        +'<div class="storage-row-top"><span>'+esc(r.a.title)+'</span>'
+        +'<span style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
+        +'<button class="storage-export-btn" onclick="exportAlbumBackup(\''+r.a.id+'\')" title="'+t('export_this_album')+'">⬆️</button>'
+        +'<b>'+bkFormatBytes(r.bytes)+'</b></span></div>'
         +'<div class="storage-bar-bg"><div class="storage-bar-fill" style="width:'+pct+'%"></div></div>'
         +'</div>';
     });
@@ -2149,6 +2159,58 @@ function openBackupSheet(){
   document.getElementById('backup-sheet').classList.add('on');
 }
 function closeBackupSheet(){ document.getElementById('backup-sheet').classList.remove('on'); }
+/* ══════════════════ EXPORT D'UN SEUL ALBUM (pour un autre téléphone) ══════════════════
+   Même format exact que la sauvegarde complète, juste réduit à UN album —
+   la restauration existante ("⬆️ Restaurer depuis un fichier") le reconnaît
+   donc automatiquement sans rien changer de ce côté-là. Pratique pour
+   transférer un seul voyage vers un autre téléphone sans envoyer TOUT.
+   Note : ne remplace jamais l'album d'origine sur CE téléphone, il reste
+   là — ce fichier est une copie destinée à être importée ailleurs. */
+function exportAlbumBackup(albumId){
+  var a=al(albumId);
+  if(!a) return;
+  var prog=document.getElementById('backup-export-progress');
+  prog.style.display='block'; prog.textContent=t('backup_preparing');
+  var total=a.photos.length, done=0;
+  var fullPhotos=[];
+  function next(i){
+    if(i>=a.photos.length){ finish(); return; }
+    var p=a.photos[i];
+    Promise.all([
+      bkPhotoSrcAsDataURL(p,'full'),
+      bkPhotoSrcAsDataURL(p,'thumb')
+    ]).then(function(res){
+      fullPhotos.push(Object.assign({}, p, {full:res[0], thumb:res[1]}));
+      done++;
+      if(done%10===0 || done===total) prog.textContent=t('backup_preparing')+' '+done+'/'+total+' '+t('backup_photos_word');
+      next(i+1);
+    });
+  }
+  function finish(){
+    var albumRow={
+      id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji, createdAt:a.createdAt,
+      photoIds:a.photos.map(function(p){ return p.id; }),
+      books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders, customStickers:a.customStickers
+    };
+    var backup={
+      appVersion: (document.getElementById('app-version-footer')||{}).textContent || 'inconnue',
+      createdAt: new Date().toISOString(),
+      albums: [albumRow],
+      photos: fullPhotos
+    };
+    prog.textContent=t('backup_writing');
+    var blob=new Blob([JSON.stringify(backup)], {type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var link=document.createElement('a');
+    var safeName=(a.title||'album').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
+    var fname='mes-voyages-'+safeName+'-'+new Date().toISOString().slice(0,10)+'.json';
+    link.href=url; link.download=fname;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+    prog.textContent='✅ '+t('backup_album_downloaded')+' : '+fname;
+  }
+  if(!a.photos.length) finish(); else next(0);
+}
 function exportFullBackup(){
   var prog=document.getElementById('backup-export-progress');
   prog.style.display='block'; prog.textContent='Préparation…';
