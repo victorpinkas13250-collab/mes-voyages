@@ -521,7 +521,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.22.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.22.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -5655,7 +5655,26 @@ function bkElementBBox(el){
   // redescendre dans ses enfants, qui eux utilisent des coordonnées
   // RELATIVES (cx,cy,cw,ch, 0-100 à l'intérieur du groupe), pas x,y,w,h.
   // Les confondre corrompait les enfants du groupe (bug réel trouvé en test).
-  return { minX:el.x-el.w/2, maxX:el.x+el.w/2, minY:el.y-el.h/2, maxY:el.y+el.h/2 };
+  var rot=el.rot||0;
+  if(!rot){
+    return { minX:el.x-el.w/2, maxX:el.x+el.w/2, minY:el.y-el.h/2, maxY:el.y+el.h/2 };
+  }
+  // Un élément PIVOTÉ occupe visuellement plus de place que sa boîte de base
+  // (une photo penchée dépasse sur les côtés) — ignorer la rotation faisait
+  // croire à tort qu'une page tenait déjà dans la zone de sécurité, ou ne la
+  // réduisait pas assez (bug réel trouvé en testant avec des éléments
+  // inclinés, comme sur les pages du livre automatique). w/h sont en % de la
+  // largeur/hauteur de PAGE respectivement (pas le même repère si la page
+  // n'est pas carrée), donc on convertit d'abord dans un repère commun avant
+  // d'appliquer la trigonométrie, puis on reconvertit le résultat.
+  var orient=(typeof bkBook!=='undefined' && bkBook) ? bkBook.orient : 'portrait';
+  var pageAspect = orient==='landscape' ? 297/210 : (orient==='square' ? 1 : 210/297);
+  var wNorm=el.w*pageAspect, hNorm=el.h; // tout ramené en "% de hauteur de page"
+  var rad=rot*Math.PI/180;
+  var cos=Math.abs(Math.cos(rad)), sin=Math.abs(Math.sin(rad));
+  var rotWNorm=wNorm*cos+hNorm*sin, rotHNorm=wNorm*sin+hNorm*cos;
+  var rotW=rotWNorm/pageAspect, rotH=rotHNorm;
+  return { minX:el.x-rotW/2, maxX:el.x+rotW/2, minY:el.y-rotH/2, maxY:el.y+rotH/2 };
 }
 function bkPageFitsSafeMargin(page){
   if(!page.elements.length) return true;
@@ -6656,6 +6675,12 @@ function bkUngroupSelected(){
   bkRenderPage();
 }
 function bkPointerDown(e, el){
+  // Le clic vient du bouton croix (suppression) : on laisse SON PROPRE clic
+  // faire son travail sans jamais démarrer de glisser-déposer — sinon
+  // bkRenderPage() ci-dessous reconstruit tout le DOM en plein milieu du
+  // clic et casse l'événement avant qu'il n'atteigne la suppression (bug
+  // réel trouvé en testant : un vrai clic souris ne supprimait rien).
+  if(e.target.closest && e.target.closest('.bk-del')) return;
   e.stopPropagation();
   if(bkMultiSelectMode){
     bkToggleMultiSelectEl(el.id);
@@ -6732,7 +6757,15 @@ function bkPointerUp(){
   window.removeEventListener('pointermove', bkPointerMove);
   window.removeEventListener('pointerup', bkPointerUp);
 }
-document.getElementById('bk-canvas').addEventListener('pointerdown', function(){ bkSelId=null; bkRenderPage(); });
+document.getElementById('bk-canvas').addEventListener('pointerdown', function(e){
+  // Ne désélectionne/ne redessine JAMAIS si le clic vient d'un contrôle
+  // interactif d'un élément (croix de suppression, poignées...) — sinon ce
+  // redessin détruit en plein milieu du clic le bouton visé, et casse
+  // l'événement avant qu'il n'atteigne son propre gestionnaire (bug réel
+  // trouvé en testant : un vrai clic souris sur la croix ne supprimait rien).
+  if(e.target.closest && e.target.closest('.bk-del,.bk-handle')) return;
+  bkSelId=null; bkRenderPage();
+});
 
 /* ── Export du livre en PDF (rendu de chaque page sur un canevas, comme une vraie mise en page) ── */
 function bkLoadImg(src){
