@@ -11,6 +11,14 @@ try{
   var savedTheme=localStorage.getItem('mv_theme');
   if(savedTheme==='dark') document.documentElement.setAttribute('data-theme','dark');
 }catch(e){}
+try{
+  // Applique le mode d'affichage AVANT le reste de la page, comme le thème,
+  // pour éviter tout flash visible au chargement. Priorité au choix manuel
+  // déjà enregistré ; sinon, détection automatique selon la largeur d'écran.
+  var savedLayout=localStorage.getItem('mv_layout_mode');
+  var effectiveLayout=savedLayout || (window.innerWidth>=900 ? 'desktop' : 'mobile');
+  if(effectiveLayout==='desktop') document.documentElement.classList.add('layout-desktop');
+}catch(e){}
 </script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7B2FF7">
@@ -196,6 +204,23 @@ img{-webkit-user-drag:none;}
 .photos-grid.cols-3 .pi{margin-bottom:8px;}
 .photos-grid.cols-4{columns:4;column-gap:6px;}
 .photos-grid.cols-4 .pi{margin-bottom:6px;}
+/* ══════════════════ MODE GRAND ÉCRAN (ordinateur) ══════════════════
+   Par défaut, détecté automatiquement selon la largeur de fenêtre au premier
+   chargement — mais toujours modifiable à la main via le bouton 🖥️/📱, peu
+   importe la taille réelle de l'écran. Recentre le contenu (au lieu de
+   l'étirer sur toute la largeur) et ouvre un peu plus la grille de photos ;
+   l'éditeur de livre n'a besoin d'aucun changement, il se comporte déjà bien
+   sur grand écran (page centrée dans son propre cadre). */
+html.layout-desktop .hdr{max-width:900px;margin:0 auto;border-radius:32px;margin-top:24px;}
+html.layout-desktop .albums-grid{max-width:900px;margin:0 auto;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
+html.layout-desktop .ah{max-width:900px;margin:24px auto 0;border-radius:32px;}
+html.layout-desktop .upload-z{max-width:868px;margin:16px auto;}
+html.layout-desktop .folder-strip-row{max-width:868px;margin:0 auto 10px;}
+html.layout-desktop .photo-search-row{max-width:868px;margin:0 auto 14px;}
+html.layout-desktop .photos-grid{max-width:900px;margin:0 auto;columns:4;}
+html.layout-desktop .photos-grid.cols-3{columns:5;}
+html.layout-desktop .photos-grid.cols-4{columns:6;}
+html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 .pi{break-inside:avoid;margin-bottom:11px;border-radius:var(--r-md);overflow:hidden;background:var(--surface);box-shadow:var(--shadow-sm);position:relative;}
 .pi img{width:100%;display:block;background:#EFEAFB;}
 .pi-like{position:absolute;top:7px;right:7px;font-size:1.05rem;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));}
@@ -486,6 +511,7 @@ img{-webkit-user-drag:none;}
       </div>
       <button class="hdr-help-btn" id="theme-toggle-btn" onclick="bkToggleTheme()" style="margin-right:6px" title="Basculer clair/sombre">🌙</button>
       <button class="hdr-help-btn" id="lang-toggle-btn" onclick="bkCycleLanguage()" style="margin-right:6px;font-size:.62rem;font-weight:800" title="Changer la langue de l'interface">🇫🇷 FR</button>
+      <button class="hdr-help-btn" id="layout-toggle-btn" onclick="bkToggleLayoutMode()" style="margin-right:6px" data-i18n-title="btn_layout_toggle" title="Basculer entre affichage mobile et ordinateur">🖥️</button>
       <button class="hdr-help-btn" onclick="openBackupSheet()" style="margin-right:6px" title="Sauvegarder / restaurer">💾</button>
       <button class="hdr-help-btn" onclick="openHelpSheet()">❔</button>
     </div>
@@ -495,7 +521,7 @@ img{-webkit-user-drag:none;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.21.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.22.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1731,6 +1757,8 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Depuis un album, bouton <b>\ud83d\uddfa\ufe0f Carte</b> : ouvre la liste de tes cartes \u2014 tu peux en cr\u00e9er <b>plusieurs pour le m\u00eame album</b> (une par ville, une par \u00e9tape du voyage...).</li>"+"<li>Dans une carte : cherche un lieu par son nom, ou touche directement la carte pour poser un point et lui donner un nom.</li>"+"<li><b>Itin\u00e9raire reli\u00e9 :</b> d\u00e8s que tu as 2 lieux ou plus, une ligne en pointill\u00e9s les relie dans l'ordre \u2014 sur la carte interactive ET sur l'image ins\u00e9r\u00e9e dans le livre.</li>"+"<li><b>R\u00e9ordonner les lieux :</b> fl\u00e8ches \u2b06\ufe0f\u2b07\ufe0f \u00e0 c\u00f4t\u00e9 de chaque lieu dans la liste, pour changer l'ordre de l'itin\u00e9raire.</li>"+"<li><b>Style du trait :</b> pointill\u00e9s, plein, avec fl\u00e8ches indiquant le sens, ou aucun trait \u2014 choisis juste en dessous de la barre de recherche de la carte.</li>"+"<li>Depuis l'\u00e9diteur de livre, l'outil <b>Carte</b> ins\u00e8re une image de la carte avec tous ses points, comme n'importe quelle photo (d\u00e9pla\u00e7able, redimensionnable) \u2014 si tu as plusieurs cartes, l'appli te demande laquelle ins\u00e9rer.</li>"+"<li>N\u00e9cessite une connexion internet pour charger les rues ; sans r\u00e9seau, la carte garde un fond uni.</li>"+'</ul>' },
     { icon:"\ud83d\udcd5", title:"Exporter, partager, vue d'ensemble", body:
       '<ul>'+"<li><b>Depuis l'\u00e9diteur de livre :</b> bouton \"Exporter PDF\" en haut, exporte le livre tel que tu l'as construit page par page.</li>"+"<li><b>Depuis un album :</b> bouton \"Export PDF\" pour une grille rapide de toutes tes photos, sans passer par l'\u00e9diteur.</li>"+"<li><b>Format story :</b> bouton \ud83d\udcf1 dans l'\u00e9diteur \u2014 exporte la page actuelle en image verticale 1080\u00d71920 (le format Instagram/Snapchat/TikTok Stories).</li>"+"<li><b>Partage direct :</b> sur t\u00e9l\u00e9phone, chaque export (PDF, image, story) ouvre directement le menu de partage natif (WhatsApp, Mail, Messages...) au lieu de juste t\u00e9l\u00e9charger \u2014 l'option d'enregistrer le fichier reste disponible dans ce m\u00eame menu.</li>"+"<li><b>Vue d'ensemble :</b> bouton \ud83d\udd32 dans l'\u00e9diteur \u2014 toutes les pages du livre en miniatures sur une seule planche, pour rep\u00e9rer une page vide ou un souci avant d'exporter. Touche une vignette pour y aller directement.</li>"+'</ul>' },
+    { icon:"\ud83d\udda5\ufe0f", title:"Affichage mobile / ordinateur", body:
+      '<ul>'+"<li>Bouton \ud83d\udda5\ufe0f (ou \ud83d\udcf1) en haut de l'\u00e9cran d'accueil : bascule l'interface entre un affichage compact (mobile) et un affichage plus large (ordinateur, plus de colonnes de photos, contenu recentr\u00e9 au lieu d'\u00eatre \u00e9tir\u00e9).</li>"+"<li>D\u00e9tect\u00e9 automatiquement selon la taille de ton \u00e9cran au premier lancement \u2014 mais ton choix, une fois fait, prend toujours le dessus, m\u00eame si tu changes d'appareil ou de taille de fen\u00eatre ensuite.</li>"+"<li>C'est purement visuel : aucune donn\u00e9e ni fonctionnalit\u00e9 ne change entre les deux modes.</li>"+'</ul>' },
     { icon:"\ud83c\udf19", title:"Th\u00e8me clair / sombre", body:
       '<ul>'+"<li>Bouton \ud83c\udf19 (ou \u2600\ufe0f) en haut de l'\u00e9cran d'accueil : bascule l'interface de l'appli entre clair et sombre. Ton choix est m\u00e9moris\u00e9 pour les prochaines fois.</li>"+"<li>C'est diff\u00e9rent des styles de <b>livre</b> (Nuit violette, Noir intense...) qui restent ind\u00e9pendants \u2014 un livre garde ses propres couleurs choisies page par page, peu importe le th\u00e8me de l'appli.</li>"+'</ul>' },
     { icon:"\ud83c\udf0d", title:"Langue de l'interface", body:
@@ -1767,6 +1795,8 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>From an album, <b>\ud83d\uddfa\ufe0f Map</b> button: opens the list of your maps \u2014 you can create <b>several for the same album</b> (one per city, one per leg of the trip...).</li>"+"<li>On a map: search for a place by name, or tap directly on the map to drop a pin and give it a name.</li>"+"<li><b>Connected route:</b> as soon as you have 2 places or more, a dashed line connects them in order \u2014 on the interactive map AND on the image inserted into the book.</li>"+"<li><b>Reorder places:</b> \u2b06\ufe0f\u2b07\ufe0f arrows next to each place in the list, to change the route order.</li>"+"<li><b>Line style:</b> dashed, solid, with arrows showing direction, or no line \u2014 choose just below the map's search bar.</li>"+"<li>From the book editor, the <b>Map</b> tool inserts a map image with all its points, like any other photo (movable, resizable) \u2014 if you have several maps, the app asks which one to insert.</li>"+"<li>Requires an internet connection to load the streets; without a network, the map keeps a plain background.</li>"+'</ul>' },
     { icon:"\ud83d\udcd5", title:"Export, share, overview", body:
       '<ul>'+"<li><b>From the book editor:</b> \"Export PDF\" button at the top, exports the book exactly as you built it, page by page.</li>"+"<li><b>From an album:</b> \"Export PDF\" button for a quick grid of all your photos, without going through the editor.</li>"+"<li><b>Story format:</b> \ud83d\udcf1 button in the editor \u2014 exports the current page as a vertical 1080\u00d71920 image (the Instagram/Snapchat/TikTok Stories format).</li>"+"<li><b>Direct sharing:</b> on phones, every export (PDF, image, story) opens the native share menu directly (WhatsApp, Mail, Messages...) instead of just downloading \u2014 the option to save the file is still available in that same menu.</li>"+"<li><b>Overview:</b> \ud83d\udd32 button in the editor \u2014 all the book's pages as thumbnails on a single board, to spot an empty page or an issue before exporting. Tap a thumbnail to jump straight to it.</li>"+'</ul>' },
+    { icon:"\ud83d\udda5\ufe0f", title:"Mobile / computer display", body:
+      '<ul>'+"<li>\ud83d\udda5\ufe0f (or \ud83d\udcf1) button at the top of the home screen: switches the interface between a compact display (mobile) and a wider one (computer, more photo columns, recentered content instead of stretched).</li>"+"<li>Automatically detected based on your screen size on first launch \u2014 but once you've made a choice, it always takes priority, even if you switch device or window size afterwards.</li>"+"<li>It's purely visual: no data or feature changes between the two modes.</li>"+'</ul>' },
     { icon:"\ud83c\udf19", title:"Light / dark theme", body:
       '<ul>'+"<li>\ud83c\udf19 (or \u2600\ufe0f) button at the top of the home screen: switches the app's interface between light and dark. Your choice is remembered for next time.</li>"+"<li>This is different from <b>book</b> styles (Purple Night, Deep Black...) which stay independent \u2014 a book keeps its own colors chosen page by page, regardless of the app's theme.</li>"+'</ul>' },
     { icon:"\ud83c\udf0d", title:"Interface language", body:
@@ -1803,6 +1833,8 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Da un album, pulsante <b>\ud83d\uddfa\ufe0f Mappa</b>: apre l'elenco delle tue mappe \u2014 puoi crearne <b>pi\u00f9 di una per lo stesso album</b> (una per citt\u00e0, una per tappa del viaggio...).</li>"+"<li>In una mappa: cerca un luogo per nome, oppure tocca direttamente la mappa per posizionare un punto e dargli un nome.</li>"+"<li><b>Itinerario collegato:</b> non appena hai 2 o pi\u00f9 luoghi, una linea tratteggiata li collega in ordine \u2014 sulla mappa interattiva E sull'immagine inserita nel libro.</li>"+"<li><b>Riordina i luoghi:</b> frecce \u2b06\ufe0f\u2b07\ufe0f accanto a ogni luogo nell'elenco, per cambiare l'ordine dell'itinerario.</li>"+"<li><b>Stile della linea:</b> tratteggiata, continua, con frecce che indicano il senso, o nessuna linea \u2014 scegli subito sotto la barra di ricerca della mappa.</li>"+"<li>Dall'editor del libro, lo strumento <b>Mappa</b> inserisce un'immagine della mappa con tutti i suoi punti, come qualsiasi altra foto (spostabile, ridimensionabile) \u2014 se hai pi\u00f9 mappe, l'app chiede quale inserire.</li>"+"<li>Richiede una connessione internet per caricare le strade; senza rete, la mappa mantiene uno sfondo uniforme.</li>"+'</ul>' },
     { icon:"\ud83d\udcd5", title:"Esporta, condividi, panoramica", body:
       '<ul>'+"<li><b>Dall'editor del libro:</b> pulsante \"Esporta PDF\" in alto, esporta il libro esattamente come lo hai costruito, pagina per pagina.</li>"+"<li><b>Da un album:</b> pulsante \"Esporta PDF\" per una griglia rapida di tutte le tue foto, senza passare dall'editor.</li>"+"<li><b>Formato story:</b> pulsante \ud83d\udcf1 nell'editor \u2014 esporta la pagina attuale come immagine verticale 1080\u00d71920 (il formato Instagram/Snapchat/TikTok Stories).</li>"+"<li><b>Condivisione diretta:</b> su telefono, ogni esportazione (PDF, immagine, story) apre direttamente il menu di condivisione nativo (WhatsApp, Mail, Messaggi...) invece di limitarsi a scaricare \u2014 l'opzione di salvare il file resta disponibile nello stesso menu.</li>"+"<li><b>Panoramica:</b> pulsante \ud83d\udd32 nell'editor \u2014 tutte le pagine del libro in miniatura su un'unica tavola, per individuare una pagina vuota o un problema prima di esportare. Tocca una miniatura per andarci direttamente.</li>"+'</ul>' },
+    { icon:"\ud83d\udda5\ufe0f", title:"Visualizzazione mobile / computer", body:
+      '<ul>'+"<li>Pulsante \ud83d\udda5\ufe0f (o \ud83d\udcf1) in alto nella schermata principale: alterna l'interfaccia tra una visualizzazione compatta (mobile) e una pi\u00f9 ampia (computer, pi\u00f9 colonne di foto, contenuto ricentrato invece di essere allungato).</li>"+"<li>Rilevato automaticamente in base alle dimensioni dello schermo al primo avvio \u2014 ma la tua scelta, una volta fatta, ha sempre la priorit\u00e0, anche se cambi dispositivo o dimensione della finestra in seguito.</li>"+"<li>\u00c8 puramente visivo: nessun dato o funzionalit\u00e0 cambia tra le due modalit\u00e0.</li>"+'</ul>' },
     { icon:"\ud83c\udf19", title:"Tema chiaro / scuro", body:
       '<ul>'+"<li>Pulsante \ud83c\udf19 (o \u2600\ufe0f) in alto nella schermata principale: alterna l'interfaccia dell'app tra chiara e scura. La tua scelta viene ricordata per le prossime volte.</li>"+"<li>\u00c8 diverso dagli stili di <b>libro</b> (Notte viola, Nero intenso...) che restano indipendenti \u2014 un libro mantiene i propri colori scelti pagina per pagina, indipendentemente dal tema dell'app.</li>"+'</ul>' },
     { icon:"\ud83c\udf0d", title:"Lingua dell'interfaccia", body:
@@ -1839,6 +1871,8 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Desde un \u00e1lbum, bot\u00f3n <b>\ud83d\uddfa\ufe0f Mapa</b>: abre la lista de tus mapas \u2014 puedes crear <b>varios para el mismo \u00e1lbum</b> (uno por ciudad, uno por etapa del viaje...).</li>"+"<li>En un mapa: busca un lugar por su nombre, o toca directamente el mapa para colocar un punto y ponerle un nombre.</li>"+"<li><b>Ruta conectada:</b> en cuanto tienes 2 lugares o m\u00e1s, una l\u00ednea discontinua los conecta en orden \u2014 en el mapa interactivo Y en la imagen insertada en el libro.</li>"+"<li><b>Reordenar lugares:</b> flechas \u2b06\ufe0f\u2b07\ufe0f junto a cada lugar en la lista, para cambiar el orden de la ruta.</li>"+"<li><b>Estilo de l\u00ednea:</b> discontinua, continua, con flechas que indican el sentido, o sin l\u00ednea \u2014 elige justo debajo de la barra de b\u00fasqueda del mapa.</li>"+"<li>Desde el editor del libro, la herramienta <b>Mapa</b> inserta una imagen del mapa con todos sus puntos, como cualquier otra foto (movible, redimensionable) \u2014 si tienes varios mapas, la app pregunta cu\u00e1l insertar.</li>"+"<li>Requiere conexi\u00f3n a internet para cargar las calles; sin red, el mapa mantiene un fondo liso.</li>"+'</ul>' },
     { icon:"\ud83d\udcd5", title:"Exportar, compartir, vista general", body:
       '<ul>'+"<li><b>Desde el editor del libro:</b> bot\u00f3n \"Exportar PDF\" arriba, exporta el libro tal como lo has construido, p\u00e1gina por p\u00e1gina.</li>"+"<li><b>Desde un \u00e1lbum:</b> bot\u00f3n \"Exportar PDF\" para una cuadr\u00edcula r\u00e1pida de todas tus fotos, sin pasar por el editor.</li>"+"<li><b>Formato story:</b> bot\u00f3n \ud83d\udcf1 en el editor \u2014 exporta la p\u00e1gina actual como imagen vertical 1080\u00d71920 (el formato de Instagram/Snapchat/TikTok Stories).</li>"+"<li><b>Compartir directo:</b> en el tel\u00e9fono, cada exportaci\u00f3n (PDF, imagen, story) abre directamente el men\u00fa de compartir nativo (WhatsApp, Correo, Mensajes...) en lugar de solo descargar \u2014 la opci\u00f3n de guardar el archivo sigue disponible en ese mismo men\u00fa.</li>"+"<li><b>Vista general:</b> bot\u00f3n \ud83d\udd32 en el editor \u2014 todas las p\u00e1ginas del libro en miniatura en un solo panel, para detectar una p\u00e1gina vac\u00eda o un problema antes de exportar. Toca una miniatura para ir directamente a ella.</li>"+'</ul>' },
+    { icon:"\ud83d\udda5\ufe0f", title:"Vista m\u00f3vil / ordenador", body:
+      '<ul>'+"<li>Bot\u00f3n \ud83d\udda5\ufe0f (o \ud83d\udcf1) en la parte superior de la pantalla de inicio: alterna la interfaz entre una vista compacta (m\u00f3vil) y una m\u00e1s amplia (ordenador, m\u00e1s columnas de fotos, contenido recentrado en vez de estirado).</li>"+"<li>Detectado autom\u00e1ticamente seg\u00fan el tama\u00f1o de tu pantalla en el primer inicio \u2014 pero tu elecci\u00f3n, una vez hecha, siempre tiene prioridad, incluso si cambias de dispositivo o tama\u00f1o de ventana despu\u00e9s.</li>"+"<li>Es puramente visual: ning\u00fan dato ni funci\u00f3n cambia entre los dos modos.</li>"+'</ul>' },
     { icon:"\ud83c\udf19", title:"Tema claro / oscuro", body:
       '<ul>'+"<li>Bot\u00f3n \ud83c\udf19 (o \u2600\ufe0f) en la parte superior de la pantalla de inicio: alterna la interfaz de la app entre claro y oscuro. Tu elecci\u00f3n se recuerda para la pr\u00f3xima vez.</li>"+"<li>Esto es distinto de los estilos de <b>libro</b> (Noche violeta, Negro intenso...) que siguen siendo independientes \u2014 un libro conserva sus propios colores elegidos p\u00e1gina por p\u00e1gina, sin importar el tema de la app.</li>"+'</ul>' },
     { icon:"\ud83c\udf0d", title:"Idioma de la interfaz", body:
@@ -1961,6 +1995,7 @@ var BK_I18N={
   format_landscape:{fr:'Paysage',en:'Landscape',it:'Orizzontale',es:'Horizontal'},
   format_square:{fr:'Carré',en:'Square',it:'Quadrato',es:'Cuadrado'},
   btn_read_mode:{fr:'Mode lecture (plein écran, sans risque de modifier)',en:'Reading mode (fullscreen, no risk of editing)',it:'Modalità lettura (schermo intero, senza rischio di modifiche)',es:'Modo lectura (pantalla completa, sin riesgo de modificar)'},
+  btn_layout_toggle:{fr:'Basculer entre affichage mobile et ordinateur',en:'Switch between mobile and computer display',it:'Passa dalla visualizzazione mobile a quella per computer',es:'Cambiar entre vista móvil y de ordenador'},
   toc_title:{fr:'Sommaire',en:'Contents',it:'Sommario',es:'Índice'},
   toc_page:{fr:'page',en:'page',it:'pagina',es:'página'},
   toc_pages:{fr:'pages',en:'pages',it:'pagine',es:'páginas'},
@@ -2122,6 +2157,23 @@ function bkCycleLanguage(){
   var i=BK_LANGS.indexOf(BK_LANG);
   var next=BK_LANGS[(i+1)%BK_LANGS.length];
   bkApplyLanguage(next);
+}
+/* ══════════════════ MODE GRAND ÉCRAN / MOBILE (bascule manuelle) ══════════════════
+   Détecté automatiquement selon la largeur de fenêtre au tout premier
+   chargement (pas de préférence encore enregistrée) — ensuite, le choix de
+   l'utilisateur prime toujours, peu importe la taille réelle de l'écran :
+   utile pour forcer l'affichage compact sur un grand écran, ou l'inverse. */
+function bkDetectAutoLayout(){ return window.innerWidth>=900 ? 'desktop' : 'mobile'; }
+function bkApplyLayoutMode(mode){
+  document.documentElement.classList.toggle('layout-desktop', mode==='desktop');
+  var btn=document.getElementById('layout-toggle-btn');
+  if(btn) btn.textContent = mode==='desktop' ? '📱' : '🖥️'; // montre l'icône de la bascule VERS l'autre mode
+}
+function bkToggleLayoutMode(){
+  var current=document.documentElement.classList.contains('layout-desktop') ? 'desktop' : 'mobile';
+  var next=current==='desktop' ? 'mobile' : 'desktop';
+  try{ localStorage.setItem('mv_layout_mode', next); }catch(e){}
+  bkApplyLayoutMode(next);
 }
 /* ══════════════════ JAUGE D'ESPACE UTILISÉ ══════════════════
    Taille RÉELLE de chaque album (photos en Blob = taille exacte disponible
@@ -7262,6 +7314,9 @@ initDB(function(){
   if(btn && document.documentElement.getAttribute('data-theme')==='dark'){
     btn.textContent='☀️'; btn.title='Basculer en clair';
   }
+  // idem pour le mode d'affichage grand écran / mobile, déjà appliqué tôt
+  var layoutBtn=document.getElementById('layout-toggle-btn');
+  if(layoutBtn) layoutBtn.textContent = document.documentElement.classList.contains('layout-desktop') ? '📱' : '🖥️';
   try{
     var savedLang=localStorage.getItem('mv_lang');
     if(savedLang) bkApplyLanguage(savedLang);
