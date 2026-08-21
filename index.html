@@ -377,6 +377,13 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 .overview-cell{position:relative;border-radius:10px;overflow:hidden;border:2px solid var(--border);cursor:pointer;background:var(--surface);aspect-ratio:210/297;}
 .version-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
 .storage-row{margin-bottom:10px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.stats-tile{background:linear-gradient(135deg,rgba(123,47,247,.08),rgba(0,194,168,.08));border:2px solid rgba(123,47,247,.15);border-radius:16px;padding:14px;text-align:center;}
+.stats-tile b{display:block;font-size:1.6rem;font-weight:900;color:var(--primary);}
+.stats-tile span{font-size:.72rem;color:var(--ink-soft);font-weight:700;}
+.stats-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:.82rem;}
+.stats-row span{color:var(--ink-soft);font-weight:700;flex-shrink:0;}
+.stats-row b{text-align:right;}
 .storage-row-top{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;margin-bottom:4px;}
 .storage-export-btn{background:var(--bg);border:1px solid var(--border);border-radius:8px;width:26px;height:26px;font-size:.72rem;flex-shrink:0;}
 .storage-row-top span{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;}
@@ -469,6 +476,16 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
   </div>
 </div>
 
+<!-- Feuille: bilan de voyage (statistiques croisant tous les albums) -->
+<div class="bk-sheet" id="travelstats-sheet">
+  <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px" data-i18n="stats_title">📊 Mon bilan de voyage</h3>
+    <div class="modal-sub" style="margin-bottom:14px" data-i18n="stats_intro">Un résumé de toute ta vie de voyageur, calculé à partir de tes albums — rien de nouveau à saisir.</div>
+    <div id="travelstats-body"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeTravelStatsSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
+  </div>
+</div>
+
 <!-- Feuille: détection de doublons -->
 <div class="bk-sheet" id="dup-sheet">
   <div class="bk-sheet-box" style="max-height:80vh;overflow-y:auto">
@@ -524,6 +541,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
       <button class="hdr-help-btn" id="lang-toggle-btn" onclick="bkCycleLanguage()" style="margin-right:6px;font-size:.62rem;font-weight:800" title="Changer la langue de l'interface">🇫🇷 FR</button>
       <button class="hdr-help-btn" id="layout-toggle-btn" onclick="bkToggleLayoutMode()" style="margin-right:6px" data-i18n-title="btn_layout_toggle" title="Basculer entre affichage mobile et ordinateur">🖥️</button>
       <button class="hdr-help-btn" id="globalmap-btn" onclick="openGlobalMapScreen()" style="margin-right:6px;display:none" data-i18n-title="btn_globalmap" title="Tous mes voyages sur une carte">🗺️</button>
+      <button class="hdr-help-btn" id="stats-btn" onclick="openTravelStatsSheet()" style="margin-right:6px;display:none" data-i18n-title="btn_stats" title="Mon bilan de voyage">📊</button>
       <button class="hdr-help-btn" onclick="openBackupSheet()" style="margin-right:6px" title="Sauvegarder / restaurer">💾</button>
       <button class="hdr-help-btn" onclick="openHelpSheet()">❔</button>
     </div>
@@ -533,7 +551,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.25.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.27.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1122,7 +1140,7 @@ function saveAlbumMeta(a){
   dbPut('albums', {
     id:a.id, title:a.title, loc:a.loc, date:a.date, emoji:a.emoji,
     createdAt:a.createdAt, photoIds:a.photos.map(function(p){ return p.id; }),
-    books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders, customStickers:a.customStickers
+    books:a.books, book:a.book, places:a.places, maps:a.maps, folders:a.folders, customStickers:a.customStickers, isBestOf:a.isBestOf
   });
 }
 // Sauvegarde UNIQUEMENT une photo (léger même si l'album a 1000 photos)
@@ -1203,6 +1221,7 @@ function renderHome(){
   }
   document.getElementById('albums-grid').innerHTML=h;
   bkRefreshGlobalMapEntry();
+  bkRefreshStatsEntry();
 }
 function esc(s){
   return String(s==null?'':s).replace(/[&<>"']/g,function(c){
@@ -1290,6 +1309,59 @@ function bkRefreshGlobalMapEntry(){
   if(!btn) return;
   btn.style.display = bkCountAllPlaces()>0 ? '' : 'none';
 }
+/* ══════════════════ MON BILAN DE VOYAGE ══════════════════
+   Troisième fonctionnalité à traverser tous les albums d'un coup (après le
+   Best of et la carte globale) — cette fois sous forme de chiffres plutôt
+   que de photos ou de carte. Toujours le même principe : rien de nouveau à
+   saisir, juste ce qui est déjà là, additionné et mis en valeur. Le "Best
+   of" (s'il existe) est volontairement exclu du compte des voyages — ce
+   n'est pas un vrai voyage, juste une collection de favoris. */
+function bkComputeTravelStats(){
+  var realAlbums=albums.filter(function(a){ return !a.isBestOf; });
+  var totalPhotos=0, totalBooks=0, totalPlaces=0, mostPhotographed=null;
+  realAlbums.forEach(function(a){
+    totalPhotos+=a.photos.length;
+    totalBooks+=(a.books||[]).filter(function(b){ return !b.isMontage; }).length;
+    (a.maps||[]).forEach(function(m){ totalPlaces+=(m.places||[]).length; });
+    if(!mostPhotographed || a.photos.length>mostPhotographed.photos.length) mostPhotographed=a;
+  });
+  var sortedByCreation=realAlbums.slice().sort(function(x,y){ return (x.createdAt||0)-(y.createdAt||0); });
+  return {
+    tripCount: realAlbums.length,
+    totalPhotos: totalPhotos,
+    totalPlaces: totalPlaces,
+    totalBooks: totalBooks,
+    oldest: sortedByCreation[0]||null,
+    newest: sortedByCreation[sortedByCreation.length-1]||null,
+    mostPhotographed: (mostPhotographed && mostPhotographed.photos.length>0) ? mostPhotographed : null
+  };
+}
+function bkRefreshStatsEntry(){
+  var btn=document.getElementById('stats-btn');
+  if(!btn) return;
+  btn.style.display = albums.filter(function(a){ return !a.isBestOf; }).length>0 ? '' : 'none';
+}
+function openTravelStatsSheet(){
+  var s=bkComputeTravelStats();
+  var h='<div class="stats-grid">'
+    +'<div class="stats-tile"><b>'+s.tripCount+'</b><span>'+t('stats_trips')+'</span></div>'
+    +'<div class="stats-tile"><b>'+s.totalPhotos+'</b><span>'+t('stats_photos')+'</span></div>'
+    +'<div class="stats-tile"><b>'+s.totalPlaces+'</b><span>'+t('stats_places')+'</span></div>'
+    +'<div class="stats-tile"><b>'+s.totalBooks+'</b><span>'+t('stats_books')+'</span></div>'
+    +'</div>';
+  if(s.oldest){
+    h+='<div class="stats-row" onclick="closeTravelStatsSheet();openAlbum(\''+s.oldest.id+'\')"><span>🕰️ '+t('stats_oldest')+'</span><b>'+esc(s.oldest.title)+'</b></div>';
+  }
+  if(s.newest && s.newest.id!==(s.oldest&&s.oldest.id)){
+    h+='<div class="stats-row" onclick="closeTravelStatsSheet();openAlbum(\''+s.newest.id+'\')"><span>✨ '+t('stats_newest')+'</span><b>'+esc(s.newest.title)+'</b></div>';
+  }
+  if(s.mostPhotographed){
+    h+='<div class="stats-row" onclick="closeTravelStatsSheet();openAlbum(\''+s.mostPhotographed.id+'\')"><span>📸 '+t('stats_most_photos')+'</span><b>'+esc(s.mostPhotographed.title)+' ('+s.mostPhotographed.photos.length+')</b></div>';
+  }
+  document.getElementById('travelstats-body').innerHTML=h;
+  document.getElementById('travelstats-sheet').classList.add('on');
+}
+function closeTravelStatsSheet(){ document.getElementById('travelstats-sheet').classList.remove('on'); }
 function bkGmPinIcon(color){
   return L.divIcon({
     className:'gm-pin-icon',
@@ -1356,7 +1428,7 @@ function bkCreateBestOfAlbum(){
       id: gid(), title: t('bestof_title'),
       loc: distinctLocs.length===1 ? distinctLocs[0] : t('bestof_multi_loc'),
       date: new Date().getFullYear().toString(),
-      emoji: '🌟', createdAt: Date.now(), photos: [], books: [], book: null, folders: [], maps: []
+      emoji: '🌟', createdAt: Date.now(), photos: [], books: [], book: null, folders: [], maps: [], isBestOf:true
     };
     favPhotos.forEach(function(f){
       var p=f.src;
@@ -1885,10 +1957,14 @@ function bkGenerateAndInsertMap(mapObj){
 /* ══════════════════ AIDE ══════════════════ */
 var HELP_SECTIONS_I18N={
   "fr": [
+    { icon:"\ud83d\udcf2", title:"Installer l'application", body:
+      '<ul>'+"<li>Sur Android, ordinateur et la plupart des navigateurs : un bandeau \"Installer\" appara\u00eet automatiquement en bas de l'\u00e9cran quand ton navigateur d\u00e9tecte que l'appli peut \u00eatre install\u00e9e. Un tap suffit \u2014 l'appli s'ajoute alors comme une vraie application, avec sa propre ic\u00f4ne.</li>"+"<li>Sur iPhone/iPad (Safari) : aucune invite automatique n'est possible techniquement, un bandeau d'instructions appara\u00eet donc \u00e0 la place \u2014 touche le bouton Partager de Safari, puis \"Sur l'\u00e9cran d'accueil\".</li>"+"<li>Si tu fermes le bandeau, il ne r\u00e9appara\u00eet plus tout seul \u2014 rien ne t'emp\u00eache d'installer plus tard via le menu de ton navigateur.</li>"+'</ul>' },
     { icon:"\ud83c\udf1f", title:"Best of \u2014 tes coups de c\u0153ur de tous tes voyages", body:
       '<ul>'+"<li>Sur l'\u00e9cran d'accueil, une carte \"\ud83c\udf1f Cr\u00e9er un best of\" appara\u00eet d\u00e8s que tu as marqu\u00e9 au moins une photo en favori (\u2764\ufe0f) \u2014 peu importe dans quel album.</li>"+"<li>En un tap, elle rassemble automatiquement TOUTES tes photos favorites, de TOUS tes voyages, dans un nouvel album \u00e0 part \u2014 le tout premier endroit de l'appli qui traverse plusieurs albums d'un coup.</li>"+"<li>Tes albums d'origine ne sont jamais touch\u00e9s : les photos r\u00e9unies sont des copies ind\u00e9pendantes. Une fois cr\u00e9\u00e9, ce nouvel album fonctionne exactement comme n'importe quel autre \u2014 tu peux y construire un livre, un livre automatique, ou un montage rapide, sans rien de sp\u00e9cial \u00e0 apprendre.</li>"+'</ul>' },
     { icon:"\ud83d\uddfa\ufe0f", title:"Tous mes voyages sur une carte", body:
       '<ul>'+"<li>Bouton \ud83d\uddfa\ufe0f en haut de l'\u00e9cran d'accueil (visible d\u00e8s que tu as plac\u00e9 au moins un lieu sur une carte, dans n'importe quel album) : ouvre une seule grande carte avec TOUS les lieux de TOUS tes voyages r\u00e9unis.</li>"+"<li>Chaque voyage a sa propre couleur de rep\u00e8re, avec une l\u00e9gende en dessous pour t'y retrouver \u2014 rien de nouveau \u00e0 saisir, juste ce que tu as d\u00e9j\u00e0 plac\u00e9 sur les cartes de chacun de tes albums, vu autrement.</li>"+"<li>Touche un rep\u00e8re (ou une ligne de la l\u00e9gende) pour aller directement \u00e0 l'album correspondant.</li>"+'</ul>' },
+    { icon:"\ud83d\udcca", title:"Mon bilan de voyage", body:
+      '<ul>'+"<li>Bouton \ud83d\udcca en haut de l'\u00e9cran d'accueil (visible d\u00e8s que tu as au moins un album) : ouvre un r\u00e9sum\u00e9 chiffr\u00e9 de toute ta vie de voyageur \u2014 nombre de voyages, de photos, de lieux visit\u00e9s, de livres cr\u00e9\u00e9s.</li>"+"<li>Indique aussi ton tout premier voyage, ton dernier en date, et l'album le plus photographi\u00e9 \u2014 touche n'importe laquelle de ces lignes pour y aller directement.</li>"+"<li>Comme le Best of et la carte globale, rien de nouveau \u00e0 saisir : tout est calcul\u00e9 \u00e0 partir de ce que tu as d\u00e9j\u00e0. Le Best of (s'il existe) n'est jamais compt\u00e9 comme un vrai voyage dans ces chiffres.</li>"+'</ul>' },
     { icon:"\ud83d\udcf8", title:"Ajouter et g\u00e9rer tes photos", body:
       '<ul>'+"<li><b>Ajouter :</b> touche la zone en pointill\u00e9s dans un album, ou glisse-d\u00e9pose tes photos directement.</li>"+"<li><b>Rechercher :</b> tape un nom de fichier ou une date dans la barre de recherche de l'album.</li>"+"<li><b>Date automatique :</b> l'appli lit la vraie date de prise de vue dans la photo quand elle existe (ic\u00f4ne \ud83d\udcf7 dans la visionneuse) ; sinon elle utilise une date de repli (\ud83d\uddd3\ufe0f ou \u2795).</li>"+"<li><b>S\u00e9lection multiple :</b> bouton \u2611\ufe0f \u00e0 c\u00f4t\u00e9 de la recherche \u2014 coche plusieurs photos pour les supprimer, les ranger dans un dossier, ou les mettre directement dans le livre (voir plus bas).</li>"+"<li><b>Densit\u00e9 de la grille :</b> bouton \u25a6 \u00e0 c\u00f4t\u00e9 de la recherche \u2014 bascule entre 2, 3 et 4 colonnes d'affichage des photos, selon que tu pr\u00e9f\u00e8res voir plus de d\u00e9tail ou plus de photos d'un coup. Le choix est m\u00e9moris\u00e9 pour la prochaine fois.</li><li><b>S\u00e9lection en gamme :</b> en mode s\u00e9lection, bouton \ud83d\udd17 \u2014 touche une photo de d\u00e9part puis une photo d'arriv\u00e9e, et tout ce qu'il y a entre les deux se coche d'un coup.</li>"+"<li><b>R\u00e9ordonner :</b> en mode s\u00e9lection, coche UNE seule photo pour faire appara\u00eetre des fl\u00e8ches \u2b05\ufe0f\u27a1\ufe0f qui la d\u00e9placent dans l'ordre affich\u00e9.</li>"+"<li><b>Ranger par jour :</b> bouton \ud83d\udcc5 pour regrouper automatiquement tes photos par date de prise de vue, avec des sections repliables.</li>"+"<li><b>Voir tes favoris :</b> bouton \u2764\ufe0f \u00e0 c\u00f4t\u00e9 de la recherche pour ne voir que les photos mises en favori.</li>"+"<li><b>Rep\u00e9rer les photos floues :</b> bouton \ud83c\udf2b\ufe0f \u2014 analyse tes photos et marque celles qui semblent floues d'un petit badge. C'est une estimation, pas une certitude (une photo de ciel bien nette peut \u00eatre marqu\u00e9e \u00e0 tort) : v\u00e9rifie toujours \u00e0 l'\u0153il avant de supprimer.</li>"+"<li><b>D\u00e9tecter les doublons :</b> bouton \ud83d\udc6f \u2014 rep\u00e8re les photos tr\u00e8s ressemblantes (rafale, quasi-identiques) et les regroupe pour te laisser choisir lesquelles garder. Une estimation aussi, \u00e0 v\u00e9rifier avant de supprimer.</li>"+"<li><b>Choisir la couverture de l'album :</b> en mode s\u00e9lection (\u2611\ufe0f), coche UNE photo puis touche \ud83d\uddbc\ufe0f pour l'utiliser comme image de couverture (sinon c'est toujours la premi\u00e8re photo ajout\u00e9e).</li>"+"<li><b>Tout supprimer :</b> bouton \ud83d\uddd1\ufe0f \u00e0 c\u00f4t\u00e9 de la recherche, avec confirmation.</li>"+"<li><b>Annuler une suppression :</b> apr\u00e8s avoir supprim\u00e9 une photo, plusieurs photos, ou un album entier, un message reste affich\u00e9 quelques secondes avec un bouton \"\u21a9\ufe0f Annuler\" \u2014 pass\u00e9 ce d\u00e9lai, la suppression devient d\u00e9finitive.</li>"+"<li><b>L\u00e9gende et favori :</b> ouvre une photo (visionneuse) pour ajouter une l\u00e9gende ou la mettre en favori (\u2764\ufe0f).</li>"+'</ul>' },
     { icon:"\ud83c\udff7\ufe0f", title:"\u00c9tiquettes libres", body:
@@ -1927,10 +2003,14 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Bouton <b>\ud83d\udcd0 Rep\u00e8res impression</b> dans l'\u00e9diteur de livre : affiche une zone en pointill\u00e9s \u00e0 5% du bord de la page.</li>"+"<li>Utile si tu comptes envoyer ton livre chez un vrai imprimeur : \u00e9vite de placer du texte ou un visage important trop pr\u00e8s du bord, qui pourrait \u00eatre perdu \u00e0 la d\u00e9coupe ou la reliure.</li>"+"<li>C'est un rep\u00e8re visuel <b>uniquement pour toi pendant l'\u00e9dition</b> \u2014 il n'appara\u00eet jamais dans le PDF export\u00e9, ni dans le format story.</li>"+"<li><b>Ajuster cette page :</b> bouton \ud83d\udd27 \u2014 r\u00e9duit et recentre automatiquement tout le contenu de la page pour qu'il tienne dans la zone de s\u00e9curit\u00e9, en gardant la disposition relative (pas de re-cr\u00e9ation, juste un \"zoom arri\u00e8re\"). Ne fait rien si la page y est d\u00e9j\u00e0.</li>"+"<li><b>Ajuster plusieurs pages :</b> m\u00eame chose, mais en choisissant les pages \u00e0 traiter d'un coup dans une liste \u00e0 cocher \u2014 les pages d\u00e9j\u00e0 dans la zone sont d\u00e9coch\u00e9es par d\u00e9faut.</li>"+'</ul>' },
   ],
   "en": [
+    { icon:"\ud83d\udcf2", title:"Install the app", body:
+      '<ul>'+"<li>On Android, computer and most browsers: an \"Install\" banner appears automatically at the bottom of the screen when your browser detects the app can be installed. One tap is enough \u2014 the app is then added like a real application, with its own icon.</li>"+"<li>On iPhone/iPad (Safari): no automatic prompt is technically possible, so an instructions banner appears instead \u2014 tap Safari's Share button, then \"Add to Home Screen\".</li>"+"<li>If you close the banner, it won't reappear on its own \u2014 nothing stops you from installing later through your browser's menu.</li>"+'</ul>' },
     { icon:"\ud83c\udf1f", title:"Best of \u2014 your favorites from every trip", body:
       '<ul>'+"<li>On the home screen, a \"\ud83c\udf1f Create a best of\" card appears as soon as you've marked at least one photo as favorite (\u2764\ufe0f) \u2014 in any album.</li>"+"<li>In one tap, it automatically gathers ALL your favorite photos, from ALL your trips, into a new separate album \u2014 the very first place in the app that spans several albums at once.</li>"+"<li>Your original albums are never touched: the gathered photos are independent copies. Once created, this new album works exactly like any other \u2014 you can build a book, an automatic book, or a quick montage from it, with nothing special to learn.</li>"+'</ul>' },
     { icon:"\ud83d\uddfa\ufe0f", title:"All my trips on a map", body:
       '<ul>'+"<li>\ud83d\uddfa\ufe0f button at the top of the home screen (visible as soon as you've placed at least one location on a map, in any album): opens a single large map with ALL the places from ALL your trips combined.</li>"+"<li>Each trip has its own pin color, with a legend below to find your way \u2014 nothing new to enter, just what you've already placed on each album's maps, seen differently.</li>"+"<li>Tap a pin (or a legend row) to jump straight to the corresponding album.</li>"+'</ul>' },
+    { icon:"\ud83d\udcca", title:"My travel summary", body:
+      '<ul>'+"<li>\ud83d\udcca button at the top of the home screen (visible as soon as you have at least one album): opens a numbered summary of your whole travel life \u2014 number of trips, photos, places visited, books created.</li>"+"<li>Also shows your very first trip, your latest one, and the most photographed album \u2014 tap any of these rows to jump straight there.</li>"+"<li>Like the Best of and the global map, nothing new to enter: everything is calculated from what you already have. The Best of (if it exists) is never counted as a real trip in these numbers.</li>"+'</ul>' },
     { icon:"\ud83d\udcf8", title:"Add and manage your photos", body:
       '<ul>'+"<li><b>Add:</b> tap the dotted area in an album, or drag and drop your photos directly.</li>"+"<li><b>Search:</b> type a file name or a date in the album's search bar.</li>"+"<li><b>Automatic date:</b> the app reads the real shooting date embedded in the photo when it exists (\ud83d\udcf7 icon in the viewer); otherwise it uses a fallback date (\ud83d\uddd3\ufe0f or \u2795).</li>"+"<li><b>Multiple selection:</b> \u2611\ufe0f button next to search \u2014 check several photos to delete them, put them in a folder, or add them straight into the book (see below).</li>"+"<li><b>Grid density:</b> \u25a6 button next to search \u2014 switches between 2, 3 and 4 photo display columns, depending on whether you prefer more detail or more photos at once. The choice is remembered for next time.</li><li><b>Range selection:</b> in selection mode, \ud83d\udd17 button \u2014 tap a starting photo then an ending photo, and everything in between gets checked at once.</li>"+"<li><b>Reorder:</b> in selection mode, check ONE single photo to reveal \u2b05\ufe0f\u27a1\ufe0f arrows that move it within the displayed order.</li>"+"<li><b>Group by day:</b> \ud83d\udcc5 button to automatically group your photos by shooting date, with collapsible sections.</li>"+"<li><b>View your favorites:</b> \u2764\ufe0f button next to search to only see photos marked as favorite.</li>"+"<li><b>Spot blurry photos:</b> \ud83c\udf2b\ufe0f button \u2014 analyzes your photos and flags ones that look blurry with a small badge. It's an estimate, not a certainty (a perfectly sharp sky photo can be flagged wrongly): always check by eye before deleting.</li>"+"<li><b>Detect duplicates:</b> \ud83d\udc6f button \u2014 spots very similar photos (burst shots, near-identical) and groups them so you can choose which to keep. Also an estimate, check before deleting.</li>"+"<li><b>Choose the album cover:</b> in selection mode (\u2611\ufe0f), check ONE photo then tap \ud83d\uddbc\ufe0f to use it as the cover image (otherwise it's always the first photo added).</li>"+"<li><b>Delete all:</b> \ud83d\uddd1\ufe0f button next to search, with confirmation.</li>"+"<li><b>Undo a deletion:</b> after deleting a photo, several photos, or a whole album, a message stays on screen for a few seconds with an \"\u21a9\ufe0f Undo\" button \u2014 after that delay, the deletion becomes permanent.</li>"+"<li><b>Caption and favorite:</b> open a photo (viewer) to add a caption or mark it as favorite (\u2764\ufe0f).</li>"+'</ul>' },
     { icon:"\ud83c\udff7\ufe0f", title:"Free tags", body:
@@ -1969,10 +2049,14 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li><b>\ud83d\udcd0 Print guides</b> button in the book editor: shows a dashed zone 5% in from the page edge.</li>"+"<li>Useful if you plan to send your book to a real printer: avoids placing text or an important face too close to the edge, which could be lost during trimming or binding.</li>"+"<li>This is a visual guide <b>only for you while editing</b> \u2014 it never appears in the exported PDF, nor in the story format.</li>"+"<li><b>Fit this page:</b> \ud83d\udd27 button \u2014 automatically shrinks and re-centers all the page's content so it fits within the safe zone, keeping the relative layout (no re-creation, just a \"zoom out\"). Does nothing if the page already fits.</li>"+"<li><b>Fit several pages:</b> same thing, but choosing which pages to process at once from a checklist \u2014 pages already within the zone are unchecked by default.</li>"+'</ul>' },
   ],
   "it": [
+    { icon:"\ud83d\udcf2", title:"Installa l'app", body:
+      '<ul>'+"<li>Su Android, computer e la maggior parte dei browser: un banner \"Installa\" appare automaticamente in fondo allo schermo quando il tuo browser rileva che l'app pu\u00f2 essere installata. Basta un tocco \u2014 l'app viene aggiunta come una vera applicazione, con la propria icona.</li>"+"<li>Su iPhone/iPad (Safari): nessun avviso automatico \u00e8 tecnicamente possibile, quindi appare invece un banner con le istruzioni \u2014 tocca il pulsante Condividi di Safari, poi \"Aggiungi a Home\".</li>"+"<li>Se chiudi il banner, non riapparir\u00e0 da solo \u2014 nulla ti impedisce di installare pi\u00f9 tardi tramite il menu del tuo browser.</li>"+'</ul>' },
     { icon:"\ud83c\udf1f", title:"Best of \u2014 i tuoi preferiti di tutti i viaggi", body:
       '<ul>'+"<li>Nella schermata principale, una scheda \"\ud83c\udf1f Crea un best of\" appare non appena hai contrassegnato almeno una foto come preferita (\u2764\ufe0f) \u2014 in qualsiasi album.</li>"+"<li>Con un tocco, raccoglie automaticamente TUTTE le tue foto preferite, da TUTTI i tuoi viaggi, in un nuovo album separato \u2014 il primo punto dell'app che attraversa pi\u00f9 album contemporaneamente.</li>"+"<li>I tuoi album originali non vengono mai toccati: le foto raccolte sono copie indipendenti. Una volta creato, questo nuovo album funziona esattamente come qualsiasi altro \u2014 puoi costruirci un libro, un libro automatico o un montaggio rapido, senza nulla di speciale da imparare.</li>"+'</ul>' },
     { icon:"\ud83d\uddfa\ufe0f", title:"Tutti i miei viaggi su una mappa", body:
       '<ul>'+"<li>Pulsante \ud83d\uddfa\ufe0f in alto nella schermata principale (visibile non appena hai posizionato almeno un luogo su una mappa, in qualsiasi album): apre un'unica grande mappa con TUTTI i luoghi di TUTTI i tuoi viaggi riuniti.</li>"+"<li>Ogni viaggio ha il proprio colore di segnaposto, con una legenda sotto per orientarti \u2014 niente di nuovo da inserire, solo ci\u00f2 che hai gi\u00e0 posizionato sulle mappe di ciascun album, visto diversamente.</li>"+"<li>Tocca un segnaposto (o una riga della legenda) per andare direttamente all'album corrispondente.</li>"+'</ul>' },
+    { icon:"\ud83d\udcca", title:"Il mio bilancio di viaggio", body:
+      '<ul>'+"<li>Pulsante \ud83d\udcca in alto nella schermata principale (visibile non appena hai almeno un album): apre un riepilogo numerico di tutta la tua vita da viaggiatore \u2014 numero di viaggi, foto, luoghi visitati, libri creati.</li>"+"<li>Mostra anche il tuo primissimo viaggio, l'ultimo in ordine di tempo, e l'album pi\u00f9 fotografato \u2014 tocca una qualsiasi di queste righe per andarci direttamente.</li>"+"<li>Come il Best of e la mappa globale, niente di nuovo da inserire: tutto viene calcolato da ci\u00f2 che hai gi\u00e0. Il Best of (se esiste) non viene mai conteggiato come un vero viaggio in questi numeri.</li>"+'</ul>' },
     { icon:"\ud83d\udcf8", title:"Aggiungi e gestisci le tue foto", body:
       '<ul>'+"<li><b>Aggiungi:</b> tocca l'area tratteggiata in un album, oppure trascina le tue foto direttamente.</li>"+"<li><b>Cerca:</b> digita un nome di file o una data nella barra di ricerca dell'album.</li>"+"<li><b>Data automatica:</b> l'app legge la vera data di scatto della foto quando esiste (icona \ud83d\udcf7 nel visualizzatore); altrimenti usa una data di riserva (\ud83d\uddd3\ufe0f o \u2795).</li>"+"<li><b>Selezione multipla:</b> pulsante \u2611\ufe0f accanto alla ricerca \u2014 seleziona pi\u00f9 foto per eliminarle, metterle in una cartella o aggiungerle direttamente al libro (vedi sotto).</li>"+"<li><b>Densit\u00e0 della griglia:</b> pulsante \u25a6 accanto alla ricerca \u2014 passa tra 2, 3 e 4 colonne di visualizzazione delle foto, a seconda che tu preferisca vedere pi\u00f9 dettagli o pi\u00f9 foto insieme. La scelta viene ricordata per la prossima volta.</li><li><b>Selezione a intervallo:</b> in modalit\u00e0 selezione, pulsante \ud83d\udd17 \u2014 tocca una foto di partenza poi una di arrivo, e tutto ci\u00f2 che sta in mezzo viene selezionato in un colpo solo.</li>"+"<li><b>Riordina:</b> in modalit\u00e0 selezione, seleziona UNA sola foto per far comparire le frecce \u2b05\ufe0f\u27a1\ufe0f che la spostano nell'ordine visualizzato.</li>"+"<li><b>Ordina per giorno:</b> pulsante \ud83d\udcc5 per raggruppare automaticamente le foto per data di scatto, con sezioni comprimibili.</li>"+"<li><b>Vedi i tuoi preferiti:</b> pulsante \u2764\ufe0f accanto alla ricerca per vedere solo le foto contrassegnate come preferite.</li>"+"<li><b>Individua le foto sfocate:</b> pulsante \ud83c\udf2b\ufe0f \u2014 analizza le tue foto e segna con un piccolo badge quelle che sembrano sfocate. \u00c8 una stima, non una certezza (una foto di cielo ben nitida pu\u00f2 essere segnata per errore): controlla sempre a occhio prima di eliminare.</li>"+"<li><b>Rileva i doppioni:</b> pulsante \ud83d\udc6f \u2014 individua le foto molto simili (scatti in sequenza, quasi identiche) e le raggruppa per lasciarti scegliere quali tenere. Anche questa \u00e8 una stima, da verificare prima di eliminare.</li>"+"<li><b>Scegli la copertina dell'album:</b> in modalit\u00e0 selezione (\u2611\ufe0f), seleziona UNA foto poi tocca \ud83d\uddbc\ufe0f per usarla come immagine di copertina (altrimenti \u00e8 sempre la prima foto aggiunta).</li>"+"<li><b>Elimina tutto:</b> pulsante \ud83d\uddd1\ufe0f accanto alla ricerca, con conferma.</li>"+"<li><b>Annulla un'eliminazione:</b> dopo aver eliminato una foto, pi\u00f9 foto o un intero album, un messaggio resta visibile per qualche secondo con un pulsante \"\u21a9\ufe0f Annulla\" \u2014 passato questo tempo, l'eliminazione diventa definitiva.</li>"+"<li><b>Didascalia e preferito:</b> apri una foto (visualizzatore) per aggiungere una didascalia o metterla tra i preferiti (\u2764\ufe0f).</li>"+'</ul>' },
     { icon:"\ud83c\udff7\ufe0f", title:"Etichette libere", body:
@@ -2011,10 +2095,14 @@ var HELP_SECTIONS_I18N={
       '<ul>'+"<li>Pulsante <b>\ud83d\udcd0 Guide di stampa</b> nell'editor del libro: mostra una zona tratteggiata al 5% dal bordo della pagina.</li>"+"<li>Utile se prevedi di inviare il tuo libro a una vera tipografia: evita di posizionare testo o un volto importante troppo vicino al bordo, che potrebbe andare perso durante il taglio o la rilegatura.</li>"+"<li>\u00c8 un riferimento visivo <b>solo per te durante la modifica</b> \u2014 non appare mai nel PDF esportato, n\u00e9 nel formato story.</li>"+"<li><b>Adatta questa pagina:</b> pulsante \ud83d\udd27 \u2014 riduce e ricentra automaticamente tutto il contenuto della pagina affinch\u00e9 rientri nella zona di sicurezza, mantenendo la disposizione relativa (non ricrea nulla, \u00e8 solo uno \"zoom indietro\"). Non fa nulla se la pagina rientra gi\u00e0.</li>"+"<li><b>Adatta pi\u00f9 pagine:</b> stessa cosa, ma scegliendo le pagine da elaborare in blocco da un elenco selezionabile \u2014 le pagine gi\u00e0 nella zona sono deselezionate di default.</li>"+'</ul>' },
   ],
   "es": [
+    { icon:"\ud83d\udcf2", title:"Instalar la app", body:
+      '<ul>'+"<li>En Android, ordenador y la mayor\u00eda de navegadores: aparece autom\u00e1ticamente un banner \"Instalar\" en la parte inferior de la pantalla cuando tu navegador detecta que la app se puede instalar. Basta un toque \u2014 la app se a\u00f1ade entonces como una aplicaci\u00f3n real, con su propio icono.</li>"+"<li>En iPhone/iPad (Safari): no es t\u00e9cnicamente posible ning\u00fan aviso autom\u00e1tico, as\u00ed que aparece en su lugar un banner con instrucciones \u2014 toca el bot\u00f3n Compartir de Safari, y luego \"A\u00f1adir a pantalla de inicio\".</li>"+"<li>Si cierras el banner, no volver\u00e1 a aparecer solo \u2014 nada te impide instalarla m\u00e1s tarde desde el men\u00fa de tu navegador.</li>"+'</ul>' },
     { icon:"\ud83c\udf1f", title:"Best of \u2014 tus favoritas de todos tus viajes", body:
       '<ul>'+"<li>En la pantalla de inicio, aparece una tarjeta \"\ud83c\udf1f Crear un best of\" en cuanto marcas al menos una foto como favorita (\u2764\ufe0f) \u2014 en cualquier \u00e1lbum.</li>"+"<li>Con un toque, re\u00fane autom\u00e1ticamente TODAS tus fotos favoritas, de TODOS tus viajes, en un nuevo \u00e1lbum aparte \u2014 el primer lugar de la app que abarca varios \u00e1lbumes a la vez.</li>"+"<li>Tus \u00e1lbumes originales nunca se tocan: las fotos reunidas son copias independientes. Una vez creado, este nuevo \u00e1lbum funciona exactamente como cualquier otro \u2014 puedes construir un libro, un libro autom\u00e1tico o un montaje r\u00e1pido a partir de \u00e9l, sin nada especial que aprender.</li>"+'</ul>' },
     { icon:"\ud83d\uddfa\ufe0f", title:"Todos mis viajes en un mapa", body:
       '<ul>'+"<li>Bot\u00f3n \ud83d\uddfa\ufe0f en la parte superior de la pantalla de inicio (visible en cuanto has colocado al menos un lugar en un mapa, en cualquier \u00e1lbum): abre un \u00fanico mapa grande con TODOS los lugares de TODOS tus viajes reunidos.</li>"+"<li>Cada viaje tiene su propio color de marcador, con una leyenda abajo para orientarte \u2014 nada nuevo que introducir, solo lo que ya colocaste en los mapas de cada \u00e1lbum, visto de otra manera.</li>"+"<li>Toca un marcador (o una fila de la leyenda) para ir directamente al \u00e1lbum correspondiente.</li>"+'</ul>' },
+    { icon:"\ud83d\udcca", title:"Mi balance de viajes", body:
+      '<ul>'+"<li>Bot\u00f3n \ud83d\udcca en la parte superior de la pantalla de inicio (visible en cuanto tienes al menos un \u00e1lbum): abre un resumen num\u00e9rico de toda tu vida como viajero \u2014 n\u00famero de viajes, fotos, lugares visitados, libros creados.</li>"+"<li>Tambi\u00e9n muestra tu primer viaje, el m\u00e1s reciente, y el \u00e1lbum m\u00e1s fotografiado \u2014 toca cualquiera de estas filas para ir directamente all\u00ed.</li>"+"<li>Como el Best of y el mapa global, nada nuevo que introducir: todo se calcula a partir de lo que ya tienes. El Best of (si existe) nunca se cuenta como un viaje real en estas cifras.</li>"+'</ul>' },
     { icon:"\ud83d\udcf8", title:"A\u00f1adir y gestionar tus fotos", body:
       '<ul>'+"<li><b>A\u00f1adir:</b> toca la zona punteada en un \u00e1lbum, o arrastra y suelta tus fotos directamente.</li>"+"<li><b>Buscar:</b> escribe un nombre de archivo o una fecha en la barra de b\u00fasqueda del \u00e1lbum.</li>"+"<li><b>Fecha autom\u00e1tica:</b> la app lee la fecha real de la toma en la foto cuando existe (icono \ud83d\udcf7 en el visor); si no, usa una fecha de respaldo (\ud83d\uddd3\ufe0f o \u2795).</li>"+"<li><b>Selecci\u00f3n m\u00faltiple:</b> bot\u00f3n \u2611\ufe0f junto a la b\u00fasqueda \u2014 marca varias fotos para eliminarlas, moverlas a una carpeta o a\u00f1adirlas directamente al libro (ver m\u00e1s abajo).</li>"+"<li><b>Densidad de la cuadr\u00edcula:</b> bot\u00f3n \u25a6 junto a la b\u00fasqueda \u2014 alterna entre 2, 3 y 4 columnas de visualizaci\u00f3n de fotos, seg\u00fan prefieras ver m\u00e1s detalle o m\u00e1s fotos a la vez. La elecci\u00f3n se recuerda para la pr\u00f3xima vez.</li><li><b>Selecci\u00f3n por rango:</b> en modo selecci\u00f3n, bot\u00f3n \ud83d\udd17 \u2014 toca una foto de inicio y luego una de fin, y todo lo que hay entre medias se marca de una vez.</li>"+"<li><b>Reordenar:</b> en modo selecci\u00f3n, marca UNA sola foto para que aparezcan las flechas \u2b05\ufe0f\u27a1\ufe0f que la mueven dentro del orden mostrado.</li>"+"<li><b>Agrupar por d\u00eda:</b> bot\u00f3n \ud83d\udcc5 para agrupar autom\u00e1ticamente tus fotos por fecha de toma, con secciones plegables.</li>"+"<li><b>Ver tus favoritos:</b> bot\u00f3n \u2764\ufe0f junto a la b\u00fasqueda para ver solo las fotos marcadas como favoritas.</li>"+"<li><b>Detectar fotos borrosas:</b> bot\u00f3n \ud83c\udf2b\ufe0f \u2014 analiza tus fotos y marca con una peque\u00f1a insignia las que parecen borrosas. Es una estimaci\u00f3n, no una certeza (una foto de cielo muy n\u00edtida puede marcarse por error): revisa siempre a simple vista antes de borrar.</li>"+"<li><b>Detectar duplicados:</b> bot\u00f3n \ud83d\udc6f \u2014 localiza fotos muy parecidas (r\u00e1fagas, casi id\u00e9nticas) y las agrupa para que elijas cu\u00e1les conservar. Tambi\u00e9n es una estimaci\u00f3n, revisa antes de borrar.</li>"+"<li><b>Elegir la portada del \u00e1lbum:</b> en modo selecci\u00f3n (\u2611\ufe0f), marca UNA foto y toca \ud83d\uddbc\ufe0f para usarla como imagen de portada (si no, siempre es la primera foto a\u00f1adida).</li>"+"<li><b>Eliminar todo:</b> bot\u00f3n \ud83d\uddd1\ufe0f junto a la b\u00fasqueda, con confirmaci\u00f3n.</li>"+"<li><b>Deshacer un borrado:</b> tras borrar una foto, varias fotos o un \u00e1lbum entero, aparece un mensaje unos segundos con un bot\u00f3n \"\u21a9\ufe0f Deshacer\" \u2014 pasado ese tiempo, el borrado se vuelve definitivo.</li>"+"<li><b>Leyenda y favorito:</b> abre una foto (visor) para a\u00f1adir una leyenda o marcarla como favorita (\u2764\ufe0f).</li>"+'</ul>' },
     { icon:"\ud83c\udff7\ufe0f", title:"Etiquetas libres", body:
@@ -2274,6 +2362,19 @@ var BK_I18N={
   globalmap_title:{fr:'🗺️ Tous mes voyages',en:'🗺️ All my trips',it:'🗺️ Tutti i miei viaggi',es:'🗺️ Todos mis viajes'},
   gm_place:{fr:'lieu',en:'place',it:'luogo',es:'lugar'},
   gm_places:{fr:'lieux',en:'places',it:'luoghi',es:'lugares'},
+  btn_stats:{fr:'Mon bilan de voyage',en:'My travel summary',it:'Il mio bilancio di viaggio',es:'Mi balance de viajes'},
+  stats_title:{fr:'📊 Mon bilan de voyage',en:'📊 My travel summary',it:'📊 Il mio bilancio di viaggio',es:'📊 Mi balance de viajes'},
+  stats_intro:{fr:'Un résumé de toute ta vie de voyageur, calculé à partir de tes albums — rien de nouveau à saisir.',en:'A summary of your whole travel life, calculated from your albums — nothing new to enter.',it:'Un riepilogo di tutta la tua vita da viaggiatore, calcolato dai tuoi album — niente di nuovo da inserire.',es:'Un resumen de toda tu vida como viajero, calculado a partir de tus álbumes — nada nuevo que introducir.'},
+  stats_trips:{fr:'voyages',en:'trips',it:'viaggi',es:'viajes'},
+  stats_photos:{fr:'photos',en:'photos',it:'foto',es:'fotos'},
+  stats_places:{fr:'lieux',en:'places',it:'luoghi',es:'lugares'},
+  stats_books:{fr:'livres créés',en:'books created',it:'libri creati',es:'libros creados'},
+  stats_oldest:{fr:'Premier voyage',en:'First trip',it:'Primo viaggio',es:'Primer viaje'},
+  stats_newest:{fr:'Dernier voyage',en:'Latest trip',it:'Ultimo viaggio',es:'Último viaje'},
+  stats_most_photos:{fr:'Le plus photographié',en:'Most photographed',it:'Il più fotografato',es:'El más fotografiado'},
+  install_hint:{fr:'📲 Installe l\'appli sur ton appareil',en:'📲 Install the app on your device',it:'📲 Installa l\'app sul tuo dispositivo',es:'📲 Instala la app en tu dispositivo'},
+  install_btn:{fr:'Installer',en:'Install',it:'Installa',es:'Instalar'},
+  install_ios_hint:{fr:'📲 Installe l\'appli : bouton Partager puis "Sur l\'écran d\'accueil"',en:'📲 Install the app: tap Share, then "Add to Home Screen"',it:'📲 Installa l\'app: tocca Condividi, poi "Aggiungi a Home"',es:'📲 Instala la app: toca Compartir y luego "Añadir a pantalla de inicio"'},
   storage_total:{fr:'Total :',en:'Total:',it:'Totale:',es:'Total:'},
   storage_gauge_title:{fr:'Espace utilisé par album',en:'Storage used per album',it:'Spazio usato per album',es:'Espacio usado por álbum'},
   export_this_album:{fr:'Exporter cet album (pour un autre téléphone)',en:'Export this album (for another phone)',it:'Esporta questo album (per un altro telefono)',es:'Exportar este álbum (para otro teléfono)'},
@@ -7643,6 +7744,69 @@ if('serviceWorker' in navigator){
 
     }).catch(function(){});
   });
+}
+/* ══════════════════ INSTALLATION DIRECTE (PWA) ══════════════════
+   Sur Android/Chrome/Edge/ordinateur : le navigateur déclenche un événement
+   natif "beforeinstallprompt" — on l'intercepte pour proposer notre propre
+   bouton "Installer", bien plus visible que le menu caché du navigateur.
+   Sur iPhone/iPad (Safari) : cet événement n'existe PAS, aucune invite
+   automatique n'est possible techniquement — on affiche donc des
+   instructions à la place (bouton Partager → Sur l'écran d'accueil).
+   Jamais affiché si l'appli tourne déjà en mode installé, et ne réapparaît
+   plus une fois fermé volontairement. */
+var bkDeferredInstallPrompt=null;
+function bkIsStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function bkIsIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+function bkDismissInstallBanner(){
+  var el=document.getElementById('install-banner');
+  if(el) el.remove();
+  try{ localStorage.setItem('mv_install_dismissed','1'); }catch(e){}
+}
+function bkShowInstallBanner(mode){
+  if(bkIsStandalone()) return;
+  if(document.getElementById('install-banner')) return;
+  try{ if(localStorage.getItem('mv_install_dismissed')==='1') return; }catch(e){}
+  var el=document.createElement('div');
+  el.id='install-banner';
+  el.style.cssText='position:fixed;left:12px;right:12px;bottom:16px;z-index:999998;background:linear-gradient(135deg,#00C2A8,#00A896);color:#fff;padding:14px 16px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.3);display:flex;align-items:center;gap:10px;font-family:Nunito,sans-serif;';
+  if(mode==='ios'){
+    el.innerHTML='<span style="flex:1;font-weight:800;font-size:.78rem">'+t('install_ios_hint')+'</span>'
+      +'<button id="install-banner-close" style="background:rgba(255,255,255,.25);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-weight:800;flex-shrink:0">✕</button>';
+  } else {
+    el.innerHTML='<span style="flex:1;font-weight:800;font-size:.85rem">'+t('install_hint')+'</span>'
+      +'<button id="install-banner-btn" style="background:#fff;color:#00897B;border:none;border-radius:50px;padding:9px 16px;font-weight:800;font-size:.82rem;margin-right:6px;flex-shrink:0">'+t('install_btn')+'</button>'
+      +'<button id="install-banner-close" style="background:rgba(255,255,255,.25);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-weight:800;flex-shrink:0">✕</button>';
+  }
+  document.body.appendChild(el);
+  document.getElementById('install-banner-close').onclick=bkDismissInstallBanner;
+  if(mode!=='ios'){
+    document.getElementById('install-banner-btn').onclick=function(){
+      var el2=document.getElementById('install-banner');
+      if(el2) el2.remove();
+      if(bkDeferredInstallPrompt){
+        bkDeferredInstallPrompt.prompt();
+        bkDeferredInstallPrompt.userChoice.then(function(){ bkDeferredInstallPrompt=null; });
+      }
+    };
+  }
+}
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  bkDeferredInstallPrompt=e;
+  bkShowInstallBanner('native');
+});
+window.addEventListener('appinstalled', function(){
+  var el=document.getElementById('install-banner');
+  if(el) el.remove();
+  bkDeferredInstallPrompt=null;
+  try{ localStorage.removeItem('mv_install_dismissed'); }catch(e){}
+});
+if(bkIsIOS() && !bkIsStandalone()){
+  setTimeout(function(){ bkShowInstallBanner('ios'); }, 2500); // laisse l'appli finir de charger avant de proposer
 }
 </script>
 </body>
