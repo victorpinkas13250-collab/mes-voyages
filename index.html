@@ -318,6 +318,11 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 .bk-tool.active{background:var(--primary);color:#fff;}
 .bk-tool .ic{font-size:1.15rem;}
 .bk-swatch{width:26px;height:26px;border-radius:50%;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--border);}
+.bk-swatch-pattern{background-size:cover!important;}
+.pattern-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.pattern-cell{aspect-ratio:1;border-radius:12px;background-size:cover;background-position:center;border:2px solid transparent;position:relative;overflow:hidden;}
+.pattern-cell.on{border-color:var(--primary);box-shadow:0 0 0 2px rgba(123,47,247,.25);}
+.pattern-cell-label{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-size:.58rem;font-weight:800;padding:3px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bk-swatch.on{box-shadow:0 0 0 3px var(--primary);}
 .bk-bgphoto-btn{width:26px;height:26px;border-radius:50%;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:.85rem;position:relative;}
 .bk-bgphoto-btn.on{box-shadow:0 0 0 3px var(--primary);}
@@ -455,6 +460,16 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 </div>
 
 <!-- Feuille: sauvegarde / restauration complète -->
+<!-- Feuille: choix d'un motif de fond parmi les 60 -->
+<div class="bk-sheet" id="pattern-picker-sheet">
+  <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px" data-i18n="title_patterns">🎨 Motifs de fond</h3>
+    <div class="modal-sub" style="margin-bottom:12px" data-i18n="patterns_intro">60 motifs, dessinés en code — aucune image importée nulle part, donc jamais de souci de droits.</div>
+    <div id="pattern-picker-grid" class="pattern-grid"></div>
+    <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closePatternPicker()"><span data-i18n="btn_cancel">Annuler</span></button></div>
+  </div>
+</div>
+
 <div class="bk-sheet" id="backup-sheet">
   <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">💾 <span data-i18n="title_backup">Sauvegarder / restaurer</span></h3>
@@ -564,7 +579,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.29.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.30.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -1993,7 +2008,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\uddc2\ufe0f", title:"Plusieurs livres par album, dupliquer un album", body:
       '<ul>'+"<li>Bouton <b>\ud83d\udcda Mes livres</b> depuis un album : cr\u00e9e, renomme, duplique ou supprime autant de livres que tu veux pour le m\u00eame album.</li>"+"<li>Depuis l'int\u00e9rieur d'un livre, le bouton \ud83d\udcda en haut permet de changer de livre sans repasser par l'album.</li>"+"<li>Un livre se rouvre directement sur la <b>derni\u00e8re page que tu modifiais</b>, pas toujours la premi\u00e8re.</li>"+"<li><b>Dupliquer un album entier :</b> bouton \u2398 sur la carte d'un album (page d'accueil) \u2014 copie toutes ses photos et ses dossiers dans un nouvel album ind\u00e9pendant, pratique pour un voyage similaire \u00e0 un pr\u00e9c\u00e9dent.</li>"+"<li><b>Remplissage en masse :</b> depuis un album, s\u00e9lectionne plusieurs photos (\u2611\ufe0f) puis touche \ud83d\udcd6 \u2014 choisis une mise en page \u00e0 plusieurs cases et toutes les photos s\u00e9lectionn\u00e9es s'y r\u00e9partissent d'un coup, dans le premier livre de l'album (nouvelle page ajout\u00e9e \u00e0 la fin).</li><li><b>Montage rapide :</b> en mode s\u00e9lection (\u2611\ufe0f) dans l'album, coche plusieurs photos puis touche \ud83d\uddbc\ufe0f \u2014 choisis une mise en page, et un montage carr\u00e9 (format post Instagram classique) s'ouvre aussit\u00f4t dans l'\u00e9diteur, avec TOUS les outils habituels (texte, filtres, formes...) pour le personnaliser.</li><li><b>O\u00f9 il est rang\u00e9 :</b> un montage n'est jamais m\u00e9lang\u00e9 \u00e0 \"Mes livres\" \u2014 il vit dans sa propre section \"\ud83d\uddbc\ufe0f Mes montages\", au m\u00eame endroit (bouton \ud83d\udcda). Il se sauvegarde automatiquement comme un livre normal, et se rouvre \u00e0 tout moment pour continuer \u00e0 le modifier.</li><li><b>L'exporter :</b> une fois satisfait, utilise les m\u00eames boutons d'export qu'un livre (image, PDF, partage direct) \u2014 rien de sp\u00e9cial \u00e0 apprendre.</li>"+'</ul>' },
     { icon:"\u270f\ufe0f", title:"L'\u00e9diteur de livre", body:
-      '<ul>'+"<li><b>Texte, Photo, Forme, Sticker, Ic\u00f4ne :</b> touche l'outil puis place l'\u00e9l\u00e9ment sur la page, d\u00e9place-le et redimensionne-le avec les poign\u00e9es.</li>"+"<li><b>Mod\u00e8le :</b> plus de 1000 combinaisons (mises en page \u00d7 styles), avec recherche \u2014 dont des formes rondes, hexagonales, octogonales, en arche, et des mosa\u00efques de 1 \u00e0 9 photos.</li>"+"<li><b>Fond de page :</b> palette de 12 couleurs, ou touche \ud83d\uddbc\ufe0f pour mettre une de tes photos en fond de page enti\u00e8re (avec un voile r\u00e9glable \ud83d\udd06\ud83d\udd05 pour garder le texte lisible).</li>"+"<li><b>Style global :</b> bouton \ud83c\udfa8 pour appliquer un style (fond, police, couleurs) \u00e0 TOUTES les pages du livre d'un coup, sans repasser page par page \u2014 le contenu (photos, texte) ne bouge pas, seul l'habillage change.</li>"+"<li><b>Page r\u00e9sum\u00e9 :</b> bouton \ud83d\udcca pour ajouter automatiquement une page avec le nombre de photos, de jours et de lieux du voyage, calcul\u00e9e \u00e0 partir de tes vraies donn\u00e9es.</li>"+"<li><b>Mise en page surprise :</b> bouton \ud83c\udfb2 \u2014 change au hasard la disposition de la page (formes, tailles) en gardant les m\u00eames photos dans le m\u00eame ordre. Le texte et les stickers d\u00e9j\u00e0 en place ne bougent pas. Touche-le plusieurs fois pour voir d'autres id\u00e9es.</li>"+"<li><b>Historique des versions :</b> bouton \ud83d\udd50 \u2014 un point de sauvegarde est gard\u00e9 \u00e0 chaque fois que tu fermes ou changes de livre (jusqu'\u00e0 15 versions), consultable m\u00eame en rouvrant l'appli un autre jour. Va plus loin que \"Annuler\" (\u21a9\ufe0f), qui lui se perd \u00e0 la fermeture de l'appli. Restaurer une version reste lui-m\u00eame annulable juste apr\u00e8s.</li>"+"<li><b>Piocher une couleur dans une photo :</b> bouton \"\ud83c\udfa8 Piocher\" pour le fond de page, ou \"\ud83c\udfa8 Piocher dans une photo\" dans le r\u00e9glage du texte \u2014 choisis une photo, sa couleur moyenne s'applique automatiquement, pour une page assortie \u00e0 l'image.</li>"+"<li><b>Carte :</b> ins\u00e8re une image de carte avec tes lieux visit\u00e9s (voir section carte plus bas).</li>"+"<li><b>Grouper / D\u00e9grouper :</b> s\u00e9lectionne plusieurs \u00e9l\u00e9ments (\ud83d\udd17 Grouper) pour les d\u00e9placer ensemble ; touche le groupe puis \"\ud83d\udd13 D\u00e9grouper\" pour les s\u00e9parer \u00e0 nouveau.</li>"+"<li><b>Mode lecture :</b> bouton \ud83d\udc41\ufe0f \u2014 affiche le livre en plein \u00e9cran, page par page (image statique), sans aucun risque de bouger un \u00e9l\u00e9ment par erreur. Navigation par fl\u00e8ches \u00e0 l'\u00e9cran, balayage tactile, ou touches gauche/droite du clavier. Pratique pour montrer le r\u00e9sultat \u00e0 quelqu'un.</li><li><b>Format :</b> bouton \ud83d\udd04 \u2014 fait d\u00e9filer entre portrait, paysage et carr\u00e9 (fa\u00e7on livre photo Instagram). Le libell\u00e9 du bouton affiche toujours le format actuellement actif.</li><li><b>R\u00e9ordonner les pages :</b> fl\u00e8ches \u2b05\ufe0f\u27a1\ufe0f dans la bande de pages en bas, pour d\u00e9placer la page ouverte.</li>"+"<li><b>Supprimer une ou plusieurs pages :</b> bouton \ud83d\uddd1\ufe0f dans la bande de pages en bas \u2014 coche les pages \u00e0 supprimer, confirme. Impossible de supprimer toutes les pages d'un coup.</li>"+"<li><b>Annuler / R\u00e9tablir :</b> en haut de l'\u00e9diteur, pour revenir en arri\u00e8re \u00e0 tout moment.</li>"+"<li><b>Enregistrer :</b> bouton \ud83d\udcbe pour sauvegarder manuellement \u00e0 tout moment (en plus de la sauvegarde automatique toutes les 20 secondes).</li>"+"<li><b>Recadrage intelligent automatique :</b> quand tu places une photo dans une forme (rond, hexagone...), l'appli rep\u00e8re toute seule la zone la plus \"charg\u00e9e en d\u00e9tails\" pour \u00e9viter de couper b\u00eatement un visage sur le bord \u2014 recadre-la toi-m\u00eame ensuite si le r\u00e9sultat ne te va pas.</li>"+"<li>Sur un \u00e9l\u00e9ment s\u00e9lectionn\u00e9 : filtres, recadrage, suppression de fond, bordure, ombre, d\u00e9grad\u00e9, dupliquer, verrouiller \u2014 selon le type d'\u00e9l\u00e9ment. 20 polices et 12 couleurs de texte disponibles.</li>"+'</ul>' },
+      '<ul>'+"<li><b>Texte, Photo, Forme, Sticker, Ic\u00f4ne :</b> touche l'outil puis place l'\u00e9l\u00e9ment sur la page, d\u00e9place-le et redimensionne-le avec les poign\u00e9es.</li>"+"<li><b>Motifs de fond :</b> bouton \ud83c\udfa8 \u00e0 c\u00f4t\u00e9 des couleurs de fond \u2014 60 motifs dessin\u00e9s en code (fruits, fleurs, formes g\u00e9om\u00e9triques, doodles...), jamais d'image import\u00e9e nulle part, donc aucun souci de droits d'auteur. M\u00eame rendu garanti entre l'\u00e9diteur et l'export, \u00e0 n'importe quelle r\u00e9solution.</li><li><b>Mod\u00e8le :</b> plus de 1000 combinaisons (mises en page \u00d7 styles), avec recherche \u2014 dont des formes rondes, hexagonales, octogonales, en arche, et des mosa\u00efques de 1 \u00e0 9 photos.</li>"+"<li><b>Fond de page :</b> palette de 12 couleurs, ou touche \ud83d\uddbc\ufe0f pour mettre une de tes photos en fond de page enti\u00e8re (avec un voile r\u00e9glable \ud83d\udd06\ud83d\udd05 pour garder le texte lisible).</li>"+"<li><b>Style global :</b> bouton \ud83c\udfa8 pour appliquer un style (fond, police, couleurs) \u00e0 TOUTES les pages du livre d'un coup, sans repasser page par page \u2014 le contenu (photos, texte) ne bouge pas, seul l'habillage change.</li>"+"<li><b>Page r\u00e9sum\u00e9 :</b> bouton \ud83d\udcca pour ajouter automatiquement une page avec le nombre de photos, de jours et de lieux du voyage, calcul\u00e9e \u00e0 partir de tes vraies donn\u00e9es.</li>"+"<li><b>Mise en page surprise :</b> bouton \ud83c\udfb2 \u2014 change au hasard la disposition de la page (formes, tailles) en gardant les m\u00eames photos dans le m\u00eame ordre. Le texte et les stickers d\u00e9j\u00e0 en place ne bougent pas. Touche-le plusieurs fois pour voir d'autres id\u00e9es.</li>"+"<li><b>Historique des versions :</b> bouton \ud83d\udd50 \u2014 un point de sauvegarde est gard\u00e9 \u00e0 chaque fois que tu fermes ou changes de livre (jusqu'\u00e0 15 versions), consultable m\u00eame en rouvrant l'appli un autre jour. Va plus loin que \"Annuler\" (\u21a9\ufe0f), qui lui se perd \u00e0 la fermeture de l'appli. Restaurer une version reste lui-m\u00eame annulable juste apr\u00e8s.</li>"+"<li><b>Piocher une couleur dans une photo :</b> bouton \"\ud83c\udfa8 Piocher\" pour le fond de page, ou \"\ud83c\udfa8 Piocher dans une photo\" dans le r\u00e9glage du texte \u2014 choisis une photo, sa couleur moyenne s'applique automatiquement, pour une page assortie \u00e0 l'image.</li>"+"<li><b>Carte :</b> ins\u00e8re une image de carte avec tes lieux visit\u00e9s (voir section carte plus bas).</li>"+"<li><b>Grouper / D\u00e9grouper :</b> s\u00e9lectionne plusieurs \u00e9l\u00e9ments (\ud83d\udd17 Grouper) pour les d\u00e9placer ensemble ; touche le groupe puis \"\ud83d\udd13 D\u00e9grouper\" pour les s\u00e9parer \u00e0 nouveau.</li>"+"<li><b>Mode lecture :</b> bouton \ud83d\udc41\ufe0f \u2014 affiche le livre en plein \u00e9cran, page par page (image statique), sans aucun risque de bouger un \u00e9l\u00e9ment par erreur. Navigation par fl\u00e8ches \u00e0 l'\u00e9cran, balayage tactile, ou touches gauche/droite du clavier. Pratique pour montrer le r\u00e9sultat \u00e0 quelqu'un.</li><li><b>Format :</b> bouton \ud83d\udd04 \u2014 fait d\u00e9filer entre portrait, paysage et carr\u00e9 (fa\u00e7on livre photo Instagram). Le libell\u00e9 du bouton affiche toujours le format actuellement actif.</li><li><b>R\u00e9ordonner les pages :</b> fl\u00e8ches \u2b05\ufe0f\u27a1\ufe0f dans la bande de pages en bas, pour d\u00e9placer la page ouverte.</li>"+"<li><b>Supprimer une ou plusieurs pages :</b> bouton \ud83d\uddd1\ufe0f dans la bande de pages en bas \u2014 coche les pages \u00e0 supprimer, confirme. Impossible de supprimer toutes les pages d'un coup.</li>"+"<li><b>Annuler / R\u00e9tablir :</b> en haut de l'\u00e9diteur, pour revenir en arri\u00e8re \u00e0 tout moment.</li>"+"<li><b>Enregistrer :</b> bouton \ud83d\udcbe pour sauvegarder manuellement \u00e0 tout moment (en plus de la sauvegarde automatique toutes les 20 secondes).</li>"+"<li><b>Recadrage intelligent automatique :</b> quand tu places une photo dans une forme (rond, hexagone...), l'appli rep\u00e8re toute seule la zone la plus \"charg\u00e9e en d\u00e9tails\" pour \u00e9viter de couper b\u00eatement un visage sur le bord \u2014 recadre-la toi-m\u00eame ensuite si le r\u00e9sultat ne te va pas.</li>"+"<li>Sur un \u00e9l\u00e9ment s\u00e9lectionn\u00e9 : filtres, recadrage, suppression de fond, bordure, ombre, d\u00e9grad\u00e9, dupliquer, verrouiller \u2014 selon le type d'\u00e9l\u00e9ment. 20 polices et 12 couleurs de texte disponibles.</li>"+'</ul>' },
     { icon:"\ud83e\ude84", title:"Livre automatique", body:
       '<ul>'+"<li>Depuis \"Mes livres\", bouton <b>\ud83e\ude84 Livre automatique</b> : choisis le nombre de pages, un style (19 disponibles, dont des styles par pays comme Italie, Espagne, Gr\u00e8ce...), une police, une couleur, des smileys favoris et jusqu'\u00e0 4 mises en page pr\u00e9f\u00e9r\u00e9es.</li>"+"<li>L'appli r\u00e9partit toutes tes photos automatiquement sur les pages, en respectant l'ordre de tes dossiers si tu en as cr\u00e9\u00e9.</li>"+"<li><b>Mode \"Structure vide\" :</b> g\u00e9n\u00e8re toutes les pages avec leurs cadres, mais sans aucune photo dedans \u2014 pratique pour pr\u00e9parer le livre avant m\u00eame d'avoir import\u00e9 tes photos, ou pour choisir toi-m\u00eame quelle photo va o\u00f9.</li>"+'</ul>' },
     { icon:"\u2702\ufe0f", title:"Retoucher une photo", body:
@@ -2039,7 +2054,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\uddc2\ufe0f", title:"Multiple books per album, duplicate an album", body:
       '<ul>'+"<li><b>\ud83d\udcda My books</b> button from an album: create, rename, duplicate or delete as many books as you want for the same album.</li>"+"<li>From inside a book, the \ud83d\udcda button at the top lets you switch books without going back to the album.</li>"+"<li>A book reopens directly on the <b>last page you were editing</b>, not always the first one.</li>"+"<li><b>Duplicate a whole album:</b> \u2398 button on an album card (home screen) \u2014 copies all its photos and folders into a new, independent album, handy for a trip similar to a previous one.</li>"+"<li><b>Bulk fill:</b> from an album, select several photos (\u2611\ufe0f) then tap \ud83d\udcd6 \u2014 choose a multi-slot layout and all selected photos are distributed into it at once, into the album's first book (new page added at the end).</li><li><b>Quick montage:</b> in selection mode (\u2611\ufe0f) in the album, check several photos then tap \ud83d\uddbc\ufe0f \u2014 pick a layout, and a square montage (classic Instagram post format) opens right away in the editor, with ALL the usual tools (text, filters, shapes...) to customize it.</li><li><b>Where it's kept:</b> a montage is never mixed with \"My books\" \u2014 it lives in its own \"\ud83d\uddbc\ufe0f My montages\" section, in the same place (\ud83d\udcda button). It saves automatically like a normal book, and reopens any time to keep editing it.</li><li><b>Exporting it:</b> once you're happy with it, use the same export buttons as a book (image, PDF, direct share) \u2014 nothing new to learn.</li>"+'</ul>' },
     { icon:"\u270f\ufe0f", title:"The book editor", body:
-      '<ul>'+"<li><b>Text, Photo, Shape, Sticker, Icon:</b> tap the tool then place the element on the page, move and resize it with the handles.</li>"+"<li><b>Template:</b> over 1000 combinations (layouts \u00d7 styles), with search \u2014 including round, hexagonal, octagonal, arch shapes, and mosaics from 1 to 9 photos.</li>"+"<li><b>Page background:</b> a palette of 12 colors, or tap \ud83d\uddbc\ufe0f to set one of your photos as a full-page background (with an adjustable \ud83d\udd06\ud83d\udd05 overlay to keep text readable).</li>"+"<li><b>Global style:</b> \ud83c\udfa8 button to apply a style (background, font, colors) to ALL pages of the book at once, without going page by page \u2014 the content (photos, text) doesn't move, only the styling changes.</li>"+"<li><b>Summary page:</b> \ud83d\udcca button to automatically add a page with the number of photos, days and places of the trip, calculated from your real data.</li>"+"<li><b>Surprise layout:</b> \ud83c\udfb2 button \u2014 randomly changes the page layout (shapes, sizes) while keeping the same photos in the same order. Text and stickers already in place don't move. Tap it several times to see other ideas.</li>"+"<li><b>Version history:</b> \ud83d\udd50 button \u2014 a save point is kept every time you close or switch books (up to 15 versions), viewable even after reopening the app another day. Goes further than \"Undo\" (\u21a9\ufe0f), which is lost when the app closes. Restoring a version can itself be undone right after.</li>"+"<li><b>Pick a color from a photo:</b> \"\ud83c\udfa8 Pick\" button for the page background, or \"\ud83c\udfa8 Pick from a photo\" in the text settings \u2014 choose a photo, its average color is applied automatically, for a page that matches the image.</li>"+"<li><b>Map:</b> inserts a map image with your visited places (see the map section below).</li>"+"<li><b>Group / Ungroup:</b> select several elements (\ud83d\udd17 Group) to move them together; tap the group then \"\ud83d\udd13 Ungroup\" to separate them again.</li>"+"<li><b>Reading mode:</b> \ud83d\udc41\ufe0f button \u2014 displays the book fullscreen, page by page (static image), with zero risk of accidentally moving an element. Navigate with on-screen arrows, swipe, or the keyboard's left/right keys. Handy for showing the result to someone.</li><li><b>Format:</b> \ud83d\udd04 button \u2014 cycles between portrait, landscape and square (Instagram-style photo book). The button label always shows the currently active format.</li><li><b>Reorder pages:</b> \u2b05\ufe0f\u27a1\ufe0f arrows in the page strip at the bottom, to move the open page.</li>"+"<li><b>Delete one or more pages:</b> \ud83d\uddd1\ufe0f button in the page strip at the bottom \u2014 check the pages to delete, confirm. You can't delete all pages at once.</li>"+"<li><b>Undo / Redo:</b> at the top of the editor, to go back at any time.</li>"+"<li><b>Save:</b> \ud83d\udcbe button to save manually at any time (on top of the automatic save every 20 seconds).</li>"+"<li><b>Automatic smart cropping:</b> when you place a photo in a shape (circle, hexagon...), the app automatically finds the most \"detail-rich\" area to avoid clumsily cutting off a face at the edge \u2014 crop it manually afterwards if the result doesn't suit you.</li>"+"<li>On a selected element: filters, cropping, background removal, border, shadow, gradient, duplicate, lock \u2014 depending on the element type. 20 fonts and 12 text colors available.</li>"+'</ul>' },
+      '<ul>'+"<li><b>Text, Photo, Shape, Sticker, Icon:</b> tap the tool then place the element on the page, move and resize it with the handles.</li>"+"<li><b>Background patterns:</b> \ud83c\udfa8 button next to the background colors \u2014 60 code-drawn patterns (fruits, flowers, geometric shapes, doodles...), never an imported image anywhere, so no copyright concerns. Identical rendering guaranteed between the editor and export, at any resolution.</li><li><b>Template:</b> over 1000 combinations (layouts \u00d7 styles), with search \u2014 including round, hexagonal, octagonal, arch shapes, and mosaics from 1 to 9 photos.</li>"+"<li><b>Page background:</b> a palette of 12 colors, or tap \ud83d\uddbc\ufe0f to set one of your photos as a full-page background (with an adjustable \ud83d\udd06\ud83d\udd05 overlay to keep text readable).</li>"+"<li><b>Global style:</b> \ud83c\udfa8 button to apply a style (background, font, colors) to ALL pages of the book at once, without going page by page \u2014 the content (photos, text) doesn't move, only the styling changes.</li>"+"<li><b>Summary page:</b> \ud83d\udcca button to automatically add a page with the number of photos, days and places of the trip, calculated from your real data.</li>"+"<li><b>Surprise layout:</b> \ud83c\udfb2 button \u2014 randomly changes the page layout (shapes, sizes) while keeping the same photos in the same order. Text and stickers already in place don't move. Tap it several times to see other ideas.</li>"+"<li><b>Version history:</b> \ud83d\udd50 button \u2014 a save point is kept every time you close or switch books (up to 15 versions), viewable even after reopening the app another day. Goes further than \"Undo\" (\u21a9\ufe0f), which is lost when the app closes. Restoring a version can itself be undone right after.</li>"+"<li><b>Pick a color from a photo:</b> \"\ud83c\udfa8 Pick\" button for the page background, or \"\ud83c\udfa8 Pick from a photo\" in the text settings \u2014 choose a photo, its average color is applied automatically, for a page that matches the image.</li>"+"<li><b>Map:</b> inserts a map image with your visited places (see the map section below).</li>"+"<li><b>Group / Ungroup:</b> select several elements (\ud83d\udd17 Group) to move them together; tap the group then \"\ud83d\udd13 Ungroup\" to separate them again.</li>"+"<li><b>Reading mode:</b> \ud83d\udc41\ufe0f button \u2014 displays the book fullscreen, page by page (static image), with zero risk of accidentally moving an element. Navigate with on-screen arrows, swipe, or the keyboard's left/right keys. Handy for showing the result to someone.</li><li><b>Format:</b> \ud83d\udd04 button \u2014 cycles between portrait, landscape and square (Instagram-style photo book). The button label always shows the currently active format.</li><li><b>Reorder pages:</b> \u2b05\ufe0f\u27a1\ufe0f arrows in the page strip at the bottom, to move the open page.</li>"+"<li><b>Delete one or more pages:</b> \ud83d\uddd1\ufe0f button in the page strip at the bottom \u2014 check the pages to delete, confirm. You can't delete all pages at once.</li>"+"<li><b>Undo / Redo:</b> at the top of the editor, to go back at any time.</li>"+"<li><b>Save:</b> \ud83d\udcbe button to save manually at any time (on top of the automatic save every 20 seconds).</li>"+"<li><b>Automatic smart cropping:</b> when you place a photo in a shape (circle, hexagon...), the app automatically finds the most \"detail-rich\" area to avoid clumsily cutting off a face at the edge \u2014 crop it manually afterwards if the result doesn't suit you.</li>"+"<li>On a selected element: filters, cropping, background removal, border, shadow, gradient, duplicate, lock \u2014 depending on the element type. 20 fonts and 12 text colors available.</li>"+'</ul>' },
     { icon:"\ud83e\ude84", title:"Automatic book", body:
       '<ul>'+"<li>From \"My books\", <b>\ud83e\ude84 Automatic book</b> button: choose the number of pages, a style (19 available, including country styles like Italy, Spain, Greece...), a font, a color, favorite emojis and up to 4 preferred layouts.</li>"+"<li>The app spreads all your photos automatically across the pages, respecting your folder order if you've created any.</li>"+"<li><b>\"Empty structure\" mode:</b> generates all pages with their frames, but with no photo inside \u2014 handy to prepare the book before even importing your photos, or to choose yourself which photo goes where.</li>"+'</ul>' },
     { icon:"\u2702\ufe0f", title:"Edit a photo", body:
@@ -2085,7 +2100,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\uddc2\ufe0f", title:"Pi\u00f9 libri per album, duplica un album", body:
       '<ul>'+"<li>Pulsante <b>\ud83d\udcda I miei libri</b> da un album: crea, rinomina, duplica o elimina tutti i libri che vuoi per lo stesso album.</li>"+"<li>Dall'interno di un libro, il pulsante \ud83d\udcda in alto permette di cambiare libro senza tornare all'album.</li>"+"<li>Un libro si riapre direttamente sull'<b>ultima pagina che stavi modificando</b>, non sempre la prima.</li>"+"<li><b>Duplica un intero album:</b> pulsante \u2398 sulla scheda di un album (schermata principale) \u2014 copia tutte le sue foto e cartelle in un nuovo album indipendente, utile per un viaggio simile a uno precedente.</li>"+"<li><b>Riempimento in blocco:</b> da un album, seleziona pi\u00f9 foto (\u2611\ufe0f) poi tocca \ud83d\udcd6 \u2014 scegli un modello a pi\u00f9 caselle e tutte le foto selezionate vengono distribuite in una volta, nel primo libro dell'album (nuova pagina aggiunta alla fine).</li><li><b>Montaggio rapido:</b> in modalit\u00e0 selezione (\u2611\ufe0f) nell'album, seleziona pi\u00f9 foto poi tocca \ud83d\uddbc\ufe0f \u2014 scegli un modello, e un montaggio quadrato (formato classico dei post Instagram) si apre subito nell'editor, con TUTTI gli strumenti abituali (testo, filtri, forme...) per personalizzarlo.</li><li><b>Dove viene conservato:</b> un montaggio non viene mai mescolato con \"I miei libri\" \u2014 vive nella sua sezione \"\ud83d\uddbc\ufe0f I miei montaggi\", nello stesso posto (pulsante \ud83d\udcda). Si salva automaticamente come un libro normale, e si riapre in qualsiasi momento per continuare a modificarlo.</li><li><b>Esportarlo:</b> una volta soddisfatto, usa gli stessi pulsanti di esportazione di un libro (immagine, PDF, condivisione diretta) \u2014 niente di nuovo da imparare.</li>"+'</ul>' },
     { icon:"\u270f\ufe0f", title:"L'editor del libro", body:
-      '<ul>'+"<li><b>Testo, Foto, Forma, Adesivo, Icona:</b> tocca lo strumento poi posiziona l'elemento sulla pagina, spostalo e ridimensionalo con le maniglie.</li>"+"<li><b>Modello:</b> oltre 1000 combinazioni (modelli \u00d7 stili), con ricerca \u2014 comprese forme rotonde, esagonali, ottagonali, ad arco, e mosaici da 1 a 9 foto.</li>"+"<li><b>Sfondo pagina:</b> tavolozza di 12 colori, oppure tocca \ud83d\uddbc\ufe0f per mettere una delle tue foto come sfondo dell'intera pagina (con un velo regolabile \ud83d\udd06\ud83d\udd05 per mantenere il testo leggibile).</li>"+"<li><b>Stile globale:</b> pulsante \ud83c\udfa8 per applicare uno stile (sfondo, font, colori) a TUTTE le pagine del libro in una volta, senza passare pagina per pagina \u2014 il contenuto (foto, testo) non si muove, cambia solo la veste grafica.</li>"+"<li><b>Pagina riepilogo:</b> pulsante \ud83d\udcca per aggiungere automaticamente una pagina con il numero di foto, giorni e luoghi del viaggio, calcolata dai tuoi dati reali.</li>"+"<li><b>Modello a sorpresa:</b> pulsante \ud83c\udfb2 \u2014 cambia a caso la disposizione della pagina (forme, dimensioni) mantenendo le stesse foto nello stesso ordine. Il testo e gli adesivi gi\u00e0 presenti non si spostano. Toccalo pi\u00f9 volte per vedere altre idee.</li>"+"<li><b>Cronologia versioni:</b> pulsante \ud83d\udd50 \u2014 un punto di salvataggio viene mantenuto ogni volta che chiudi o cambi libro (fino a 15 versioni), consultabile anche riaprendo l'app un altro giorno. Va oltre \"Annulla\" (\u21a9\ufe0f), che invece si perde alla chiusura dell'app. Ripristinare una versione \u00e8 a sua volta annullabile subito dopo.</li>"+"<li><b>Pesca un colore da una foto:</b> pulsante \"\ud83c\udfa8 Scegli\" per lo sfondo della pagina, oppure \"\ud83c\udfa8 Scegli da una foto\" nelle impostazioni del testo \u2014 scegli una foto, il suo colore medio si applica automaticamente, per una pagina abbinata all'immagine.</li>"+"<li><b>Mappa:</b> inserisce un'immagine di mappa con i tuoi luoghi visitati (vedi la sezione mappa pi\u00f9 sotto).</li>"+"<li><b>Raggruppa / Separa:</b> seleziona pi\u00f9 elementi (\ud83d\udd17 Raggruppa) per spostarli insieme; tocca il gruppo poi \"\ud83d\udd13 Separa\" per dividerli di nuovo.</li>"+"<li><b>Modalit\u00e0 lettura:</b> pulsante \ud83d\udc41\ufe0f \u2014 mostra il libro a schermo intero, pagina per pagina (immagine statica), senza alcun rischio di spostare un elemento per sbaglio. Navigazione con le frecce a schermo, scorrimento tattile, o i tasti sinistra/destra della tastiera. Utile per mostrare il risultato a qualcuno.</li><li><b>Formato:</b> pulsante \ud83d\udd04 \u2014 scorre tra verticale, orizzontale e quadrato (stile album fotografico Instagram). L'etichetta del pulsante mostra sempre il formato attualmente attivo.</li><li><b>Riordina le pagine:</b> frecce \u2b05\ufe0f\u27a1\ufe0f nella striscia delle pagine in basso, per spostare la pagina aperta.</li>"+"<li><b>Elimina una o pi\u00f9 pagine:</b> pulsante \ud83d\uddd1\ufe0f nella striscia delle pagine in basso \u2014 seleziona le pagine da eliminare, conferma. Non \u00e8 possibile eliminare tutte le pagine in una volta.</li>"+"<li><b>Annulla / Ripeti:</b> in alto nell'editor, per tornare indietro in qualsiasi momento.</li>"+"<li><b>Salva:</b> pulsante \ud83d\udcbe per salvare manualmente in qualsiasi momento (oltre al salvataggio automatico ogni 20 secondi).</li>"+"<li><b>Ritaglio intelligente automatico:</b> quando metti una foto in una forma (cerchio, esagono...), l'app individua da sola la zona pi\u00f9 \"ricca di dettagli\" per evitare di tagliare goffamente un volto sul bordo \u2014 ritagliala tu stesso in seguito se il risultato non ti convince.</li>"+"<li>Su un elemento selezionato: filtri, ritaglio, rimozione sfondo, bordo, ombra, sfumatura, duplica, blocca \u2014 a seconda del tipo di elemento. 20 font e 12 colori di testo disponibili.</li>"+'</ul>' },
+      '<ul>'+"<li><b>Testo, Foto, Forma, Adesivo, Icona:</b> tocca lo strumento poi posiziona l'elemento sulla pagina, spostalo e ridimensionalo con le maniglie.</li>"+"<li><b>Motivi di sfondo:</b> pulsante \ud83c\udfa8 accanto ai colori di sfondo \u2014 60 motivi disegnati in codice (frutta, fiori, forme geometriche, scarabocchi...), mai un'immagine importata da nessuna parte, quindi nessun problema di diritti d'autore. Resa identica garantita tra l'editor e l'esportazione, a qualsiasi risoluzione.</li><li><b>Modello:</b> oltre 1000 combinazioni (modelli \u00d7 stili), con ricerca \u2014 comprese forme rotonde, esagonali, ottagonali, ad arco, e mosaici da 1 a 9 foto.</li>"+"<li><b>Sfondo pagina:</b> tavolozza di 12 colori, oppure tocca \ud83d\uddbc\ufe0f per mettere una delle tue foto come sfondo dell'intera pagina (con un velo regolabile \ud83d\udd06\ud83d\udd05 per mantenere il testo leggibile).</li>"+"<li><b>Stile globale:</b> pulsante \ud83c\udfa8 per applicare uno stile (sfondo, font, colori) a TUTTE le pagine del libro in una volta, senza passare pagina per pagina \u2014 il contenuto (foto, testo) non si muove, cambia solo la veste grafica.</li>"+"<li><b>Pagina riepilogo:</b> pulsante \ud83d\udcca per aggiungere automaticamente una pagina con il numero di foto, giorni e luoghi del viaggio, calcolata dai tuoi dati reali.</li>"+"<li><b>Modello a sorpresa:</b> pulsante \ud83c\udfb2 \u2014 cambia a caso la disposizione della pagina (forme, dimensioni) mantenendo le stesse foto nello stesso ordine. Il testo e gli adesivi gi\u00e0 presenti non si spostano. Toccalo pi\u00f9 volte per vedere altre idee.</li>"+"<li><b>Cronologia versioni:</b> pulsante \ud83d\udd50 \u2014 un punto di salvataggio viene mantenuto ogni volta che chiudi o cambi libro (fino a 15 versioni), consultabile anche riaprendo l'app un altro giorno. Va oltre \"Annulla\" (\u21a9\ufe0f), che invece si perde alla chiusura dell'app. Ripristinare una versione \u00e8 a sua volta annullabile subito dopo.</li>"+"<li><b>Pesca un colore da una foto:</b> pulsante \"\ud83c\udfa8 Scegli\" per lo sfondo della pagina, oppure \"\ud83c\udfa8 Scegli da una foto\" nelle impostazioni del testo \u2014 scegli una foto, il suo colore medio si applica automaticamente, per una pagina abbinata all'immagine.</li>"+"<li><b>Mappa:</b> inserisce un'immagine di mappa con i tuoi luoghi visitati (vedi la sezione mappa pi\u00f9 sotto).</li>"+"<li><b>Raggruppa / Separa:</b> seleziona pi\u00f9 elementi (\ud83d\udd17 Raggruppa) per spostarli insieme; tocca il gruppo poi \"\ud83d\udd13 Separa\" per dividerli di nuovo.</li>"+"<li><b>Modalit\u00e0 lettura:</b> pulsante \ud83d\udc41\ufe0f \u2014 mostra il libro a schermo intero, pagina per pagina (immagine statica), senza alcun rischio di spostare un elemento per sbaglio. Navigazione con le frecce a schermo, scorrimento tattile, o i tasti sinistra/destra della tastiera. Utile per mostrare il risultato a qualcuno.</li><li><b>Formato:</b> pulsante \ud83d\udd04 \u2014 scorre tra verticale, orizzontale e quadrato (stile album fotografico Instagram). L'etichetta del pulsante mostra sempre il formato attualmente attivo.</li><li><b>Riordina le pagine:</b> frecce \u2b05\ufe0f\u27a1\ufe0f nella striscia delle pagine in basso, per spostare la pagina aperta.</li>"+"<li><b>Elimina una o pi\u00f9 pagine:</b> pulsante \ud83d\uddd1\ufe0f nella striscia delle pagine in basso \u2014 seleziona le pagine da eliminare, conferma. Non \u00e8 possibile eliminare tutte le pagine in una volta.</li>"+"<li><b>Annulla / Ripeti:</b> in alto nell'editor, per tornare indietro in qualsiasi momento.</li>"+"<li><b>Salva:</b> pulsante \ud83d\udcbe per salvare manualmente in qualsiasi momento (oltre al salvataggio automatico ogni 20 secondi).</li>"+"<li><b>Ritaglio intelligente automatico:</b> quando metti una foto in una forma (cerchio, esagono...), l'app individua da sola la zona pi\u00f9 \"ricca di dettagli\" per evitare di tagliare goffamente un volto sul bordo \u2014 ritagliala tu stesso in seguito se il risultato non ti convince.</li>"+"<li>Su un elemento selezionato: filtri, ritaglio, rimozione sfondo, bordo, ombra, sfumatura, duplica, blocca \u2014 a seconda del tipo di elemento. 20 font e 12 colori di testo disponibili.</li>"+'</ul>' },
     { icon:"\ud83e\ude84", title:"Libro automatico", body:
       '<ul>'+"<li>Da \"I miei libri\", pulsante <b>\ud83e\ude84 Libro automatico</b>: scegli il numero di pagine, uno stile (19 disponibili, compresi stili per paese come Italia, Spagna, Grecia...), un font, un colore, emoji preferite e fino a 4 modelli preferiti.</li>"+"<li>L'app distribuisce automaticamente tutte le tue foto sulle pagine, rispettando l'ordine delle cartelle se ne hai create.</li>"+"<li><b>Modalit\u00e0 \"Struttura vuota\":</b> genera tutte le pagine con le loro cornici, ma senza alcuna foto dentro \u2014 utile per preparare il libro prima ancora di aver importato le foto, o per scegliere tu stesso quale foto va dove.</li>"+'</ul>' },
     { icon:"\u2702\ufe0f", title:"Modifica una foto", body:
@@ -2131,7 +2146,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\uddc2\ufe0f", title:"Varios libros por \u00e1lbum, duplicar un \u00e1lbum", body:
       '<ul>'+"<li>Bot\u00f3n <b>\ud83d\udcda Mis libros</b> desde un \u00e1lbum: crea, renombra, duplica o elimina tantos libros como quieras para el mismo \u00e1lbum.</li>"+"<li>Desde dentro de un libro, el bot\u00f3n \ud83d\udcda de arriba permite cambiar de libro sin volver al \u00e1lbum.</li>"+"<li>Un libro se reabre directamente en la <b>\u00faltima p\u00e1gina que estabas editando</b>, no siempre la primera.</li>"+"<li><b>Duplicar un \u00e1lbum entero:</b> bot\u00f3n \u2398 en la tarjeta de un \u00e1lbum (pantalla de inicio) \u2014 copia todas sus fotos y carpetas en un nuevo \u00e1lbum independiente, \u00fatil para un viaje parecido a uno anterior.</li>"+"<li><b>Relleno masivo:</b> desde un \u00e1lbum, selecciona varias fotos (\u2611\ufe0f) y toca \ud83d\udcd6 \u2014 elige una plantilla con varias casillas y todas las fotos seleccionadas se reparten de una vez, en el primer libro del \u00e1lbum (nueva p\u00e1gina a\u00f1adida al final).</li><li><b>Montaje r\u00e1pido:</b> en modo selecci\u00f3n (\u2611\ufe0f) en el \u00e1lbum, marca varias fotos y toca \ud83d\uddbc\ufe0f \u2014 elige un dise\u00f1o, y un montaje cuadrado (formato cl\u00e1sico de publicaci\u00f3n de Instagram) se abre enseguida en el editor, con TODAS las herramientas habituales (texto, filtros, formas...) para personalizarlo.</li><li><b>D\u00f3nde se guarda:</b> un montaje nunca se mezcla con \"Mis libros\" \u2014 vive en su propia secci\u00f3n \"\ud83d\uddbc\ufe0f Mis montajes\", en el mismo lugar (bot\u00f3n \ud83d\udcda). Se guarda autom\u00e1ticamente como un libro normal, y se reabre en cualquier momento para seguir edit\u00e1ndolo.</li><li><b>Exportarlo:</b> una vez satisfecho, usa los mismos botones de exportaci\u00f3n que un libro (imagen, PDF, compartir directo) \u2014 nada nuevo que aprender.</li>"+'</ul>' },
     { icon:"\u270f\ufe0f", title:"El editor del libro", body:
-      '<ul>'+"<li><b>Texto, Foto, Forma, Pegatina, Icono:</b> toca la herramienta y coloca el elemento en la p\u00e1gina, mu\u00e9velo y c\u00e1mbialo de tama\u00f1o con las asas.</li>"+"<li><b>Plantilla:</b> m\u00e1s de 1000 combinaciones (dise\u00f1os \u00d7 estilos), con b\u00fasqueda \u2014 incluidas formas redondas, hexagonales, octogonales, en arco, y mosaicos de 1 a 9 fotos.</li>"+"<li><b>Fondo de p\u00e1gina:</b> paleta de 12 colores, o toca \ud83d\uddbc\ufe0f para poner una de tus fotos como fondo de p\u00e1gina completa (con un velo ajustable \ud83d\udd06\ud83d\udd05 para mantener el texto legible).</li>"+"<li><b>Estilo global:</b> bot\u00f3n \ud83c\udfa8 para aplicar un estilo (fondo, fuente, colores) a TODAS las p\u00e1ginas del libro de una vez, sin pasar p\u00e1gina por p\u00e1gina \u2014 el contenido (fotos, texto) no se mueve, solo cambia la apariencia.</li>"+"<li><b>P\u00e1gina resumen:</b> bot\u00f3n \ud83d\udcca para a\u00f1adir autom\u00e1ticamente una p\u00e1gina con el n\u00famero de fotos, d\u00edas y lugares del viaje, calculada a partir de tus datos reales.</li>"+"<li><b>Dise\u00f1o sorpresa:</b> bot\u00f3n \ud83c\udfb2 \u2014 cambia al azar la disposici\u00f3n de la p\u00e1gina (formas, tama\u00f1os) manteniendo las mismas fotos en el mismo orden. El texto y las pegatinas ya colocados no se mueven. T\u00f3calo varias veces para ver otras ideas.</li>"+"<li><b>Historial de versiones:</b> bot\u00f3n \ud83d\udd50 \u2014 se guarda un punto de recuperaci\u00f3n cada vez que cierras o cambias de libro (hasta 15 versiones), consultable incluso al reabrir la app otro d\u00eda. Va m\u00e1s all\u00e1 de \"Deshacer\" (\u21a9\ufe0f), que se pierde al cerrar la app. Restaurar una versi\u00f3n es a su vez reversible justo despu\u00e9s.</li>"+"<li><b>Elegir un color de una foto:</b> bot\u00f3n \"\ud83c\udfa8 Elegir\" para el fondo de p\u00e1gina, o \"\ud83c\udfa8 Elegir de una foto\" en los ajustes de texto \u2014 elige una foto, su color medio se aplica autom\u00e1ticamente, para una p\u00e1gina a juego con la imagen.</li>"+"<li><b>Mapa:</b> inserta una imagen de mapa con tus lugares visitados (ver la secci\u00f3n de mapa m\u00e1s abajo).</li>"+"<li><b>Agrupar / Desagrupar:</b> selecciona varios elementos (\ud83d\udd17 Agrupar) para moverlos juntos; toca el grupo y luego \"\ud83d\udd13 Desagrupar\" para separarlos de nuevo.</li>"+"<li><b>Modo lectura:</b> bot\u00f3n \ud83d\udc41\ufe0f \u2014 muestra el libro a pantalla completa, p\u00e1gina por p\u00e1gina (imagen est\u00e1tica), sin ning\u00fan riesgo de mover un elemento por error. Navega con las flechas en pantalla, deslizando, o las teclas izquierda/derecha del teclado. \u00datil para mostrar el resultado a alguien.</li><li><b>Formato:</b> bot\u00f3n \ud83d\udd04 \u2014 recorre entre vertical, horizontal y cuadrado (estilo \u00e1lbum de fotos de Instagram). La etiqueta del bot\u00f3n siempre muestra el formato actualmente activo.</li><li><b>Reordenar p\u00e1ginas:</b> flechas \u2b05\ufe0f\u27a1\ufe0f en la franja de p\u00e1ginas de abajo, para mover la p\u00e1gina abierta.</li>"+"<li><b>Eliminar una o varias p\u00e1ginas:</b> bot\u00f3n \ud83d\uddd1\ufe0f en la franja de p\u00e1ginas de abajo \u2014 marca las p\u00e1ginas a eliminar, confirma. No se pueden eliminar todas las p\u00e1ginas a la vez.</li>"+"<li><b>Deshacer / Rehacer:</b> en la parte superior del editor, para retroceder en cualquier momento.</li>"+"<li><b>Guardar:</b> bot\u00f3n \ud83d\udcbe para guardar manualmente en cualquier momento (adem\u00e1s del guardado autom\u00e1tico cada 20 segundos).</li>"+"<li><b>Recorte inteligente autom\u00e1tico:</b> cuando colocas una foto en una forma (c\u00edrculo, hex\u00e1gono...), la app localiza sola la zona con m\u00e1s \"detalle\" para evitar cortar torpemente una cara en el borde \u2014 rec\u00f3rtala t\u00fa mismo despu\u00e9s si el resultado no te convence.</li>"+"<li>Sobre un elemento seleccionado: filtros, recorte, eliminar fondo, borde, sombra, degradado, duplicar, bloquear \u2014 seg\u00fan el tipo de elemento. 20 fuentes y 12 colores de texto disponibles.</li>"+'</ul>' },
+      '<ul>'+"<li><b>Texto, Foto, Forma, Pegatina, Icono:</b> toca la herramienta y coloca el elemento en la p\u00e1gina, mu\u00e9velo y c\u00e1mbialo de tama\u00f1o con las asas.</li>"+"<li><b>Patrones de fondo:</b> bot\u00f3n \ud83c\udfa8 junto a los colores de fondo \u2014 60 patrones dibujados en c\u00f3digo (frutas, flores, formas geom\u00e9tricas, garabatos...), nunca una imagen importada de ning\u00fan sitio, as\u00ed que sin problemas de derechos de autor. Renderizado id\u00e9ntico garantizado entre el editor y la exportaci\u00f3n, a cualquier resoluci\u00f3n.</li><li><b>Plantilla:</b> m\u00e1s de 1000 combinaciones (dise\u00f1os \u00d7 estilos), con b\u00fasqueda \u2014 incluidas formas redondas, hexagonales, octogonales, en arco, y mosaicos de 1 a 9 fotos.</li>"+"<li><b>Fondo de p\u00e1gina:</b> paleta de 12 colores, o toca \ud83d\uddbc\ufe0f para poner una de tus fotos como fondo de p\u00e1gina completa (con un velo ajustable \ud83d\udd06\ud83d\udd05 para mantener el texto legible).</li>"+"<li><b>Estilo global:</b> bot\u00f3n \ud83c\udfa8 para aplicar un estilo (fondo, fuente, colores) a TODAS las p\u00e1ginas del libro de una vez, sin pasar p\u00e1gina por p\u00e1gina \u2014 el contenido (fotos, texto) no se mueve, solo cambia la apariencia.</li>"+"<li><b>P\u00e1gina resumen:</b> bot\u00f3n \ud83d\udcca para a\u00f1adir autom\u00e1ticamente una p\u00e1gina con el n\u00famero de fotos, d\u00edas y lugares del viaje, calculada a partir de tus datos reales.</li>"+"<li><b>Dise\u00f1o sorpresa:</b> bot\u00f3n \ud83c\udfb2 \u2014 cambia al azar la disposici\u00f3n de la p\u00e1gina (formas, tama\u00f1os) manteniendo las mismas fotos en el mismo orden. El texto y las pegatinas ya colocados no se mueven. T\u00f3calo varias veces para ver otras ideas.</li>"+"<li><b>Historial de versiones:</b> bot\u00f3n \ud83d\udd50 \u2014 se guarda un punto de recuperaci\u00f3n cada vez que cierras o cambias de libro (hasta 15 versiones), consultable incluso al reabrir la app otro d\u00eda. Va m\u00e1s all\u00e1 de \"Deshacer\" (\u21a9\ufe0f), que se pierde al cerrar la app. Restaurar una versi\u00f3n es a su vez reversible justo despu\u00e9s.</li>"+"<li><b>Elegir un color de una foto:</b> bot\u00f3n \"\ud83c\udfa8 Elegir\" para el fondo de p\u00e1gina, o \"\ud83c\udfa8 Elegir de una foto\" en los ajustes de texto \u2014 elige una foto, su color medio se aplica autom\u00e1ticamente, para una p\u00e1gina a juego con la imagen.</li>"+"<li><b>Mapa:</b> inserta una imagen de mapa con tus lugares visitados (ver la secci\u00f3n de mapa m\u00e1s abajo).</li>"+"<li><b>Agrupar / Desagrupar:</b> selecciona varios elementos (\ud83d\udd17 Agrupar) para moverlos juntos; toca el grupo y luego \"\ud83d\udd13 Desagrupar\" para separarlos de nuevo.</li>"+"<li><b>Modo lectura:</b> bot\u00f3n \ud83d\udc41\ufe0f \u2014 muestra el libro a pantalla completa, p\u00e1gina por p\u00e1gina (imagen est\u00e1tica), sin ning\u00fan riesgo de mover un elemento por error. Navega con las flechas en pantalla, deslizando, o las teclas izquierda/derecha del teclado. \u00datil para mostrar el resultado a alguien.</li><li><b>Formato:</b> bot\u00f3n \ud83d\udd04 \u2014 recorre entre vertical, horizontal y cuadrado (estilo \u00e1lbum de fotos de Instagram). La etiqueta del bot\u00f3n siempre muestra el formato actualmente activo.</li><li><b>Reordenar p\u00e1ginas:</b> flechas \u2b05\ufe0f\u27a1\ufe0f en la franja de p\u00e1ginas de abajo, para mover la p\u00e1gina abierta.</li>"+"<li><b>Eliminar una o varias p\u00e1ginas:</b> bot\u00f3n \ud83d\uddd1\ufe0f en la franja de p\u00e1ginas de abajo \u2014 marca las p\u00e1ginas a eliminar, confirma. No se pueden eliminar todas las p\u00e1ginas a la vez.</li>"+"<li><b>Deshacer / Rehacer:</b> en la parte superior del editor, para retroceder en cualquier momento.</li>"+"<li><b>Guardar:</b> bot\u00f3n \ud83d\udcbe para guardar manualmente en cualquier momento (adem\u00e1s del guardado autom\u00e1tico cada 20 segundos).</li>"+"<li><b>Recorte inteligente autom\u00e1tico:</b> cuando colocas una foto en una forma (c\u00edrculo, hex\u00e1gono...), la app localiza sola la zona con m\u00e1s \"detalle\" para evitar cortar torpemente una cara en el borde \u2014 rec\u00f3rtala t\u00fa mismo despu\u00e9s si el resultado no te convence.</li>"+"<li>Sobre un elemento seleccionado: filtros, recorte, eliminar fondo, borde, sombra, degradado, duplicar, bloquear \u2014 seg\u00fan el tipo de elemento. 20 fuentes y 12 colores de texto disponibles.</li>"+'</ul>' },
     { icon:"\ud83e\ude84", title:"Libro autom\u00e1tico", body:
       '<ul>'+"<li>Desde \"Mis libros\", bot\u00f3n <b>\ud83e\ude84 Libro autom\u00e1tico</b>: elige el n\u00famero de p\u00e1ginas, un estilo (19 disponibles, incluidos estilos por pa\u00eds como Italia, Espa\u00f1a, Grecia...), una fuente, un color, emojis favoritos y hasta 4 dise\u00f1os preferidos.</li>"+"<li>La app reparte todas tus fotos autom\u00e1ticamente en las p\u00e1ginas, respetando el orden de tus carpetas si has creado alguna.</li>"+"<li><b>Modo \"Estructura vac\u00eda\":</b> genera todas las p\u00e1ginas con sus marcos, pero sin ninguna foto dentro \u2014 \u00fatil para preparar el libro antes incluso de importar tus fotos, o para elegir t\u00fa mismo qu\u00e9 foto va d\u00f3nde.</li>"+'</ul>' },
     { icon:"\u2702\ufe0f", title:"Retocar una foto", body:
@@ -2397,6 +2412,8 @@ var BK_I18N={
   autobackup_download:{fr:'Récupérer cette sauvegarde',en:'Retrieve this backup',it:'Recupera questo backup',es:'Recuperar esta copia'},
   autobackup_downloaded:{fr:'✅ Sauvegarde automatique téléchargée',en:'✅ Automatic backup downloaded',it:'✅ Backup automatico scaricato',es:'✅ Copia de seguridad automática descargada'},
   autobackup_error:{fr:'❌ Impossible de récupérer la sauvegarde automatique',en:'❌ Could not retrieve the automatic backup',it:'❌ Impossibile recuperare il backup automatico',es:'❌ No se pudo recuperar la copia de seguridad automática'},
+  title_patterns:{fr:'🎨 Motifs de fond',en:'🎨 Background patterns',it:'🎨 Motivi di sfondo',es:'🎨 Patrones de fondo'},
+  patterns_intro:{fr:'60 motifs, dessinés en code — aucune image importée nulle part, donc jamais de souci de droits.',en:'60 patterns, drawn in code — no image imported anywhere, so never any copyright concern.',it:'60 motivi, disegnati in codice — nessuna immagine importata da nessuna parte, quindi mai problemi di diritti.',es:'60 patrones, dibujados en código — ninguna imagen importada de ningún sitio, así que nunca hay problema de derechos.'},
   tool_pagenum:{fr:'Numéroter les pages',en:'Number the pages',it:'Numera le pagine',es:'Numerar las páginas'},
   pagenum_added:{fr:'🔢 Numéros ajoutés sur les {n} pages',en:'🔢 Numbers added to all {n} pages',it:'🔢 Numeri aggiunti a tutte le {n} pagine',es:'🔢 Números añadidos a las {n} páginas'},
   btn_pdf_hd:{fr:'Exporter PDF en qualité impression (300 DPI, plus lent)',en:'Export PDF in print quality (300 DPI, slower)',it:'Esporta PDF in qualità di stampa (300 DPI, più lento)',es:'Exportar PDF en calidad de impresión (300 DPI, más lento)'},
@@ -4318,6 +4335,465 @@ document.getElementById('pg-lb').addEventListener('touchend',function(e){
                      photoId? (pour type photo), text?, fontSize?, color? (pour type texte)} */
 var BK_COLORS=['#241E38','#7B2FF7','#FF5A6E','#00C2A8','#FFFFFF','#FFD93D','#000000','#FF8FA3','#1E88E5','#FB8C00','#2D8659','#9E9E9E'];
 var BK_BGS=['#FFFFFF','#F7F5FC','#241E38','#FFD93D','#7B2FF7','#00C2A8','#000000','#FF8FA3','#1E88E5','#FB8C00','#2D8659','#EDE0D4'];
+/* ══════════════════ MOTIFS DE FOND — 60 CRÉATIONS ORIGINALES ══════════════════
+   Chaque motif est un vrai dessin vectoriel (SVG) généré par du code — jamais
+   une image importée de quelque part, donc aucun souci de droits d'auteur,
+   jamais. Deux familles :
+   1. "Dispersion" (fruits, cœurs, étoiles...) — un petit dessin répété avec
+      des tailles/rotations/positions LÉGÈREMENT irrégulières (jamais une
+      grille parfaite, comme dans la vraie nature) + dégradé + ombre portée
+      douce pour un rendu à la fois soigné et vivant.
+   2. "Géométrique" (rayures, pois, chevrons, tissage...) — un vrai motif
+      texturé, répété en trame régulière.
+   Convertis en image (data URI) et utilisés à la fois dans l'éditeur (CSS
+   background-image) ET dans les exports (canvas via ctx.createPattern) —
+   donc TOUJOURS un rendu identique entre ce que tu vois et ce que tu
+   exportes, jamais de mauvaise surprise. */
+function bkPatternSvgOpen(vb){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+vb+' '+vb+'">'; }
+function bkPatternShadowFilter(id, color){
+  return '<filter id="'+id+'" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0.6" dy="1.8" stdDeviation="1.6" flood-color="'+color+'" flood-opacity="0.32"/></filter>';
+}
+// Disperse N instances d'une forme sur une trame 3x3 légèrement bruitée (jamais un vrai quadrillage)
+function bkPatternScatterPositions(vb, seedOffset){
+  var cells=3, cell=vb/cells, positions=[];
+  for(var r=0;r<cells;r++) for(var col=0;col<cells;col++){
+    var jx=((r*7+col*13+seedOffset*5)%11)/11-0.5, jy=((r*11+col*5+seedOffset*7)%13)/13-0.5;
+    var rot=(((r*17+col*9+seedOffset*3)%36)-18)*2;
+    var scale=0.75+(((r*5+col*11+seedOffset*13)%10)/10)*0.5;
+    positions.push({x:cell*(col+0.5)+jx*cell*0.5, y:cell*(r+0.5)+jy*cell*0.5, rot:rot, scale:scale});
+  }
+  return positions;
+}
+function bkPatternScatter(vb, bg, shapeMarkup, shadowColor, seedOffset){
+  var fid='sh'+Math.random().toString(36).slice(2,8);
+  var positions=bkPatternScatterPositions(vb, seedOffset||0);
+  var g='';
+  positions.forEach(function(p){
+    g+='<g transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+p.rot.toFixed(0)+') scale('+p.scale.toFixed(2)+')">'+shapeMarkup+'</g>';
+  });
+  return bkPatternSvgOpen(vb)
+    +'<defs>'+bkPatternShadowFilter(fid, shadowColor)+'</defs>'
+    +'<rect width="'+vb+'" height="'+vb+'" fill="'+bg+'"/>'
+    +'<g filter="url(#'+fid+')">'+g+'</g>'
+    +'</svg>';
+}
+var BK_PATTERN_SHAPES={
+  lemonSlice:function(){
+    return '<circle r="13" fill="#CDDB4E"/><circle r="11" fill="#FFFAEA"/><circle r="9" fill="#FCE96A"/>'
+      +'<circle r="2.4" fill="#FFFCE0"/>'
+      +'<g stroke="#E4C93A" stroke-width="0.6" opacity="0.5">'
+      +'<line x1="0" y1="-2.4" x2="0" y2="-8.5"/><line x1="1.7" y1="-1.7" x2="6" y2="-6"/>'
+      +'<line x1="2.4" y1="0" x2="8.5" y2="0"/><line x1="1.7" y1="1.7" x2="6" y2="6"/>'
+      +'<line x1="0" y1="2.4" x2="0" y2="8.5"/><line x1="-1.7" y1="1.7" x2="-6" y2="6"/>'
+      +'<line x1="-2.4" y1="0" x2="-8.5" y2="0"/><line x1="-1.7" y1="-1.7" x2="-6" y2="-6"/></g>';
+  },
+  wholeLemon:function(){
+    return '<path d="M0,-13 C5,-13 7.5,-7 7.5,0 C7.5,7 5,13 0,13 C-5,13 -7.5,7 -7.5,0 C-7.5,-7 -5,-13 0,-13 Z" fill="#FCE23C"/>'
+      +'<path d="M-1.2,-12.5 Q0,-15 1.2,-12.5 Z" fill="#D9A800"/>'
+      +'<ellipse cx="-3" cy="-5" rx="2" ry="4.5" fill="#FFFFFF" opacity="0.35"/>'
+      +'<path d="M0,-13 Q-0.5,-15.5 -1,-17" stroke="#6B8F4E" stroke-width="1" fill="none"/>'
+      +'<ellipse cx="-2" cy="-17" rx="2.6" ry="1.4" fill="#7FAE5C" transform="rotate(-25 -2 -17)"/>'
+      +'<ellipse cx="0.5" cy="-17.5" rx="2.2" ry="1.2" fill="#8FC06A" transform="rotate(10 0.5 -17.5)"/>';
+  },
+  orangeSlice:function(){
+    return '<circle r="12" fill="#F2A100"/><circle r="10" fill="#FFE7B3"/><circle r="8.3" fill="#FFA733"/>'
+      +'<circle r="2" fill="#FFDFA0"/>'
+      +'<g stroke="#D67E00" stroke-width="0.6" opacity="0.5">'
+      +'<line x1="0" y1="-2" x2="0" y2="-7.8"/><line x1="1.4" y1="-1.4" x2="5.5" y2="-5.5"/>'
+      +'<line x1="2" y1="0" x2="7.8" y2="0"/><line x1="1.4" y1="1.4" x2="5.5" y2="5.5"/>'
+      +'<line x1="0" y1="2" x2="0" y2="7.8"/><line x1="-1.4" y1="1.4" x2="-5.5" y2="5.5"/>'
+      +'<line x1="-2" y1="0" x2="-7.8" y2="0"/><line x1="-1.4" y1="-1.4" x2="-5.5" y2="-5.5"/></g>';
+  },
+  strawberry:function(){
+    return '<path d="M0,-8 C6,-8 9,-2 7,5 C5.5,10 2,13 0,13 C-2,13 -5.5,10 -7,5 C-9,-2 -6,-8 0,-8 Z" fill="#F0384B"/>'
+      +'<g fill="#FFE566"><circle cx="-3" cy="-1" r="0.7"/><circle cx="2" cy="1" r="0.7"/><circle cx="-1" cy="5" r="0.7"/><circle cx="4" cy="6" r="0.7"/><circle cx="-4" cy="8" r="0.7"/><circle cx="0" cy="-4" r="0.7"/></g>'
+      +'<path d="M-5,-7 L0,-11 L5,-7 L2,-9 L0,-6 L-2,-9 Z" fill="#4C9A4C"/>';
+  },
+  cherry:function(){
+    return '<circle cx="-5" cy="6" r="6" fill="#D81E3E"/><circle cx="5" cy="8" r="6" fill="#E63354"/>'
+      +'<ellipse cx="-7" cy="3" rx="1.6" ry="2.4" fill="#FFFFFF" opacity="0.3"/>'
+      +'<path d="M-5,0 Q-2,-12 4,-3" stroke="#5B8A3A" stroke-width="1.1" fill="none"/>'
+      +'<path d="M5,2 Q2,-12 4,-3" stroke="#5B8A3A" stroke-width="1.1" fill="none"/>';
+  },
+  pineapple:function(){
+    var g='<path d="M-6,-10 C-5,-4 -5,10 0,14 C5,10 5,-4 6,-10 C6,-14 -6,-14 -6,-10 Z" fill="#F4B93E"/>';
+    for(var y=-8;y<12;y+=4) for(var x=-5;x<6;x+=4) g+='<path d="M'+x+','+(y-2)+' L'+(x+2)+','+y+' L'+x+','+(y+2)+' L'+(x-2)+','+y+' Z" fill="none" stroke="#C6890A" stroke-width="0.5" opacity="0.6"/>';
+    g+='<path d="M-3,-10 L0,-19 L3,-10 M-5,-9 L-3,-18 M5,-9 L3,-18" stroke="#4C8F4A" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
+    return g;
+  },
+  watermelon:function(){
+    return '<path d="M-9,7 A9,9 0 0 1 9,7 Z" fill="#3C9A4A"/>'
+      +'<path d="M-7.5,6.2 A7.5,7.5 0 0 1 7.5,6.2 Z" fill="#EFFAE0"/>'
+      +'<path d="M-6,5.6 A6,6 0 0 1 6,5.6 Z" fill="#F0435C"/>'
+      +'<g fill="#241E38"><ellipse cx="-3" cy="3.5" rx="0.6" ry="1"/><ellipse cx="0" cy="2" rx="0.6" ry="1"/><ellipse cx="3" cy="3.5" rx="0.6" ry="1"/></g>';
+  },
+  cactus:function(){
+    return '<rect x="-2.5" y="-6" width="5" height="18" rx="2.5" fill="#4C9A5C"/>'
+      +'<rect x="-8" y="-2" width="5" height="10" rx="2.5" fill="#5AAE6A"/>'
+      +'<rect x="3" y="-9" width="5" height="12" rx="2.5" fill="#5AAE6A"/>'
+      +'<g stroke="#3A7A48" stroke-width="0.4" opacity="0.7">'
+      +'<line x1="-2.5" y1="-3" x2="2.5" y2="-3"/><line x1="-2.5" y1="1" x2="2.5" y2="1"/><line x1="-2.5" y1="5" x2="2.5" y2="5"/></g>'
+      +'<circle cx="-1" cy="-9" r="0.8" fill="#F0A0C0"/><circle cx="1.5" cy="-10" r="0.7" fill="#F0A0C0"/>';
+  },
+  tropicalLeaf:function(){
+    return '<path d="M0,-14 C10,-10 12,4 0,14 C6,4 6,-6 0,-14 Z" fill="#2E8B57"/>'
+      +'<path d="M0,-14 C-10,-10 -12,4 0,14 C-6,4 -6,-6 0,-14 Z" fill="#3AA168"/>'
+      +'<line x1="0" y1="-13" x2="0" y2="13" stroke="#1E5C38" stroke-width="0.8"/>';
+  },
+  flower:function(){
+    return '<g fill="#FFD9E8"><ellipse cx="0" cy="-5.4" rx="3.3" ry="5.4"/>'
+      +'<ellipse cx="5.1" cy="-1.5" rx="3.3" ry="5.4" transform="rotate(72 5.1 -1.5)"/>'
+      +'<ellipse cx="3.2" cy="4.5" rx="3.3" ry="5.4" transform="rotate(144 3.2 4.5)"/>'
+      +'<ellipse cx="-3.2" cy="4.5" rx="3.3" ry="5.4" transform="rotate(216 -3.2 4.5)"/>'
+      +'<ellipse cx="-5.1" cy="-1.5" rx="3.3" ry="5.4" transform="rotate(288 -5.1 -1.5)"/></g>'
+      +'<circle r="2.7" fill="#FFC93C"/>';
+  },
+  tulip:function(){
+    return '<path d="M0,-12 C-5,-10 -5,-2 0,2 C5,-2 5,-10 0,-12 Z" fill="#E84A7A"/>'
+      +'<path d="M-3,-9 C-6,-6 -5,0 -1,1" fill="#D63B6B"/>'
+      +'<path d="M3,-9 C6,-6 5,0 1,1" fill="#D63B6B"/>'
+      +'<line x1="0" y1="2" x2="0" y2="14" stroke="#4C9A4C" stroke-width="1.4"/>'
+      +'<path d="M0,7 Q6,7 8,3" stroke="#4C9A4C" stroke-width="1.2" fill="none"/>';
+  },
+  hollyLeaf:function(){
+    return '<path d="M0,-10 L3,-4 L9,-3 L4,1 L6,8 L0,4 L-6,8 L-4,1 L-9,-3 L-3,-4 Z" fill="#2E7D4F"/>'
+      +'<circle cx="-2" cy="10" r="2" fill="#D81E3E"/><circle cx="2" cy="10" r="2" fill="#E63354"/>';
+  },
+  star:function(){
+    var pts=[], R=10, r=4.2;
+    for(var i=0;i<10;i++){ var ang=Math.PI/5*i-Math.PI/2, rad=i%2===0?R:r; pts.push((rad*Math.cos(ang)).toFixed(1)+','+(rad*Math.sin(ang)).toFixed(1)); }
+    return '<polygon points="'+pts.join(' ')+'" fill="#FFD93D"/>';
+  },
+  heart:function(){
+    return '<path d="M0,9 C-13,-1 -13,-13 -5,-15 C-1,-16 0,-11 0,-11 C0,-11 1,-16 5,-15 C13,-13 13,-1 0,9 Z" fill="#7B2FF7"/>';
+  },
+  cloud:function(){
+    return '<path d="M-10,4 A6,6 0 0 1 -8,-7 A7,7 0 0 1 6,-8 A5.5,5.5 0 0 1 10,4 Z" fill="#FFFFFF"/>';
+  },
+  lightning:function(){
+    return '<polygon points="2,-14 -6,1 -1,1 -3,14 7,-3 1,-3" fill="#FFD93D"/>';
+  },
+  snowflake:function(){
+    var g='';
+    for(var i=0;i<6;i++){ var a=i*60; g+='<line x1="0" y1="0" x2="0" y2="-12" stroke="#DCE9FF" stroke-width="1.4" stroke-linecap="round" transform="rotate('+a+')"/>'
+      +'<line x1="0" y1="-8" x2="-2.6" y2="-10.6" stroke="#DCE9FF" stroke-width="1" stroke-linecap="round" transform="rotate('+a+')"/>'
+      +'<line x1="0" y1="-8" x2="2.6" y2="-10.6" stroke="#DCE9FF" stroke-width="1" stroke-linecap="round" transform="rotate('+a+')"/>'; }
+    return g;
+  },
+  palmTree:function(){
+    return '<path d="M-1,10 C-1,-2 0,-8 1,-12" stroke="#8A6238" stroke-width="2" fill="none"/>'
+      +'<g fill="#3AA168">'
+      +'<path d="M1,-12 C6,-15 12,-13 14,-9 C9,-10 4,-10 1,-12 Z"/>'
+      +'<path d="M1,-12 C7,-11 11,-6 11,-1 C7,-4 3,-8 1,-12 Z"/>'
+      +'<path d="M1,-12 C-4,-15 -10,-13 -12,-9 C-7,-10 -2,-10 1,-12 Z"/>'
+      +'<path d="M1,-12 C-5,-11 -9,-6 -9,-1 C-5,-4 -1,-8 1,-12 Z"/>'
+      +'<path d="M1,-12 C1,-17 3,-19 6,-20 C4,-16 2,-14 1,-12 Z"/></g>';
+  },
+  balloon:function(){
+    return '<ellipse cx="0" cy="-2" rx="8" ry="10" fill="#FF8FA3"/>'
+      +'<polygon points="-2,7 2,7 0,10" fill="#FF8FA3"/>'
+      +'<line x1="0" y1="10" x2="0" y2="18" stroke="#B96B7A" stroke-width="0.8"/>'
+      +'<ellipse cx="-3" cy="-6" rx="2" ry="3" fill="#FFFFFF" opacity="0.35"/>';
+  },
+  hotAirBalloon:function(){
+    return '<path d="M-8,-4 C-8,-13 8,-13 8,-4 C8,3 4,7 0,7 C-4,7 -8,3 -8,-4 Z" fill="#FF5A6E"/>'
+      +'<path d="M-8,-4 C-3,-6 3,-6 8,-4" stroke="#C7233A" stroke-width="0.7" fill="none"/>'
+      +'<line x1="-5" y1="6" x2="-3" y2="11" stroke="#6B4A2E" stroke-width="0.8"/>'
+      +'<line x1="5" y1="6" x2="3" y2="11" stroke="#6B4A2E" stroke-width="0.8"/>'
+      +'<rect x="-3" y="11" width="6" height="4" rx="1" fill="#8A6238"/>';
+  },
+  paperPlane:function(){
+    return '<polygon points="-12,6 12,0 -12,-6 -6,0" fill="#E8E4F5"/><polygon points="-6,0 -12,6 -2,0" fill="#C9C2E0"/>';
+  },
+  suitcase:function(){
+    return '<rect x="-10" y="-6" width="20" height="14" rx="3" fill="#FF8FA3"/>'
+      +'<rect x="-4" y="-10" width="8" height="5" rx="1.5" fill="none" stroke="#FF8FA3" stroke-width="2"/>'
+      +'<line x1="-10" y1="0" x2="10" y2="0" stroke="#C7607A" stroke-width="1"/>';
+  },
+  compass:function(){
+    return '<circle r="10" fill="#FFFFFF" stroke="#1E88E5" stroke-width="1.4"/>'
+      +'<polygon points="0,-7 2.5,0 0,2 -2.5,0" fill="#FF5A6E"/><polygon points="0,7 2.5,0 0,-2 -2.5,0" fill="#B0B8C4"/>'
+      +'<circle r="1.3" fill="#1E88E5"/>';
+  },
+  anchor:function(){
+    return '<circle cy="-8" r="2.4" fill="none" stroke="#1E88E5" stroke-width="1.6"/>'
+      +'<line x1="0" y1="-5.6" x2="0" y2="10" stroke="#1E88E5" stroke-width="1.8"/>'
+      +'<path d="M-8,4 A8,8 0 0 0 0,12 A8,8 0 0 0 8,4" fill="none" stroke="#1E88E5" stroke-width="1.8"/>'
+      +'<line x1="-5" y1="-2" x2="5" y2="-2" stroke="#1E88E5" stroke-width="1.6"/>';
+  },
+  camera:function(){
+    return '<rect x="-11" y="-6" width="22" height="15" rx="2.5" fill="#241E38"/>'
+      +'<rect x="-4" y="-10" width="8" height="4" rx="1" fill="#241E38"/>'
+      +'<circle cy="1.5" r="5.5" fill="#4A4468"/><circle cy="1.5" r="3.2" fill="#8B85AA"/>';
+  },
+  mapPin:function(){
+    return '<path d="M0,12 C-8,0 -8,-7 0,-11 C8,-7 8,0 0,12 Z" fill="#FF5A6E"/><circle cy="-6" r="3.2" fill="#FFFFFF"/>';
+  },
+  bee:function(){
+    return '<ellipse rx="7" ry="5" fill="#FFD93D"/>'
+      +'<path d="M-5,-2 L5,-2 M-5,1 L5,1" stroke="#241E38" stroke-width="2"/>'
+      +'<ellipse cx="-4" cy="-4" rx="4" ry="3" fill="#E9E6F5" opacity="0.75" transform="rotate(-20 -4 -4)"/>'
+      +'<ellipse cx="4" cy="-4" rx="4" ry="3" fill="#E9E6F5" opacity="0.75" transform="rotate(20 4 -4)"/>';
+  },
+  butterfly:function(){
+    return '<line x1="0" y1="-8" x2="0" y2="8" stroke="#241E38" stroke-width="1.2"/>'
+      +'<path d="M0,-6 C-9,-12 -13,-2 -3,0 Z" fill="#B98CFF"/><path d="M0,1 C-8,4 -10,11 -2,9 Z" fill="#7B2FF7"/>'
+      +'<path d="M0,-6 C9,-12 13,-2 3,0 Z" fill="#B98CFF"/><path d="M0,1 C8,4 10,11 2,9 Z" fill="#7B2FF7"/>';
+  },
+  seashell:function(){
+    var g='<path d="M0,10 L0,-2" stroke="#F0A400" stroke-width="0.6"/>';
+    for(var i=-4;i<=4;i++) g+='<path d="M0,8 L'+(i*2.4).toFixed(1)+',-8" stroke="#F5C864" stroke-width="0.9" fill="none"/>';
+    g+='<path d="M-9,8 A9,9 0 0 1 9,8 Z" fill="none" stroke="#F0A400" stroke-width="1"/>';
+    return g;
+  },
+  moonStars:function(){
+    return '<path d="M6,-10 A9,9 0 1 0 6,9 A7,7 0 1 1 6,-10 Z" fill="#FFE985"/>'
+      +'<path d="M-8,-6 l1,2 l2,1 l-2,1 l-1,2 l-1,-2 l-2,-1 l2,-1 Z" fill="#FFFFFF"/>'
+      +'<path d="M-10,6 l0.7,1.4 l1.4,0.7 l-1.4,0.7 l-0.7,1.4 l-0.7,-1.4 l-1.4,-0.7 l1.4,-0.7 Z" fill="#FFFFFF"/>';
+  },
+  coffeeCup:function(){
+    return '<path d="M-7,-6 L-6,8 A6,3 0 0 0 6,8 L7,-6 Z" fill="#8A6238"/>'
+      +'<path d="M7,-4 C12,-4 12,4 7,4" fill="none" stroke="#8A6238" stroke-width="1.6"/>'
+      +'<path d="M-3,-10 Q-1,-13 -3,-16 M2,-10 Q4,-13 2,-16" stroke="#C7B8A0" stroke-width="1" fill="none" opacity="0.7"/>';
+  },
+  book:function(){
+    return '<path d="M-9,-8 L0,-6 L9,-8 L9,8 L0,6 L-9,8 Z" fill="#FF8FA3"/>'
+      +'<line x1="0" y1="-6" x2="0" y2="6" stroke="#C7607A" stroke-width="1"/>';
+  },
+  umbrella:function(){
+    return '<path d="M-10,0 A10,9 0 0 1 10,0 Z" fill="#00C2A8"/>'
+      +'<path d="M-10,0 Q-5,-3 0,0 Q5,-3 10,0" fill="none" stroke="#00967F" stroke-width="0.8"/>'
+      +'<line x1="0" y1="0" x2="0" y2="13" stroke="#5A5478" stroke-width="1.4"/>'
+      +'<path d="M0,13 Q-3,15 -2,12" fill="none" stroke="#5A5478" stroke-width="1.2"/>';
+  },
+  mushroom:function(){
+    return '<path d="M-8,0 A8,7 0 0 1 8,0 Z" fill="#F0435C"/>'
+      +'<circle cx="-3" cy="-3" r="1.3" fill="#FFFFFF"/><circle cx="3" cy="-4" r="1" fill="#FFFFFF"/><circle cx="0" cy="-1" r="1.1" fill="#FFFFFF"/>'
+      +'<rect x="-3" y="0" width="6" height="8" rx="2" fill="#FFF3DC"/>';
+  },
+  bird:function(){
+    return '<path d="M-9,2 C-4,-6 6,-6 10,0 C6,-1 4,1 2,4 C0,1 -3,0 -6,3 C-7,1 -8,1 -9,2 Z" fill="#1E88E5"/>'
+      +'<circle cx="7" cy="-2" r="1.1" fill="#241E38"/>';
+  },
+  feather:function(){
+    return '<path d="M0,-14 C6,-8 6,8 0,14 C-6,8 -6,-8 0,-14 Z" fill="#B98CFF"/>'
+      +'<line x1="0" y1="-13" x2="0" y2="13" stroke="#7B2FF7" stroke-width="0.8"/>'
+      +'<g stroke="#7B2FF7" stroke-width="0.5" opacity="0.6">'
+      +'<line x1="0" y1="-8" x2="-3.5" y2="-6"/><line x1="0" y1="-4" x2="-4.5" y2="-2"/><line x1="0" y1="0" x2="-5" y2="2"/>'
+      +'<line x1="0" y1="-8" x2="3.5" y2="-6"/><line x1="0" y1="-4" x2="4.5" y2="-2"/><line x1="0" y1="0" x2="5" y2="2"/></g>';
+  },
+  autumnLeaf:function(){
+    return '<path d="M0,-12 C6,-8 8,-2 4,0 C9,1 10,7 5,9 C6,12 2,14 0,11 C-2,14 -6,12 -5,9 C-10,7 -9,1 -4,0 C-8,-2 -6,-8 0,-12 Z" fill="#E87A2C"/>'
+      +'<line x1="0" y1="-11" x2="0" y2="10" stroke="#B8511A" stroke-width="0.8"/>';
+  },
+  confetti:function(){
+    return '<rect x="-6" y="-2" width="6" height="4" fill="#FF5A6E" transform="rotate(20)"/>'
+      +'<circle cx="5" cy="-4" r="2.2" fill="#00C2A8"/>'
+      +'<rect x="-2" y="4" width="5" height="3" fill="#FFD93D" transform="rotate(-15 -2 4)"/>'
+      +'<circle cx="-6" cy="6" r="1.8" fill="#7B2FF7"/>';
+  }
+};
+// Motifs "dispersion" (id -> {shape, bg, shadow})
+var BK_SCATTER_DEFS=[
+  {id:'lemons_slice', emoji:'🍋', label:'Citrons (quartiers)', shape:'lemonSlice', bg:'#1E1B33', shadow:'#000'},
+  {id:'lemons_whole', emoji:'🍋', label:'Citrons entiers', shape:'wholeLemon', bg:'#16281F', shadow:'#000'},
+  {id:'lemons_cream', emoji:'🍋', label:'Citrons (fond crème)', shape:'wholeLemon', bg:'#FFF8E5', shadow:'#8a7a2a'},
+  {id:'oranges', emoji:'🍊', label:'Oranges', shape:'orangeSlice', bg:'#241730', shadow:'#000'},
+  {id:'strawberries', emoji:'🍓', label:'Fraises', shape:'strawberry', bg:'#FFF3F0', shadow:'#8a1f2e'},
+  {id:'cherries', emoji:'🍒', label:'Cerises', shape:'cherry', bg:'#FCEEE9', shadow:'#7a1225'},
+  {id:'pineapple', emoji:'🍍', label:'Ananas', shape:'pineapple', bg:'#FFF6DC', shadow:'#8a6a10'},
+  {id:'watermelon', emoji:'🍉', label:'Pastèque', shape:'watermelon', bg:'#F4FFF0', shadow:'#1f5a2e'},
+  {id:'cactus', emoji:'🌵', label:'Cactus', shape:'cactus', bg:'#FFE8D6', shadow:'#8a4a1a'},
+  {id:'tropical', emoji:'🌴', label:'Feuilles tropicales', shape:'tropicalLeaf', bg:'#0F2E20', shadow:'#000'},
+  {id:'palm', emoji:'🌴', label:'Palmiers', shape:'palmTree', bg:'#DFF5FF', shadow:'#1a5a6a'},
+  {id:'flowers', emoji:'🌸', label:'Fleurs', shape:'flower', bg:'#3E1F52', shadow:'#000'},
+  {id:'tulips', emoji:'🌷', label:'Tulipes', shape:'tulip', bg:'#FFF0F5', shadow:'#8a2a4a'},
+  {id:'holly', emoji:'🌿', label:'Houx', shape:'hollyLeaf', bg:'#12261A', shadow:'#000'},
+  {id:'stars', emoji:'⭐', label:'Étoiles', shape:'star', bg:'#181233', shadow:'#000'},
+  {id:'hearts', emoji:'💜', label:'Cœurs', shape:'heart', bg:'#FFF8F0', shadow:'#3d0f8f'},
+  {id:'clouds', emoji:'☁️', label:'Nuages', shape:'cloud', bg:'#8FCBFF', shadow:'#1a5a8a'},
+  {id:'lightning', emoji:'⚡', label:'Éclairs', shape:'lightning', bg:'#241E38', shadow:'#000'},
+  {id:'snowflakes', emoji:'❄️', label:'Flocons', shape:'snowflake', bg:'#2A4A6E', shadow:'#000'},
+  {id:'balloons', emoji:'🎈', label:'Ballons', shape:'balloon', bg:'#EAF6FF', shadow:'#7a3a4a'},
+  {id:'hotair', emoji:'🎈', label:'Montgolfières', shape:'hotAirBalloon', bg:'#FFEFD6', shadow:'#8a3a1a'},
+  {id:'planes', emoji:'✈️', label:'Avions en papier', shape:'paperPlane', bg:'#F0F4FF', shadow:'#3a3a6a'},
+  {id:'suitcases', emoji:'🧳', label:'Valises', shape:'suitcase', bg:'#FFF0F4', shadow:'#8a3a4a'},
+  {id:'compass', emoji:'🧭', label:'Boussoles', shape:'compass', bg:'#F5F8FF', shadow:'#1a4a7a'},
+  {id:'anchors', emoji:'⚓', label:'Ancres', shape:'anchor', bg:'#EAF3FF', shadow:'#1a4a7a'},
+  {id:'cameras', emoji:'📷', label:'Appareils photo', shape:'camera', bg:'#F5F3FF', shadow:'#3a2a5a'},
+  {id:'mappins', emoji:'📍', label:'Repères de carte', shape:'mapPin', bg:'#FFF0F0', shadow:'#7a1a2a'},
+  {id:'bees', emoji:'🐝', label:'Abeilles', shape:'bee', bg:'#FFF8E0', shadow:'#6a5a0a'},
+  {id:'butterflies', emoji:'🦋', label:'Papillons', shape:'butterfly', bg:'#F5F0FF', shadow:'#3a1a6a'},
+  {id:'shells', emoji:'🐚', label:'Coquillages', shape:'seashell', bg:'#FFF6E8', shadow:'#8a6a1a'},
+  {id:'moonstars', emoji:'🌙', label:'Lune & étoiles', shape:'moonStars', bg:'#141033', shadow:'#000'},
+  {id:'coffee', emoji:'☕', label:'Tasses de café', shape:'coffeeCup', bg:'#F5EBDD', shadow:'#4a3010'},
+  {id:'books', emoji:'📖', label:'Livres', shape:'book', bg:'#FFF3F5', shadow:'#6a2030'},
+  {id:'umbrellas', emoji:'☂️', label:'Parapluies', shape:'umbrella', bg:'#E8FFFA', shadow:'#0a5a4a'},
+  {id:'mushrooms', emoji:'🍄', label:'Champignons', shape:'mushroom', bg:'#F0FFE8', shadow:'#5a1a2a'},
+  {id:'birds', emoji:'🐦', label:'Oiseaux', shape:'bird', bg:'#EAF6FF', shadow:'#1a4a7a'},
+  {id:'feathers', emoji:'🪶', label:'Plumes', shape:'feather', bg:'#F8F0FF', shadow:'#3a1a6a'},
+  {id:'autumn', emoji:'🍂', label:'Feuilles d\'automne', shape:'autumnLeaf', bg:'#FFF3E0', shadow:'#7a3a0a'},
+  {id:'confetti', emoji:'🎉', label:'Confettis', shape:'confetti', bg:'#FFFFFF', shadow:'#4a3a6a'}
+];
+// Motifs "géométrique" (trame régulière, pas de dispersion organique)
+var BK_GEO_DEFS=[
+  {id:'geo_dots_red', emoji:'🔴', label:'Pois (rouge)', fn:function(){ return bkPatGeoDots(60,'#F03D57','#FFF8EE',9); }},
+  {id:'geo_dots_teal', emoji:'🔵', label:'Pois (turquoise)', fn:function(){ return bkPatGeoDots(60,'#00A78C','#F0FFFC',9); }},
+  {id:'geo_dots_purple', emoji:'🟣', label:'Pois (violet)', fn:function(){ return bkPatGeoDots(60,'#7B2FF7','#F5EFFF',9); }},
+  {id:'geo_dots_mini', emoji:'⚪', label:'Petits pois', fn:function(){ return bkPatGeoDots(30,'#241E38','#FFFFFF',3.5); }},
+  {id:'geo_stripes_diag', emoji:'🌈', label:'Rayures diagonales', fn:function(){ return bkPatGeoStripes(30,'#00E0BE','#00A78C','#FBF9FF',true); }},
+  {id:'geo_stripes_h', emoji:'🌈', label:'Rayures horizontales', fn:function(){ return bkPatGeoStripes(24,'#FF8FA3','#F0384B','#FFFFFF',false); }},
+  {id:'geo_stripes_thin', emoji:'🌈', label:'Fines rayures', fn:function(){ return bkPatGeoStripes(14,'#1E88E5','#1565C0','#EAF3FF',true,0.35); }},
+  {id:'geo_chevron', emoji:'📐', label:'Chevrons', fn:function(){ return bkPatGeoChevron(40,'#FFD93D','#FFF8E0'); }},
+  {id:'geo_waves', emoji:'🌊', label:'Vagues', fn:function(){ return bkPatGeoWaves(50,'#1E88E5','#EAF3FF'); }},
+  {id:'geo_scales', emoji:'🐟', label:'Écailles', fn:function(){ return bkPatGeoScales(24,'#00C2A8','#F0FFFC'); }},
+  {id:'geo_diamonds', emoji:'💎', label:'Losanges', fn:function(){ return bkPatGeoDiamonds(36,'#7B2FF7','#B98CFF','#F5EFFF'); }},
+  {id:'geo_checker', emoji:'⬛', label:'Damier', fn:function(){ return bkPatGeoChecker(24,'#241E38','#FFFFFF'); }},
+  {id:'geo_grid', emoji:'📓', label:'Cahier quadrillé', fn:function(){ return bkPatGeoGrid(16,'#B8C4E0','#FFFFFF'); }},
+  {id:'geo_triangles', emoji:'🔺', label:'Triangles', fn:function(){ return bkPatGeoTriangles(28,'#FF5A6E','#FFEDEF'); }},
+  {id:'geo_houndstooth', emoji:'🧶', label:'Pied-de-poule', fn:function(){ return bkPatGeoHoundstooth(24,'#241E38','#FFFFFF'); }},
+  {id:'geo_crosshatch', emoji:'✏️', label:'Hachures croisées', fn:function(){ return bkPatGeoCrosshatch(20,'#FB8C00','#FFF6E8'); }},
+  {id:'geo_scribble', emoji:'〰️', label:'Gribouillis', fn:function(){ return bkPatGeoScribble(70,'#F4EEFF','#181330'); }},
+  {id:'geo_dotgrid', emoji:'⚬', label:'Grille pointillée', fn:function(){ return bkPatGeoDotGrid(46,'#241E38','#FFFFFF'); }},
+  {id:'geo_herringbone', emoji:'🧵', label:'Chevrons tissés', fn:function(){ return bkPatGeoHerringbone(20,'#2D8659','#EAF7EE'); }},
+  {id:'geo_honeycomb', emoji:'🍯', label:'Nid d\'abeille', fn:function(){ return bkPatGeoHoneycomb(26,'#FB8C00','#FFF6E0'); }},
+  {id:'geo_rainbow', emoji:'🌈', label:'Arcs multicolores', fn:function(){ return bkPatGeoRainbow(70,'#F0F8FF'); }}
+];
+function bkPatGeoRainbow(tile,bg){
+  var cols=['#FF5A6E','#FFD93D','#00C2A8','#1E88E5','#7B2FF7'], h=tile*0.55, g='';
+  cols.forEach(function(c,i){ var r=h-i*8; g+='<path d="M0,'+h+' A'+r+','+r+' 0 0 1 '+(r*2)+','+h+'" fill="none" stroke="'+c+'" stroke-width="6"/>'; });
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+(tile*0.6)+'">'
+    +'<rect width="'+tile+'" height="'+(tile*0.6)+'" fill="'+bg+'"/>'+g+'</svg>';
+}
+function bkPatGeoDots(tile,dot,bg,r){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<circle cx="'+(tile/2)+'" cy="'+(tile/2)+'" r="'+r+'" fill="'+dot+'"/></svg>';
+}
+function bkPatGeoStripes(tile,c1,c2,bg,diag,widthRatio){
+  var w=(widthRatio||0.5)*tile;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'" transform="'+(diag?'rotate(38)':'')+'"/>'
+    +'<rect width="'+w+'" height="'+tile+'" fill="'+c1+'" transform="'+(diag?'rotate(38)':'')+'"/></svg>';
+}
+function bkPatGeoChevron(tile,c1,bg){
+  var h=tile/2;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<polyline points="0,'+h+' '+(tile/2)+',0 '+tile+','+h+'" fill="none" stroke="'+c1+'" stroke-width="7"/>'
+    +'<polyline points="0,'+tile+' '+(tile/2)+','+h+' '+tile+','+tile+'" fill="none" stroke="'+c1+'" stroke-width="7"/></svg>';
+}
+function bkPatGeoWaves(tile,c1,bg){
+  var h=tile/2;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<path d="M0,'+(h*0.3)+' Q'+(tile*0.25)+',0 '+(tile*0.5)+','+(h*0.3)+' T'+tile+','+(h*0.3)+'" fill="none" stroke="'+c1+'" stroke-width="4"/>'
+    +'<path d="M0,'+(h*1.3)+' Q'+(tile*0.25)+','+h+' '+(tile*0.5)+','+(h*1.3)+' T'+tile+','+(h*1.3)+'" fill="none" stroke="'+c1+'" stroke-width="4"/></svg>';
+}
+function bkPatGeoScales(tile,c1,bg){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+(tile*2)+' '+tile+'">'
+    +'<rect width="'+(tile*2)+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<path d="M0,'+tile+' A'+(tile/2)+','+(tile/2)+' 0 0 1 '+tile+','+tile+' A'+(tile/2)+','+(tile/2)+' 0 0 1 '+(tile*2)+','+tile+' Z" fill="'+c1+'" opacity="0.85"/>'
+    +'<path d="M'+(tile/2)+','+tile+' A'+(tile/2)+','+(tile/2)+' 0 0 1 '+(tile*1.5)+','+tile+'" fill="none" stroke="'+c1+'" stroke-width="1.5" opacity="0.5"/></svg>';
+}
+function bkPatGeoDiamonds(tile,c1,c2,bg){
+  var h=tile/2;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<polygon points="'+h+',0 '+tile+','+h+' '+h+','+tile+' 0,'+h+'" fill="none" stroke="'+c1+'" stroke-width="2"/>'
+    +'<circle cx="'+h+'" cy="'+h+'" r="3" fill="'+c2+'"/></svg>';
+}
+function bkPatGeoChecker(tile,c1,c2){
+  var h=tile/2;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+c2+'"/>'
+    +'<rect width="'+h+'" height="'+h+'" fill="'+c1+'"/><rect x="'+h+'" y="'+h+'" width="'+h+'" height="'+h+'" fill="'+c1+'"/></svg>';
+}
+function bkPatGeoGrid(tile,line,bg){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<line x1="0" y1="0" x2="0" y2="'+tile+'" stroke="'+line+'" stroke-width="0.7"/>'
+    +'<line x1="0" y1="0" x2="'+tile+'" y2="0" stroke="'+line+'" stroke-width="0.7"/></svg>';
+}
+function bkPatGeoTriangles(tile,c1,bg){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<polygon points="0,'+tile+' '+(tile/2)+',0 '+tile+','+tile+'" fill="'+c1+'"/></svg>';
+}
+function bkPatGeoHoundstooth(tile,c1,bg){
+  var h=tile/2;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<polygon points="0,0 '+h+',0 '+h+','+h+' 0,'+h+'" fill="'+c1+'"/>'
+    +'<polygon points="'+h+','+h+' '+tile+','+h+' '+tile+','+tile+' '+h+','+tile+'" fill="'+c1+'"/>'
+    +'<polygon points="'+h+',0 '+tile+',0 '+(h+h*0.4)+','+(h*0.6)+'" fill="'+c1+'"/></svg>';
+}
+function bkPatGeoCrosshatch(tile,c1,bg){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<line x1="0" y1="0" x2="'+tile+'" y2="'+tile+'" stroke="'+c1+'" stroke-width="1.4" opacity="0.65"/>'
+    +'<line x1="'+tile+'" y1="0" x2="0" y2="'+tile+'" stroke="'+c1+'" stroke-width="1.4" opacity="0.65"/></svg>';
+}
+function bkPatGeoScribble(tile,c1,bg){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+(tile*0.7)+'">'
+    +'<rect width="'+tile+'" height="'+(tile*0.7)+'" fill="'+bg+'"/>'
+    +'<path d="M2,'+(tile*0.35)+' Q'+(tile*0.15)+','+(tile*0.1)+' '+(tile*0.28)+','+(tile*0.3)+' T'+(tile*0.5)+','+(tile*0.28)+' Q'+(tile*0.6)+','+(tile*0.05)+' '+(tile*0.72)+','+(tile*0.28)+' T'+(tile*0.98)+','+(tile*0.25)+'" '
+    +'fill="none" stroke="'+c1+'" stroke-width="3.2" stroke-linecap="round"/></svg>';
+}
+function bkPatGeoDotGrid(tile,dot,bg){
+  var h=tile/2;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tile+' '+tile+'">'
+    +'<rect width="'+tile+'" height="'+tile+'" fill="'+bg+'"/>'
+    +'<line x1="0" y1="'+h+'" x2="'+tile+'" y2="'+h+'" stroke="'+dot+'" stroke-width="1" stroke-dasharray="2,3" opacity="0.5"/>'
+    +'<line x1="'+h+'" y1="0" x2="'+h+'" y2="'+tile+'" stroke="'+dot+'" stroke-width="1" stroke-dasharray="2,3" opacity="0.5"/>'
+    +'<circle cx="'+h+'" cy="'+h+'" r="3.2" fill="'+dot+'"/></svg>';
+}
+function bkPatGeoHerringbone(tile,c1,bg){
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+(tile*2)+' '+(tile*2)+'">'
+    +'<rect width="'+(tile*2)+'" height="'+(tile*2)+'" fill="'+bg+'"/>'
+    +'<g stroke="'+c1+'" stroke-width="5" stroke-linecap="square">'
+    +'<line x1="0" y1="'+tile+'" x2="'+tile+'" y2="0"/><line x1="'+tile+'" y1="'+(tile*2)+'" x2="'+(tile*2)+'" y2="'+tile+'"/>'
+    +'<line x1="'+tile+'" y1="0" x2="'+(tile*2)+'" y2="'+tile+'" transform="translate('+tile+',0)"/>'
+    +'</g></svg>';
+}
+function bkPatGeoHoneycomb(tile,c1,bg){
+  var r=tile/2, h=r*0.87;
+  var pts=[[r*0.5,0],[r*1.5,0],[r*2,h],[r*1.5,h*2],[r*0.5,h*2],[0,h]].map(function(p){return p[0]+','+p[1];}).join(' ');
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+(r*2)+' '+(h*2)+'">'
+    +'<rect width="'+(r*2)+'" height="'+(h*2)+'" fill="'+bg+'"/>'
+    +'<polygon points="'+pts+'" fill="none" stroke="'+c1+'" stroke-width="2"/></svg>';
+}
+var BK_PATTERNS=[];
+BK_SCATTER_DEFS.forEach(function(d,i){
+  BK_PATTERNS.push({id:d.id, emoji:d.emoji, label:d.label, svg:function(){
+    return bkPatternScatter(150, d.bg, BK_PATTERN_SHAPES[d.shape](), d.shadow, i);
+  }});
+});
+BK_GEO_DEFS.forEach(function(d){
+  BK_PATTERNS.push({id:d.id, emoji:d.emoji, label:d.label, svg:d.fn});
+});
+var bkPatternUriCache={};
+function bkPatternInfo(id){
+  if(bkPatternUriCache[id]) return bkPatternUriCache[id];
+  var def=BK_PATTERNS.find(function(p){ return p.id===id; });
+  if(!def) return null;
+  var svg=def.svg();
+  // Ajoute des width/height explicites correspondant au viewBox — sans ça,
+  // une image SVG chargée via <img> ou dans un canevas peut se voir attribuer
+  // une taille par défaut arbitraire par le navigateur, cassant la mise à
+  // l'échelle du motif (bug potentiel réel, corrigé avant même d'arriver).
+  var vb=svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+  var vbW=vb?parseFloat(vb[1]):150, vbH=vb?parseFloat(vb[2]):150;
+  svg=svg.replace('<svg ', '<svg width="'+vbW+'" height="'+vbH+'" ');
+  var uri='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+  var info={uri:uri, vbW:vbW, vbH:vbH, aspect:vbW/vbH};
+  bkPatternUriCache[id]=info;
+  return info;
+}
+function bkPatternDataURI(id){
+  var info=bkPatternInfo(id);
+  return info?info.uri:null;
+}
 var BK_FONTS=[
   {id:'Poppins', label:'Poppins'},
   {id:'Nunito', label:'Nunito'},
@@ -5898,8 +6374,14 @@ function renderBkSwatches(){
   var page=bkBook.pages[bkPageIdx];
   var h='';
   BK_BGS.forEach(function(c){
-    h+='<div class="bk-swatch'+(!page.bgPhotoId&&page.bg===c?' on':'')+'" style="background:'+c+'" onclick="bkSetBg(\''+c+'\')"></div>';
+    h+='<div class="bk-swatch'+(!page.bgPhotoId&&!page.bgPattern&&page.bg===c?' on':'')+'" style="background:'+c+'" onclick="bkSetBg(\''+c+'\')"></div>';
   });
+  if(page.bgPattern){
+    var pat=BK_PATTERNS.find(function(p){ return p.id===page.bgPattern; });
+    h+='<div class="bk-swatch bk-swatch-pattern on" style="background-image:url(\''+bkPatternDataURI(page.bgPattern)+'\')" onclick="openPatternPicker()" title="'+(pat?pat.label:'')+'"></div>';
+  } else {
+    h+='<button class="bk-btn" style="padding:4px 8px;font-size:.7rem;flex-shrink:0" onclick="openPatternPicker()" title="'+t('title_patterns')+'">🎨</button>';
+  }
   if(page.bgPhotoId){
     var ph=bkPhotoById(page.bgPhotoId);
     h+='<div class="bk-bgphoto-btn on" style="background-image:url(\''+(ph?bkPhotoSrc(ph,'thumb'):'')+'\')" onclick="openBgPhotoPicker()">'
@@ -5917,8 +6399,31 @@ function bkSetBg(c){
   var page=bkBook.pages[bkPageIdx];
   page.bg=c;
   page.bgPhotoId=null; // une couleur choisie retire toute photo de fond éventuelle
+  page.bgPattern=null; // ...et retire aussi un motif éventuel
   bkRenderPage();
   renderBkSwatches();
+}
+/* ══════════════════ CHOIX D'UN MOTIF DE FOND (parmi les 60) ══════════════════ */
+function openPatternPicker(){
+  var page=bkBook.pages[bkPageIdx];
+  var h='';
+  BK_PATTERNS.forEach(function(p){
+    var uri=bkPatternDataURI(p.id);
+    h+='<div class="pattern-cell'+(page.bgPattern===p.id?' on':'')+'" onclick="bkSetBgPattern(\''+p.id+'\')" style="background-image:url(\''+uri+'\')">'
+      +'<span class="pattern-cell-label">'+p.emoji+' '+esc(p.label)+'</span></div>';
+  });
+  document.getElementById('pattern-picker-grid').innerHTML=h;
+  document.getElementById('pattern-picker-sheet').classList.add('on');
+}
+function closePatternPicker(){ document.getElementById('pattern-picker-sheet').classList.remove('on'); }
+function bkSetBgPattern(id){
+  bkSnapshot();
+  var page=bkBook.pages[bkPageIdx];
+  page.bgPattern=id;
+  page.bgPhotoId=null; // un motif choisi retire toute photo de fond éventuelle
+  bkRenderPage();
+  renderBkSwatches();
+  closePatternPicker();
 }
 function openBgPhotoPicker(){
   bkPickerFolderId=null;
@@ -5985,6 +6490,7 @@ function bkSetBgPhoto(photoId){
   bkSnapshot();
   var page=bkBook.pages[bkPageIdx];
   page.bgPhotoId=photoId;
+  page.bgPattern=null; // une photo de fond retire aussi un motif éventuel
   if(page.bgPhotoDim===undefined) page.bgPhotoDim=35; // voile sombre par défaut, pour garder le texte lisible
   closeBkPhotoSheet();
   bkRenderPage();
@@ -6021,6 +6527,19 @@ function bkRenderPage(){
       canvas.style.backgroundSize='cover';
       canvas.style.backgroundPosition='center';
     }
+  } else if(page.bgPattern){
+    var pinfo=bkPatternInfo(page.bgPattern);
+    canvas.style.background='';
+    canvas.style.backgroundImage=pinfo?'url(\''+pinfo.uri+'\')':'none';
+    // Taille de tuile en % de la page — reste cohérent peu importe la
+    // résolution d'affichage ou d'export. Important : les % de largeur et de
+    // hauteur en CSS se réfèrent CHACUN à leur propre dimension (pas la même
+    // base si la page n'est pas carrée) — il faut donc corriger par le vrai
+    // ratio largeur/hauteur de la page, sinon un motif rond devient ovale
+    // dès qu'on est en portrait ou paysage (bug réel, repéré avant l'export).
+    var pageWH = bkBook.orient==='landscape' ? 297/210 : (bkBook.orient==='square' ? 1 : 210/297);
+    canvas.style.backgroundSize=pinfo?'14% '+(14*pageWH/pinfo.aspect).toFixed(2)+'%':'auto';
+    canvas.style.backgroundRepeat='repeat';
   } else {
     canvas.style.background=page.bg;
     canvas.style.backgroundImage='none';
@@ -7519,6 +8038,23 @@ function bkRenderPageToCanvas(page, orient, customPXW, customPXH){
       var dim=page.bgPhotoDim!==undefined?page.bgPhotoDim:35;
       if(dim>0){ ctx.fillStyle='rgba(0,0,0,'+(dim/100)+')'; ctx.fillRect(0,0,PXW,PXH); }
     }).catch(function(){}) : Promise.resolve();
+    // Motif de fond : même logique de taille de tuile (14% de la largeur de
+    // page, ratio corrigé par l'orientation) que dans l'éditeur — garantit un
+    // rendu IDENTIQUE entre ce qui est affiché et ce qui est exporté, peu
+    // importe la résolution demandée (export normal ou qualité impression).
+    var patternLoad = (!page.bgPhotoId && page.bgPattern) ? (function(){
+      var pinfo=bkPatternInfo(page.bgPattern);
+      if(!pinfo) return Promise.resolve();
+      return bkLoadImg(pinfo.uri).then(function(img){
+        var canvasPattern=ctx.createPattern(img, 'repeat');
+        var tileW=PXW*0.14, tileH=tileW/pinfo.aspect;
+        if(canvasPattern.setTransform){
+          canvasPattern.setTransform(new DOMMatrix().scale(tileW/pinfo.vbW, tileH/pinfo.vbH));
+        }
+        ctx.fillStyle=canvasPattern;
+        ctx.fillRect(0,0,PXW,PXH);
+      }).catch(function(){});
+    })() : Promise.resolve();
     var leaves=bkCollectLeafElements(page.elements);
     var imgMap=new Map();
     var loads=leaves.map(function(el){
@@ -7545,7 +8081,7 @@ function bkRenderPageToCanvas(page, orient, customPXW, customPXH){
       return document.fonts.load('800 40px "'+f+'"').catch(function(){});
     });
     var fontsReady=Promise.all(fontLoads).then(function(){ return document.fonts.ready; }).catch(function(){});
-    Promise.all([bgLoad, fontsReady].concat(loads)).then(function(){
+    Promise.all([bgLoad, patternLoad, fontsReady].concat(loads)).then(function(){
       page.elements.forEach(function(el){ bkDrawElementTree(ctx, el, PXW, PXH, imgMap); });
       resolve(c.toDataURL('image/jpeg',0.92));
     });
