@@ -591,7 +591,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.34.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.35.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -4369,31 +4369,25 @@ var BK_BGS=['#FFFFFF','#F7F5FC','#241E38','#FFD93D','#7B2FF7','#00C2A8','#000000
    exportes, jamais de mauvaise surprise. */
 function bkPatternSvgOpen(vb){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+vb+' '+vb+'">'; }
 function bkPatternShadowFilter(id, color){
-  return '<filter id="'+id+'" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0.6" dy="2.2" stdDeviation="1.9" flood-color="'+color+'" flood-opacity="0.36"/></filter>';
+  // Léger tremblement organique (comme un tracé à la main, pas une courbe
+  // mathématique parfaite) combiné à l'ombre portée — testé d'abord sur un
+  // motif isolé à plusieurs réglages avant de généraliser : ce dosage
+  // précis donne un vrai charme "dessiné" sans jamais paraître flou ou cassé.
+  return '<filter id="'+id+'" x="-50%" y="-50%" width="200%" height="200%">'
+    +'<feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" seed="7" result="wobble"/>'
+    +'<feDisplacementMap in="SourceGraphic" in2="wobble" scale="2" xChannelSelector="R" yChannelSelector="G" result="wobbled"/>'
+    +'<feDropShadow in="wobbled" dx="0.6" dy="2.2" stdDeviation="1.9" flood-color="'+color+'" flood-opacity="0.36"/>'
+    +'</filter>';
 }
-/* Éclaircit (percent>0) ou assombrit (percent<0) une couleur hex — sert à
-   fabriquer un dégradé doux à partir d'une seule couleur de fond déjà
-   définie, sans devoir retoucher les 118 définitions une par une :
-   améliore d'un coup tous les motifs qui passent par ce moteur commun. */
-function bkHexShade(hex, percent){
-  var num=parseInt(hex.replace('#',''),16);
-  var r=(num>>16)+Math.round(255*percent/100);
-  var g=((num>>8)&0x00FF)+Math.round(255*percent/100);
-  var b=(num&0x0000FF)+Math.round(255*percent/100);
-  r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
-  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
-}
-/* Fond en dégradé doux (au lieu d'un aplat uni) + léger reflet lumineux en
-   coin — le même petit "supplément d'âme" que les vraies planches de papier
-   scrapbook professionnelles, appliqué automatiquement à tous les motifs. */
-function bkPatternBgDefs(gid, bg){
-  var light=bkHexShade(bg, 7), dark=bkHexShade(bg, -6);
-  return '<radialGradient id="'+gid+'" cx="28%" cy="22%" r="95%">'
-    +'<stop offset="0%" stop-color="'+light+'"/><stop offset="100%" stop-color="'+dark+'"/></radialGradient>';
-}
-function bkPatternBgMarkup(vb, gid){
-  return '<rect width="'+vb+'" height="'+vb+'" fill="url(#'+gid+')"/>'
-    +'<ellipse cx="'+(vb*0.24).toFixed(0)+'" cy="'+(vb*0.18).toFixed(0)+'" rx="'+(vb*0.32).toFixed(0)+'" ry="'+(vb*0.22).toFixed(0)+'" fill="#FFFFFF" opacity="0.06"/>';
+/* Fond en aplat uni — jamais de dégradé sur une tuile qui se répète : un
+   dégradé (plus clair en haut, plus sombre en bas) crée un vrai quadrillage
+   visible dès que le motif recouvre une page entière, chaque tuile étant
+   alors clairement délimitée de la suivante (bug réel, vu sur une vraie
+   page avec le motif ananas — repéré et corrigé). Les vraies planches
+   scrapbook professionnelles utilisent d'ailleurs presque toujours des
+   fonds en aplat pour cette même raison. */
+function bkPatternBgMarkup(vb, bg){
+  return '<rect width="'+vb+'" height="'+vb+'" fill="'+bg+'"/>';
 }
 // Disperse N instances d'une forme sur une trame 3x3 légèrement bruitée (jamais un vrai quadrillage)
 function bkPatternScatterPositions(vb, seedOffset, cells){
@@ -4413,7 +4407,7 @@ function bkPatternScatterPositions(vb, seedOffset, cells){
   return positions;
 }
 function bkPatternScatter(vb, bg, shapeMarkup, shadowColor, seedOffset, cells, scaleBoost){
-  var fid='sh'+Math.random().toString(36).slice(2,8), gid='bg'+Math.random().toString(36).slice(2,8);
+  var fid='sh'+Math.random().toString(36).slice(2,8);
   var positions=bkPatternScatterPositions(vb, seedOffset||0, cells);
   var g='';
   positions.forEach(function(p){
@@ -4421,8 +4415,8 @@ function bkPatternScatter(vb, bg, shapeMarkup, shadowColor, seedOffset, cells, s
     g+='<g transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+p.rot.toFixed(0)+') scale('+sc+')">'+shapeMarkup+'</g>';
   });
   return bkPatternSvgOpen(vb)
-    +'<defs>'+bkPatternShadowFilter(fid, shadowColor)+bkPatternBgDefs(gid, bg)+'</defs>'
-    +bkPatternBgMarkup(vb, gid)
+    +'<defs>'+bkPatternShadowFilter(fid, shadowColor)+'</defs>'
+    +bkPatternBgMarkup(vb, bg)
     +'<g filter="url(#'+fid+')">'+g+'</g>'
     +'</svg>';
 }
