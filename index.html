@@ -612,7 +612,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.40.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.40.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -7164,10 +7164,12 @@ function bkSetBgPattern(id){
    par défaut, décoche celles que tu veux garder telles quelles), même
    mécanique que "Ajuster plusieurs pages" pour rester cohérent. */
 var bkPendingPatternId=null;
+var bkPendingPatternOpacity=100;
 function openPatternPagePicker(){
   var page=bkBook.pages[bkPageIdx];
   if(!page.bgPattern){ toast(t('pattern_pick_first')); return; }
   bkPendingPatternId=page.bgPattern;
+  bkPendingPatternOpacity=page.bgPatternOpacity!==undefined?page.bgPatternOpacity:100;
   var h='';
   bkBook.pages.forEach(function(pg,i){
     h+='<div class="version-row"><label style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer">'
@@ -7185,6 +7187,7 @@ function bkRunApplyPatternMultiple(){
   bkSnapshot();
   checked.forEach(function(i){
     bkBook.pages[i].bgPattern=bkPendingPatternId;
+    bkBook.pages[i].bgPatternOpacity=bkPendingPatternOpacity; // reprend aussi l'opacité de la page actuelle, pas juste le motif
     bkBook.pages[i].bgPhotoId=null;
   });
   closePatternPagePicker();
