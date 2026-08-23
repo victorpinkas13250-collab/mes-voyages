@@ -591,7 +591,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.33.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.34.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -4402,7 +4402,12 @@ function bkPatternScatterPositions(vb, seedOffset, cells){
   for(var r=0;r<cells;r++) for(var col=0;col<cells;col++){
     var jx=((r*7+col*13+seedOffset*5)%11)/11-0.5, jy=((r*11+col*5+seedOffset*7)%13)/13-0.5;
     var rot=(((r*17+col*9+seedOffset*3)%36)-18)*2;
-    var scale=0.75+(((r*5+col*11+seedOffset*13)%10)/10)*0.5;
+    // Échelle relevée (0.95 à 1.45 au lieu de 0.75 à 1.25) : les formes se
+    // chevauchent légèrement entre elles, comme sur les vraies planches
+    // scrapbook professionnelles observées en référence — beaucoup moins
+    // d'espace vide entre les éléments, une composition plus dense et sûre
+    // d'elle plutôt que des motifs isolés bien rangés chacun dans leur case.
+    var scale=0.95+(((r*5+col*11+seedOffset*13)%10)/10)*0.5;
     positions.push({x:cell*(col+0.5)+jx*cell*0.5, y:cell*(r+0.5)+jy*cell*0.5, rot:rot, scale:scale});
   }
   return positions;
@@ -4426,7 +4431,7 @@ function bkPatternScatter(vb, bg, shapeMarkup, shadowColor, seedOffset, cells, s
    (4 éléments par tuile au lieu de 9) et échelle relevée — jamais les mêmes
    réglages que les motifs existants, pour ne surtout pas les changer. */
 function bkPatternScatterBig(vb, bg, shapeMarkup, shadowColor, seedOffset){
-  return bkPatternScatter(vb, bg, shapeMarkup, shadowColor, seedOffset, 2, 1.7);
+  return bkPatternScatter(vb, bg, shapeMarkup, shadowColor, seedOffset, 2, 1.2); // réduit encore : la tuile réelle étant bien plus grande sur la page (voir fix 36%), un dépassement de coupe devient bien plus visible aux coutures
 }
 var BK_PATTERN_SHAPES={
   lemonSlice:function(){
@@ -7037,7 +7042,12 @@ function bkRenderPage(){
     // ratio largeur/hauteur de la page, sinon un motif rond devient ovale
     // dès qu'on est en portrait ou paysage (bug réel, repéré avant l'export).
     var pageWH = bkBook.orient==='landscape' ? 297/210 : (bkBook.orient==='square' ? 1 : 210/297);
-    canvas.style.backgroundSize=pinfo?'14% '+(14*pageWH/pinfo.aspect).toFixed(2)+'%':'auto';
+    // 36% de la largeur de page (au lieu de 14% avant) : chaque forme reste
+    // assez grande pour être vraiment reconnaissable à l'échelle réelle
+    // d'une page — bug réel trouvé en comparant le rendu final à une vraie
+    // planche scrapbook professionnelle : à 14%, une fraise devenait un
+    // minuscule point rouge illisible au lieu d'un vrai dessin.
+    canvas.style.backgroundSize=pinfo?'36% '+(36*pageWH/pinfo.aspect).toFixed(2)+'%':'auto';
     canvas.style.backgroundRepeat='repeat';
   } else {
     canvas.style.background=page.bg;
@@ -8546,7 +8556,7 @@ function bkRenderPageToCanvas(page, orient, customPXW, customPXH){
       if(!pinfo) return Promise.resolve();
       return bkLoadImg(pinfo.uri).then(function(img){
         var canvasPattern=ctx.createPattern(img, 'repeat');
-        var tileW=PXW*0.14, tileH=tileW/pinfo.aspect;
+        var tileW=PXW*0.36, tileH=tileW/pinfo.aspect; // même valeur que l'éditeur (voir commentaire là-bas)
         if(canvasPattern.setTransform){
           canvasPattern.setTransform(new DOMMatrix().scale(tileW/pinfo.vbW, tileH/pinfo.vbH));
         }
