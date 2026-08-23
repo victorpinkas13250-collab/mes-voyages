@@ -276,9 +276,14 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 .pdf-go{width:100%;padding:15px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border:none;border-radius:50px;color:#fff;font-weight:800;font-size:.95rem;margin-top:22px;box-shadow:0 8px 22px rgba(123,47,247,.35);}
 .pdf-cancel{width:100%;padding:11px;background:none;border:none;color:var(--ink-soft);font-weight:700;font-size:.82rem;margin-top:8px;}
 .pdf-progress{display:none;text-align:center;padding:10px 0 4px;}
+.bk-export-progress{display:none;position:fixed;left:16px;right:16px;top:14px;z-index:999997;background:var(--surface);border-radius:16px;padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.25);}
+.bk-export-progress.on{display:block;}
+.bk-export-progress-msg{font-weight:800;font-size:.82rem;color:var(--ink);margin-bottom:8px;text-align:center;}
 .pdf-progress.on{display:block;}
 .pdf-progress .bar-track{background:var(--border);border-radius:50px;height:9px;overflow:hidden;margin-top:10px;}
 .pdf-progress .bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:50px;width:0%;transition:width .2s;}
+.bk-export-progress .bar-track{background:var(--border);border-radius:50px;height:9px;overflow:hidden;}
+.bk-export-progress .bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:50px;width:0%;transition:width .2s;}
 /* ── ÉDITEUR DE LIVRE (pages libres façon Canva) ── */
 #pg-book{display:none;position:fixed;inset:0;background:#EDE8F9;z-index:500;flex-direction:column;}
 #pg-book.on{display:flex;}
@@ -591,7 +596,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.35.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.36.0</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -751,6 +756,10 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 
 <!-- ══════════ ÉDITEUR DE LIVRE (pages libres) ══════════ -->
 <div id="pg-book">
+  <div class="bk-export-progress" id="bk-export-progress">
+    <div class="bk-export-progress-msg" id="bk-export-progress-msg"></div>
+    <div class="bar-track"><div class="bar-fill" id="bk-export-progress-bar"></div></div>
+  </div>
   <div class="bk-top">
     <div class="bk-top-scroll">
       <button class="bk-btn" onclick="closeBook()" data-i18n="btn_close">✕ Fermer</button>
@@ -2044,7 +2053,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\udcbe", title:"O\u00f9 sont tes donn\u00e9es ? Sauvegarder / restaurer", body:
       '<ul>'+"<li>Tout est stock\u00e9 <b>uniquement sur ton t\u00e9l\u00e9phone</b> (dans le navigateur) \u2014 pas de compte, pas de cloud, rien n'est envoy\u00e9 ailleurs.</li>"+"<li>Un PDF export\u00e9 part dans le dossier T\u00e9l\u00e9chargements normal de ton t\u00e9l\u00e9phone, comme n'importe quel fichier t\u00e9l\u00e9charg\u00e9.</li>"+"<li><b>Sauvegarde compl\u00e8te :</b> bouton \ud83d\udcbe en haut de l'\u00e9cran d'accueil \u2014 cr\u00e9e un seul fichier avec TOUT (albums, photos, livres, cartes). Garde-le de c\u00f4t\u00e9, ou r\u00e9importe-le si tu changes de t\u00e9l\u00e9phone ou effaces les donn\u00e9es du site.</li>"+"<li><b>Restaurer :</b> depuis ce m\u00eame \u00e9cran, \"\u2b06\ufe0f Restaurer depuis un fichier\" \u2014 les albums du fichier sont <b>ajout\u00e9s</b> \u00e0 ceux d\u00e9j\u00e0 pr\u00e9sents (jamais d'\u00e9crasement), m\u00eame si tu r\u00e9importes plusieurs fois.</li> <li><b>Sauvegarde automatique quotidienne :</b> une sauvegarde compl\u00e8te se fait toute seule une fois par jour, en arri\u00e8re-plan, dans un espace de stockage priv\u00e9 \u00e0 l'appli \u2014 toujours UN SEUL fichier, jamais d'accumulation (le nouveau remplace l'ancien chaque jour). Un vrai fichier t\u00e9l\u00e9chargeable n'est jamais cr\u00e9\u00e9 tout seul (impossible techniquement et pas souhaitable) \u2014 r\u00e9cup\u00e8re-le en un tap depuis cette m\u00eame fen\u00eatre quand tu en as besoin.</li><li><b>Exporter un seul album :</b> dans cette m\u00eame fen\u00eatre, bouton \u2b06\ufe0f \u00e0 c\u00f4t\u00e9 d'un album pr\u00e9cis dans la liste \u2014 g\u00e9n\u00e8re un fichier avec SEULEMENT cet album (photos incluses), pour le transf\u00e9rer vers un autre t\u00e9l\u00e9phone sans envoyer tous tes voyages. Se restaure ensuite exactement comme une sauvegarde compl\u00e8te.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Rep\u00e8res pour un imprimeur professionnel", body:
-      '<ul>'+"<li>Bouton <b>\ud83d\udcd0 Rep\u00e8res impression</b> dans l'\u00e9diteur de livre : affiche une zone en pointill\u00e9s \u00e0 5% du bord de la page.</li>"+"<li>Utile si tu comptes envoyer ton livre chez un vrai imprimeur : \u00e9vite de placer du texte ou un visage important trop pr\u00e8s du bord, qui pourrait \u00eatre perdu \u00e0 la d\u00e9coupe ou la reliure.</li>"+"<li>C'est un rep\u00e8re visuel <b>uniquement pour toi pendant l'\u00e9dition</b> \u2014 il n'appara\u00eet jamais dans le PDF export\u00e9, ni dans le format story.</li>"+"<li><b>Ajuster cette page :</b> bouton \ud83d\udd27 \u2014 r\u00e9duit et recentre automatiquement tout le contenu de la page pour qu'il tienne dans la zone de s\u00e9curit\u00e9, en gardant la disposition relative (pas de re-cr\u00e9ation, juste un \"zoom arri\u00e8re\"). Ne fait rien si la page y est d\u00e9j\u00e0.</li>"+"<li><b>Ajuster plusieurs pages :</b> m\u00eame chose, mais en choisissant les pages \u00e0 traiter d'un coup dans une liste \u00e0 cocher \u2014 les pages d\u00e9j\u00e0 dans la zone sont d\u00e9coch\u00e9es par d\u00e9faut.</li><li><b>Num\u00e9roter les pages :</b> bouton \ud83d\udd22 \u2014 pose un petit num\u00e9ro dans un badge rond soign\u00e9 sur CHAQUE page du livre, toujours dans la zone de s\u00e9curit\u00e9. Fonctionne aussi bien sur un livre tout juste cr\u00e9\u00e9 que d\u00e9j\u00e0 rempli depuis longtemps \u2014 relance-le \u00e0 tout moment, jamais de doublon.</li><li><b>Remplir cette page / Remplir plusieurs pages :</b> boutons \ud83d\udd0d \u2014 l'inverse d'\"Ajuster\" : agrandit toute la composition (au lieu de la r\u00e9duire) jusqu'\u00e0 toucher la zone de s\u00e9curit\u00e9, sans jamais la d\u00e9passer ni d\u00e9former quoi que ce soit. Ne fait rien si la page utilise d\u00e9j\u00e0 tout l'espace disponible.</li><li><b>Export PDF qualit\u00e9 impression :</b> bouton \ud83d\udda8\ufe0f \u2014 g\u00e9n\u00e8re le PDF \u00e0 300 points par pouce (qualit\u00e9 professionnelle), environ 4x plus de d\u00e9tail que l'export normal. M\u00eame agencement, m\u00eames tailles, m\u00eames formes \u2014 juste plus net. Plus lent \u00e0 g\u00e9n\u00e9rer, surtout sur un livre \u00e0 beaucoup de pages.</li>"+'</ul>' },
+      '<ul>'+"<li>Bouton <b>\ud83d\udcd0 Rep\u00e8res impression</b> dans l'\u00e9diteur de livre : affiche une zone en pointill\u00e9s \u00e0 5% du bord de la page.</li>"+"<li>Utile si tu comptes envoyer ton livre chez un vrai imprimeur : \u00e9vite de placer du texte ou un visage important trop pr\u00e8s du bord, qui pourrait \u00eatre perdu \u00e0 la d\u00e9coupe ou la reliure.</li>"+"<li>C'est un rep\u00e8re visuel <b>uniquement pour toi pendant l'\u00e9dition</b> \u2014 il n'appara\u00eet jamais dans le PDF export\u00e9, ni dans le format story.</li>"+"<li><b>Ajuster cette page :</b> bouton \ud83d\udd27 \u2014 r\u00e9duit et recentre automatiquement tout le contenu de la page pour qu'il tienne dans la zone de s\u00e9curit\u00e9, en gardant la disposition relative (pas de re-cr\u00e9ation, juste un \"zoom arri\u00e8re\"). Ne fait rien si la page y est d\u00e9j\u00e0.</li>"+"<li><b>Ajuster plusieurs pages :</b> m\u00eame chose, mais en choisissant les pages \u00e0 traiter d'un coup dans une liste \u00e0 cocher \u2014 les pages d\u00e9j\u00e0 dans la zone sont d\u00e9coch\u00e9es par d\u00e9faut.</li><li><b>Num\u00e9roter les pages :</b> bouton \ud83d\udd22 \u2014 pose un petit num\u00e9ro dans un badge rond soign\u00e9 sur CHAQUE page du livre, toujours dans la zone de s\u00e9curit\u00e9. Fonctionne aussi bien sur un livre tout juste cr\u00e9\u00e9 que d\u00e9j\u00e0 rempli depuis longtemps \u2014 relance-le \u00e0 tout moment, jamais de doublon.</li><li><b>Progression des exports :</b> un bandeau avec une vraie barre qui avance s'affiche pendant tout export (PDF, PDF HD, image de page, story, bande) \u2014 plus besoin de deviner si \u00e7a travaille encore, surtout sur un livre \u00e0 beaucoup de pages ou en haute r\u00e9solution.</li><li><b>Remplir cette page / Remplir plusieurs pages :</b> boutons \ud83d\udd0d \u2014 l'inverse d'\"Ajuster\" : agrandit toute la composition (au lieu de la r\u00e9duire) jusqu'\u00e0 toucher la zone de s\u00e9curit\u00e9, sans jamais la d\u00e9passer ni d\u00e9former quoi que ce soit. Ne fait rien si la page utilise d\u00e9j\u00e0 tout l'espace disponible.</li><li><b>Export PDF qualit\u00e9 impression :</b> bouton \ud83d\udda8\ufe0f \u2014 g\u00e9n\u00e8re le PDF \u00e0 300 points par pouce (qualit\u00e9 professionnelle), environ 4x plus de d\u00e9tail que l'export normal. M\u00eame agencement, m\u00eames tailles, m\u00eames formes \u2014 juste plus net. Plus lent \u00e0 g\u00e9n\u00e9rer, surtout sur un livre \u00e0 beaucoup de pages.</li>"+'</ul>' },
   ],
   "en": [
     { icon:"\ud83d\udcf2", title:"Install the app", body:
@@ -2090,7 +2099,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\udcbe", title:"Where is your data? Backup / restore", body:
       '<ul>'+"<li>Everything is stored <b>only on your phone</b> (in the browser) \u2014 no account, no cloud, nothing is sent anywhere else.</li>"+"<li>An exported PDF goes into your phone's normal Downloads folder, like any downloaded file.</li>"+"<li><b>Full backup:</b> \ud83d\udcbe button at the top of the home screen \u2014 creates a single file with EVERYTHING (albums, photos, books, maps). Keep it safe, or reimport it if you change phones or clear the site's data.</li>"+"<li><b>Restore:</b> from that same screen, \"\u2b06\ufe0f Restore from a file\" \u2014 albums from the file are <b>added</b> to those already present (never overwritten), even if you reimport several times.</li> <li><b>Daily automatic backup:</b> a full backup happens on its own once a day, in the background, in a storage space private to the app \u2014 always a SINGLE file, never accumulating (the new one replaces the old one each day). A real downloadable file is never created on its own (technically impossible and not desirable) \u2014 retrieve it in one tap from this same window whenever you need it.</li><li><b>Export a single album:</b> in this same window, \u2b06\ufe0f button next to a specific album in the list \u2014 generates a file with ONLY that album (photos included), to transfer it to another phone without sending all your trips. Restores afterwards exactly like a full backup.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Guides for a professional printer", body:
-      '<ul>'+"<li><b>\ud83d\udcd0 Print guides</b> button in the book editor: shows a dashed zone 5% in from the page edge.</li>"+"<li>Useful if you plan to send your book to a real printer: avoids placing text or an important face too close to the edge, which could be lost during trimming or binding.</li>"+"<li>This is a visual guide <b>only for you while editing</b> \u2014 it never appears in the exported PDF, nor in the story format.</li>"+"<li><b>Fit this page:</b> \ud83d\udd27 button \u2014 automatically shrinks and re-centers all the page's content so it fits within the safe zone, keeping the relative layout (no re-creation, just a \"zoom out\"). Does nothing if the page already fits.</li>"+"<li><b>Fit several pages:</b> same thing, but choosing which pages to process at once from a checklist \u2014 pages already within the zone are unchecked by default.</li><li><b>Number the pages:</b> \ud83d\udd22 button \u2014 places a small number in a neat round badge on EVERY page of the book, always within the safe zone. Works just as well on a freshly created book as one already filled for a while \u2014 rerun it any time, never a duplicate.</li><li><b>Fill this page / Fill several pages:</b> \ud83d\udd0d buttons \u2014 the opposite of \"Fit\": enlarges the whole composition (instead of shrinking it) until it touches the safe zone, without ever exceeding it or distorting anything. Does nothing if the page already uses all the available space.</li><li><b>Print-quality PDF export:</b> \ud83d\udda8\ufe0f button \u2014 generates the PDF at 300 dots per inch (professional quality), about 4x more detail than the normal export. Same layout, same sizes, same shapes \u2014 just sharper. Slower to generate, especially on a book with many pages.</li>"+'</ul>' },
+      '<ul>'+"<li><b>\ud83d\udcd0 Print guides</b> button in the book editor: shows a dashed zone 5% in from the page edge.</li>"+"<li>Useful if you plan to send your book to a real printer: avoids placing text or an important face too close to the edge, which could be lost during trimming or binding.</li>"+"<li>This is a visual guide <b>only for you while editing</b> \u2014 it never appears in the exported PDF, nor in the story format.</li>"+"<li><b>Fit this page:</b> \ud83d\udd27 button \u2014 automatically shrinks and re-centers all the page's content so it fits within the safe zone, keeping the relative layout (no re-creation, just a \"zoom out\"). Does nothing if the page already fits.</li>"+"<li><b>Fit several pages:</b> same thing, but choosing which pages to process at once from a checklist \u2014 pages already within the zone are unchecked by default.</li><li><b>Number the pages:</b> \ud83d\udd22 button \u2014 places a small number in a neat round badge on EVERY page of the book, always within the safe zone. Works just as well on a freshly created book as one already filled for a while \u2014 rerun it any time, never a duplicate.</li><li><b>Export progress:</b> a banner with a real progress bar shows during every export (PDF, HD PDF, page image, story, strip) \u2014 no more guessing whether it's still working, especially on a long book or in high resolution.</li><li><b>Fill this page / Fill several pages:</b> \ud83d\udd0d buttons \u2014 the opposite of \"Fit\": enlarges the whole composition (instead of shrinking it) until it touches the safe zone, without ever exceeding it or distorting anything. Does nothing if the page already uses all the available space.</li><li><b>Print-quality PDF export:</b> \ud83d\udda8\ufe0f button \u2014 generates the PDF at 300 dots per inch (professional quality), about 4x more detail than the normal export. Same layout, same sizes, same shapes \u2014 just sharper. Slower to generate, especially on a book with many pages.</li>"+'</ul>' },
   ],
   "it": [
     { icon:"\ud83d\udcf2", title:"Installa l'app", body:
@@ -2136,7 +2145,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\udcbe", title:"Dove sono i tuoi dati? Backup / ripristino", body:
       '<ul>'+"<li>Tutto \u00e8 memorizzato <b>solo sul tuo telefono</b> (nel browser) \u2014 nessun account, nessun cloud, niente viene inviato altrove.</li>"+"<li>Un PDF esportato finisce nella normale cartella Download del telefono, come qualsiasi file scaricato.</li>"+"<li><b>Backup completo:</b> pulsante \ud83d\udcbe in alto nella schermata principale \u2014 crea un unico file con TUTTO (album, foto, libri, mappe). Conservalo con cura, o reimportalo se cambi telefono o cancelli i dati del sito.</li>"+"<li><b>Ripristina:</b> dalla stessa schermata, \"\u2b06\ufe0f Ripristina da un file\" \u2014 gli album del file vengono <b>aggiunti</b> a quelli gi\u00e0 presenti (mai sovrascritti), anche se reimporti pi\u00f9 volte.</li> <li><b>Backup automatico giornaliero:</b> un backup completo avviene da solo una volta al giorno, in background, in uno spazio di archiviazione privato dell'app \u2014 sempre UN SOLO file, mai accumulo (il nuovo sostituisce il vecchio ogni giorno). Un vero file scaricabile non viene mai creato da solo (tecnicamente impossibile e non auspicabile) \u2014 recuperalo con un tocco da questa stessa finestra quando ne hai bisogno.</li><li><b>Esporta un solo album:</b> in questa stessa finestra, pulsante \u2b06\ufe0f accanto a un album specifico nell'elenco \u2014 genera un file con SOLO quell'album (foto incluse), per trasferirlo su un altro telefono senza inviare tutti i tuoi viaggi. Si ripristina poi esattamente come un backup completo.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Guide per una stampa professionale", body:
-      '<ul>'+"<li>Pulsante <b>\ud83d\udcd0 Guide di stampa</b> nell'editor del libro: mostra una zona tratteggiata al 5% dal bordo della pagina.</li>"+"<li>Utile se prevedi di inviare il tuo libro a una vera tipografia: evita di posizionare testo o un volto importante troppo vicino al bordo, che potrebbe andare perso durante il taglio o la rilegatura.</li>"+"<li>\u00c8 un riferimento visivo <b>solo per te durante la modifica</b> \u2014 non appare mai nel PDF esportato, n\u00e9 nel formato story.</li>"+"<li><b>Adatta questa pagina:</b> pulsante \ud83d\udd27 \u2014 riduce e ricentra automaticamente tutto il contenuto della pagina affinch\u00e9 rientri nella zona di sicurezza, mantenendo la disposizione relativa (non ricrea nulla, \u00e8 solo uno \"zoom indietro\"). Non fa nulla se la pagina rientra gi\u00e0.</li>"+"<li><b>Adatta pi\u00f9 pagine:</b> stessa cosa, ma scegliendo le pagine da elaborare in blocco da un elenco selezionabile \u2014 le pagine gi\u00e0 nella zona sono deselezionate di default.</li><li><b>Numera le pagine:</b> pulsante \ud83d\udd22 \u2014 mette un piccolo numero in un elegante badge rotondo su OGNI pagina del libro, sempre dentro la zona di sicurezza. Funziona bene sia su un libro appena creato che su uno gi\u00e0 pieno da tempo \u2014 rilancialo in qualsiasi momento, mai un doppione.</li><li><b>Riempi questa pagina / Riempi pi\u00f9 pagine:</b> pulsanti \ud83d\udd0d \u2014 l'opposto di \"Adatta\": ingrandisce l'intera composizione (invece di ridurla) fino a toccare la zona di sicurezza, senza mai superarla n\u00e9 deformare nulla. Non fa nulla se la pagina usa gi\u00e0 tutto lo spazio disponibile.</li><li><b>Esportazione PDF qualit\u00e0 di stampa:</b> pulsante \ud83d\udda8\ufe0f \u2014 genera il PDF a 300 punti per pollice (qualit\u00e0 professionale), circa 4 volte pi\u00f9 dettaglio dell'esportazione normale. Stessa disposizione, stesse dimensioni, stesse forme \u2014 solo pi\u00f9 nitido. Pi\u00f9 lento da generare, soprattutto su un libro con molte pagine.</li>"+'</ul>' },
+      '<ul>'+"<li>Pulsante <b>\ud83d\udcd0 Guide di stampa</b> nell'editor del libro: mostra una zona tratteggiata al 5% dal bordo della pagina.</li>"+"<li>Utile se prevedi di inviare il tuo libro a una vera tipografia: evita di posizionare testo o un volto importante troppo vicino al bordo, che potrebbe andare perso durante il taglio o la rilegatura.</li>"+"<li>\u00c8 un riferimento visivo <b>solo per te durante la modifica</b> \u2014 non appare mai nel PDF esportato, n\u00e9 nel formato story.</li>"+"<li><b>Adatta questa pagina:</b> pulsante \ud83d\udd27 \u2014 riduce e ricentra automaticamente tutto il contenuto della pagina affinch\u00e9 rientri nella zona di sicurezza, mantenendo la disposizione relativa (non ricrea nulla, \u00e8 solo uno \"zoom indietro\"). Non fa nulla se la pagina rientra gi\u00e0.</li>"+"<li><b>Adatta pi\u00f9 pagine:</b> stessa cosa, ma scegliendo le pagine da elaborare in blocco da un elenco selezionabile \u2014 le pagine gi\u00e0 nella zona sono deselezionate di default.</li><li><b>Numera le pagine:</b> pulsante \ud83d\udd22 \u2014 mette un piccolo numero in un elegante badge rotondo su OGNI pagina del libro, sempre dentro la zona di sicurezza. Funziona bene sia su un libro appena creato che su uno gi\u00e0 pieno da tempo \u2014 rilancialo in qualsiasi momento, mai un doppione.</li><li><b>Avanzamento delle esportazioni:</b> durante ogni esportazione (PDF, PDF HD, immagine pagina, story, striscia) appare un banner con una vera barra di avanzamento \u2014 niente pi\u00f9 dubbi su se sta ancora lavorando, specialmente su un libro lungo o in alta risoluzione.</li><li><b>Riempi questa pagina / Riempi pi\u00f9 pagine:</b> pulsanti \ud83d\udd0d \u2014 l'opposto di \"Adatta\": ingrandisce l'intera composizione (invece di ridurla) fino a toccare la zona di sicurezza, senza mai superarla n\u00e9 deformare nulla. Non fa nulla se la pagina usa gi\u00e0 tutto lo spazio disponibile.</li><li><b>Esportazione PDF qualit\u00e0 di stampa:</b> pulsante \ud83d\udda8\ufe0f \u2014 genera il PDF a 300 punti per pollice (qualit\u00e0 professionale), circa 4 volte pi\u00f9 dettaglio dell'esportazione normale. Stessa disposizione, stesse dimensioni, stesse forme \u2014 solo pi\u00f9 nitido. Pi\u00f9 lento da generare, soprattutto su un libro con molte pagine.</li>"+'</ul>' },
   ],
   "es": [
     { icon:"\ud83d\udcf2", title:"Instalar la app", body:
@@ -2182,7 +2191,7 @@ var HELP_SECTIONS_I18N={
     { icon:"\ud83d\udcbe", title:"\u00bfD\u00f3nde est\u00e1n tus datos? Copia de seguridad / restaurar", body:
       '<ul>'+"<li>Todo se guarda <b>\u00fanicamente en tu tel\u00e9fono</b> (en el navegador) \u2014 sin cuenta, sin nube, no se env\u00eda nada a ning\u00fan otro sitio.</li>"+"<li>Un PDF exportado va a la carpeta de Descargas normal de tu tel\u00e9fono, como cualquier archivo descargado.</li>"+"<li><b>Copia de seguridad completa:</b> bot\u00f3n \ud83d\udcbe en la parte superior de la pantalla de inicio \u2014 crea un \u00fanico archivo con TODO (\u00e1lbumes, fotos, libros, mapas). Gu\u00e1rdalo a buen recaudo, o vuelve a importarlo si cambias de tel\u00e9fono o borras los datos del sitio.</li>"+"<li><b>Restaurar:</b> desde esa misma pantalla, \"\u2b06\ufe0f Restaurar desde un archivo\" \u2014 los \u00e1lbumes del archivo se <b>a\u00f1aden</b> a los que ya est\u00e1n presentes (nunca se sobrescriben), incluso si vuelves a importar varias veces.</li> <li><b>Copia de seguridad autom\u00e1tica diaria:</b> una copia completa se hace sola una vez al d\u00eda, en segundo plano, en un espacio de almacenamiento privado de la app \u2014 siempre UN SOLO archivo, nunca se acumula (el nuevo sustituye al anterior cada d\u00eda). Nunca se crea un archivo descargable real por s\u00ed solo (t\u00e9cnicamente imposible y no deseable) \u2014 recup\u00e9ralo con un toque desde esta misma ventana cuando lo necesites.</li><li><b>Exportar un solo \u00e1lbum:</b> en esta misma ventana, bot\u00f3n \u2b06\ufe0f junto a un \u00e1lbum concreto en la lista \u2014 genera un archivo con SOLO ese \u00e1lbum (fotos incluidas), para transferirlo a otro tel\u00e9fono sin enviar todos tus viajes. Se restaura despu\u00e9s exactamente igual que una copia de seguridad completa.</li>"+'</ul>' },
     { icon:"\ud83d\udcd0", title:"Gu\u00edas para una imprenta profesional", body:
-      '<ul>'+"<li>Bot\u00f3n <b>\ud83d\udcd0 Gu\u00edas de impresi\u00f3n</b> en el editor del libro: muestra una zona discontinua al 5% del borde de la p\u00e1gina.</li>"+"<li>\u00datil si piensas enviar tu libro a una imprenta de verdad: evita colocar texto o una cara importante demasiado cerca del borde, que podr\u00eda perderse al cortar o encuadernar.</li>"+"<li>Es una gu\u00eda visual <b>solo para ti durante la edici\u00f3n</b> \u2014 nunca aparece en el PDF exportado, ni en el formato story.</li>"+"<li><b>Ajustar esta p\u00e1gina:</b> bot\u00f3n \ud83d\udd27 \u2014 reduce y recentra autom\u00e1ticamente todo el contenido de la p\u00e1gina para que quepa en la zona segura, manteniendo la disposici\u00f3n relativa (no recrea nada, solo un \"alejar zoom\"). No hace nada si la p\u00e1gina ya encaja.</li>"+"<li><b>Ajustar varias p\u00e1ginas:</b> lo mismo, pero eligiendo qu\u00e9 p\u00e1ginas procesar de una vez en una lista de casillas \u2014 las p\u00e1ginas que ya est\u00e1n dentro de la zona aparecen desmarcadas por defecto.</li><li><b>Numerar las p\u00e1ginas:</b> bot\u00f3n \ud83d\udd22 \u2014 coloca un peque\u00f1o n\u00famero en una pulcra insignia redonda en CADA p\u00e1gina del libro, siempre dentro de la zona segura. Funciona tan bien en un libro reci\u00e9n creado como en uno ya lleno desde hace tiempo \u2014 vuelve a ejecutarlo cuando quieras, nunca un duplicado.</li><li><b>Rellenar esta p\u00e1gina / Rellenar varias p\u00e1ginas:</b> botones \ud83d\udd0d \u2014 lo contrario de \"Ajustar\": ampl\u00eda toda la composici\u00f3n (en vez de reducirla) hasta tocar la zona segura, sin superarla nunca ni deformar nada. No hace nada si la p\u00e1gina ya usa todo el espacio disponible.</li><li><b>Exportaci\u00f3n PDF calidad de impresi\u00f3n:</b> bot\u00f3n \ud83d\udda8\ufe0f \u2014 genera el PDF a 300 puntos por pulgada (calidad profesional), unas 4 veces m\u00e1s detalle que la exportaci\u00f3n normal. Misma disposici\u00f3n, mismos tama\u00f1os, mismas formas \u2014 solo m\u00e1s n\u00edtido. M\u00e1s lento de generar, sobre todo en un libro con muchas p\u00e1ginas.</li>"+'</ul>' },
+      '<ul>'+"<li>Bot\u00f3n <b>\ud83d\udcd0 Gu\u00edas de impresi\u00f3n</b> en el editor del libro: muestra una zona discontinua al 5% del borde de la p\u00e1gina.</li>"+"<li>\u00datil si piensas enviar tu libro a una imprenta de verdad: evita colocar texto o una cara importante demasiado cerca del borde, que podr\u00eda perderse al cortar o encuadernar.</li>"+"<li>Es una gu\u00eda visual <b>solo para ti durante la edici\u00f3n</b> \u2014 nunca aparece en el PDF exportado, ni en el formato story.</li>"+"<li><b>Ajustar esta p\u00e1gina:</b> bot\u00f3n \ud83d\udd27 \u2014 reduce y recentra autom\u00e1ticamente todo el contenido de la p\u00e1gina para que quepa en la zona segura, manteniendo la disposici\u00f3n relativa (no recrea nada, solo un \"alejar zoom\"). No hace nada si la p\u00e1gina ya encaja.</li>"+"<li><b>Ajustar varias p\u00e1ginas:</b> lo mismo, pero eligiendo qu\u00e9 p\u00e1ginas procesar de una vez en una lista de casillas \u2014 las p\u00e1ginas que ya est\u00e1n dentro de la zona aparecen desmarcadas por defecto.</li><li><b>Numerar las p\u00e1ginas:</b> bot\u00f3n \ud83d\udd22 \u2014 coloca un peque\u00f1o n\u00famero en una pulcra insignia redonda en CADA p\u00e1gina del libro, siempre dentro de la zona segura. Funciona tan bien en un libro reci\u00e9n creado como en uno ya lleno desde hace tiempo \u2014 vuelve a ejecutarlo cuando quieras, nunca un duplicado.</li><li><b>Progreso de las exportaciones:</b> aparece un banner con una barra de progreso real durante cada exportaci\u00f3n (PDF, PDF HD, imagen de p\u00e1gina, story, tira) \u2014 ya no hay que adivinar si sigue funcionando, sobre todo en un libro largo o en alta resoluci\u00f3n.</li><li><b>Rellenar esta p\u00e1gina / Rellenar varias p\u00e1ginas:</b> botones \ud83d\udd0d \u2014 lo contrario de \"Ajustar\": ampl\u00eda toda la composici\u00f3n (en vez de reducirla) hasta tocar la zona segura, sin superarla nunca ni deformar nada. No hace nada si la p\u00e1gina ya usa todo el espacio disponible.</li><li><b>Exportaci\u00f3n PDF calidad de impresi\u00f3n:</b> bot\u00f3n \ud83d\udda8\ufe0f \u2014 genera el PDF a 300 puntos por pulgada (calidad profesional), unas 4 veces m\u00e1s detalle que la exportaci\u00f3n normal. Misma disposici\u00f3n, mismos tama\u00f1os, mismas formas \u2014 solo m\u00e1s n\u00edtido. M\u00e1s lento de generar, sobre todo en un libro con muchas p\u00e1ginas.</li>"+'</ul>' },
   ],
 };
 function getHelpSections(){ return HELP_SECTIONS_I18N[BK_LANG] || HELP_SECTIONS_I18N.fr; }
@@ -2436,6 +2445,8 @@ var BK_I18N={
   pagenum_added:{fr:'🔢 Numéros ajoutés sur les {n} pages',en:'🔢 Numbers added to all {n} pages',it:'🔢 Numeri aggiunti a tutte le {n} pagine',es:'🔢 Números añadidos a las {n} páginas'},
   btn_pdf_hd:{fr:'Exporter PDF en qualité impression (300 DPI, plus lent)',en:'Export PDF in print quality (300 DPI, slower)',it:'Esporta PDF in qualità di stampa (300 DPI, più lento)',es:'Exportar PDF en calidad de impresión (300 DPI, más lento)'},
   pdf_hd_generating:{fr:'🖨️ Génération en haute résolution… ({n} pages, patience)',en:'🖨️ Generating in high resolution… ({n} pages, please wait)',it:'🖨️ Generazione in alta risoluzione… ({n} pagine, attendi)',es:'🖨️ Generando en alta resolución… ({n} páginas, espera)'},
+  pdf_generating:{fr:'📕 Génération du PDF…',en:'📕 Generating the PDF…',it:'📕 Generazione del PDF…',es:'📕 Generando el PDF…'},
+  export_generating_image:{fr:'🖼️ Génération de l\'image…',en:'🖼️ Generating the image…',it:'🖼️ Generazione dell\'immagine…',es:'🖼️ Generando la imagen…'},
   pdf_hd_done:{fr:'🖨️ Livre exporté en qualité impression',en:'🖨️ Book exported in print quality',it:'🖨️ Libro esportato in qualità di stampa',es:'🖨️ Libro exportado en calidad de impresión'},
   pdf_hd_error:{fr:'Erreur pendant l\'export haute résolution',en:'Error during high-resolution export',it:'Errore durante l\'esportazione ad alta risoluzione',es:'Error al exportar en alta resolución'},
   tool_fill_page:{fr:'Remplir cette page',en:'Fill this page',it:'Riempi questa pagina',es:'Rellenar esta página'},
@@ -8596,7 +8607,22 @@ function bkRenderPageToCanvas(page, orient, customPXW, customPXH){
    le fichier, donc rien n'est perdu par rapport à avant. Si le partage natif
    n'est pas disponible (certains navigateurs), retombe simplement sur le
    téléchargement classique, comme précédemment. */
+/* ══════════════════ BARRE DE PROGRESSION D'EXPORT (éditeur de livre) ══════════════════
+   Bandeau flottant en haut de l'éditeur, visible pendant TOUT export (PDF
+   normal, PDF HD, image de page, story, bande) — jusqu'ici, seul un petit
+   toast s'affichait au tout début sans jamais se mettre à jour : sur un
+   livre à beaucoup de pages ou en HD, impossible de savoir si ça travaillait
+   encore ou si ça avait planté en silence. */
+function bkShowExportProgress(msg, pct){
+  document.getElementById('bk-export-progress').classList.add('on');
+  document.getElementById('bk-export-progress-msg').textContent=msg;
+  document.getElementById('bk-export-progress-bar').style.width=(pct==null?0:pct)+'%';
+}
+function bkHideExportProgress(){
+  document.getElementById('bk-export-progress').classList.remove('on');
+}
 function bkShareOrDownloadBlob(blob, filename, successMsg){
+  bkHideExportProgress();
   var file;
   try{ file=new File([blob], filename, {type:blob.type}); }catch(e){ file=null; }
   if(file && navigator.canShare && navigator.canShare({files:[file]})){
@@ -8611,6 +8637,7 @@ function bkShareOrDownloadBlob(blob, filename, successMsg){
   }
 }
 function bkDownloadBlob(blob, filename, successMsg){
+  bkHideExportProgress();
   var url=URL.createObjectURL(blob);
   var link=document.createElement('a');
   link.href=url; link.download=filename;
@@ -8620,7 +8647,9 @@ function bkDownloadBlob(blob, filename, successMsg){
 }
 function exportPageAsImage(){
   var page=bkBook.pages[bkPageIdx];
+  bkShowExportProgress(t('export_generating_image'), 30);
   bkRenderPageToCanvas(page, bkBook.orient).then(function(dataUrl){
+    bkShowExportProgress(t('export_generating_image'), 90);
     var fname=(bkAlbum.title||'ma-page').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-page'+(bkPageIdx+1)+'.jpg';
     var byteStr=atob(dataUrl.split(',')[1]);
     var bytes=new Uint8Array(byteStr.length);
@@ -8629,6 +8658,7 @@ function exportPageAsImage(){
     bkShareOrDownloadBlob(blob, fname, '🖼️ Image exportée');
   }).catch(function(err){
     console.error('Erreur export image', err);
+    bkHideExportProgress();
     toast('❌ Erreur pendant l\'export image');
   });
 }
@@ -8643,12 +8673,14 @@ function exportBookStory(){
   // 1080×1920 au lieu du format classique du livre).
   var page=bkBook.pages[bkPageIdx];
   if(!page) return;
-  toast('Génération du format story…');
+  bkShowExportProgress(t('strip_generating'), 20);
   var fontsReady=(document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
   var baseName=(bkAlbum.title||'mon-voyage').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
   fontsReady.then(function(){
+    bkShowExportProgress(t('strip_generating'), 55);
     return bkRenderPageToCanvas(page, bkBook.orient, 1080, 1920);
   }).then(function(dataUrl){
+    bkShowExportProgress(t('strip_generating'), 90);
     var byteStr=atob(dataUrl.split(',')[1]);
     var bytes=new Uint8Array(byteStr.length);
     for(var i=0;i<byteStr.length;i++) bytes[i]=byteStr.charCodeAt(i);
@@ -8656,6 +8688,7 @@ function exportBookStory(){
     bkShareOrDownloadBlob(blob, baseName+'-story-page'+(bkPageIdx+1)+'.jpg', '📱 Page exportée au format story');
   }).catch(function(err){
     console.error('Erreur export story', err);
+    bkHideExportProgress();
     toast('❌ Erreur pendant l\'export story');
   });
 }
@@ -8667,7 +8700,7 @@ function exportBookStory(){
 function exportBookStrip(){
   var pages=bkBook.pages;
   if(!pages.length) return;
-  toast(t('strip_generating'));
+  bkShowExportProgress(t('strip_generating'), 5);
   var stripW=800;
   var pageH = bkBook.orient==='square' ? stripW : (bkBook.orient==='portrait' ? Math.round(stripW*(297/210)) : Math.round(stripW*(210/297)));
   var totalH=pageH*pages.length;
@@ -8679,12 +8712,14 @@ function exportBookStrip(){
   var fontsReady=(document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
   var chain=fontsReady.then(function(){ return null; });
   var renders=[];
-  pages.forEach(function(page){
+  pages.forEach(function(page, i){
     chain=chain.then(function(){ return bkRenderPageToCanvas(page, bkBook.orient, finalW, finalPageH); }).then(function(dataUrl){
       renders.push(dataUrl);
+      bkShowExportProgress(t('strip_generating')+' ('+(i+1)+'/'+pages.length+')', Math.round((i+1)/pages.length*85));
     });
   });
   chain.then(function(){
+    bkShowExportProgress(t('strip_generating'), 90);
     var bigCanvas=document.createElement('canvas');
     bigCanvas.width=finalW; bigCanvas.height=finalTotalH;
     var ctx=bigCanvas.getContext('2d');
@@ -8702,6 +8737,7 @@ function exportBookStrip(){
     });
   }).catch(function(err){
     console.error('Erreur export bande', err);
+    bkHideExportProgress();
     toast('❌ '+t('strip_error'));
   });
 }
@@ -8725,21 +8761,24 @@ function exportBookPDFHD(){
   var pages=bkBook.pages;
   var DPI=300, MM_PER_INCH=25.4;
   var pxW=Math.round(pageW/MM_PER_INCH*DPI), pxH=Math.round(pageH/MM_PER_INCH*DPI);
-  toast(t('pdf_hd_generating').replace('{n}', pages.length));
+  bkShowExportProgress(t('pdf_hd_generating').replace('{n}', pages.length), 3);
   var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
   var chain=fontsReady.then(function(){ return null; });
   pages.forEach(function(page, i){
     chain=chain.then(function(){ return bkRenderPageToCanvas(page, orient, pxW, pxH); }).then(function(dataUrl){
       if(i>0) doc.addPage();
       doc.addImage(dataUrl, 'JPEG', 0, 0, pageW, pageH, undefined, 'FAST');
+      bkShowExportProgress(t('pdf_hd_generating').replace('{n}', pages.length)+' ('+(i+1)+'/'+pages.length+')', Math.round((i+1)/pages.length*92));
     });
   });
   chain.then(function(){
+    bkShowExportProgress(t('pdf_hd_generating').replace('{n}', pages.length), 96);
     var fname=(bkAlbum.title||'mon-livre').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-livre-HD.pdf';
     var blob=doc.output('blob');
     bkShareOrDownloadBlob(blob, fname, t('pdf_hd_done'));
   }).catch(function(err){
     console.error('Erreur export livre HD', err);
+    bkHideExportProgress();
     toast('❌ '+t('pdf_hd_error'));
   });
 }
@@ -8754,21 +8793,24 @@ function exportBookPDF(){
     : new jsPDFCtor({orientation:orient, unit:'mm', format:'a4'});
   var pageW=doc.internal.pageSize.getWidth(), pageH=doc.internal.pageSize.getHeight();
   var pages=bkBook.pages;
-  toast('Génération du PDF…');
+  bkShowExportProgress(t('pdf_generating'), 5);
   var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
   var chain=fontsReady.then(function(){ return null; });
   pages.forEach(function(page, i){
     chain=chain.then(function(){ return bkRenderPageToCanvas(page, orient); }).then(function(dataUrl){
       if(i>0) doc.addPage();
       doc.addImage(dataUrl, 'JPEG', 0, 0, pageW, pageH);
+      bkShowExportProgress(t('pdf_generating')+' ('+(i+1)+'/'+pages.length+')', Math.round((i+1)/pages.length*92));
     });
   });
   chain.then(function(){
+    bkShowExportProgress(t('pdf_generating'), 96);
     var fname=(bkAlbum.title||'mon-livre').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-livre.pdf';
     var blob=doc.output('blob');
     bkShareOrDownloadBlob(blob, fname, '📕 Livre exporté avec succès');
   }).catch(function(err){
     console.error('Erreur export livre', err);
+    bkHideExportProgress();
     toast('❌ Erreur pendant l\'export du livre');
   });
 }
