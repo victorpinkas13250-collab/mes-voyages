@@ -596,7 +596,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.37.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.37.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -7486,6 +7486,16 @@ function bkFilterCSS(f){
   if(!f) return 'none';
   return 'brightness('+f.brightness+'%) contrast('+f.contrast+'%) saturate('+f.saturate+'%) grayscale('+f.grayscale+'%)';
 }
+/* Échelle de police de l'éditeur — voir le commentaire détaillé dans
+   bkElementInnerHTML. Lit la largeur RÉELLE actuelle du canevas affiché à
+   l'écran (variable selon l'appareil et l'orientation portrait/paysage/
+   carré) et la ramène à la même référence de 1000 unités que l'export. */
+function bkEditorFontScale(){
+  var canvas=document.getElementById('bk-canvas');
+  if(!canvas) return 1;
+  var w=canvas.getBoundingClientRect().width;
+  return w>0 ? w/1000 : 1;
+}
 function bkElementInnerHTML(el){
   var borderStyle = (el.border && el.border.width>0) ? ('border:'+el.border.width+'px solid '+el.border.color+';') : '';
   var radiusStyle = el.round ? 'border-radius:50%;' : '';
@@ -7533,7 +7543,16 @@ function bkElementInnerHTML(el){
     var stickerBg = el.isSticker
       ? 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:'+(el.bgColor||'rgba(255,255,255,0.55)')+';border-radius:50%;box-shadow:0 3px 8px rgba(0,0,0,.25);'
       : '';
-    return '<div class="bk-txt" style="'+stickerBg+'font-size:'+el.fontSize+'px;color:'+el.color+';font-weight:800;font-family:\''+ff+'\',sans-serif;'+shadowStyle+'">'+esc(el.text)+'</div>';
+    // el.fontSize est calibré pour une page de largeur 1000 (même référence
+    // que l'export : fs = el.fontSize*(PXW/1000)) — mais le canevas affiché
+    // à l'écran dans l'éditeur ne fait souvent que 350-400px de large sur un
+    // téléphone. Sans ramener la taille à l'échelle RÉELLE du canevas
+    // affiché, le texte en pixels CSS bruts ressort bien plus petit à
+    // l'écran, proportionnellement, que dans l'export final (bug réel :
+    // texte et badge de numéro de page visiblement plus petits dans le PDF
+    // que dans l'appli, repéré sur une vraie capture).
+    var fs=(el.fontSize||16)*bkEditorFontScale();
+    return '<div class="bk-txt" style="'+stickerBg+'font-size:'+fs+'px;color:'+el.color+';font-weight:800;font-family:\''+ff+'\',sans-serif;'+shadowStyle+'">'+esc(el.text)+'</div>';
   }
   return '';
 }
@@ -9199,6 +9218,13 @@ initDB(function(){
   });
 });
 
+// Le texte de l'éditeur est mis à l'échelle de la largeur réelle du canevas
+// affiché (voir bkEditorFontScale) — un redimensionnement de fenêtre ou une
+// rotation d'écran change cette largeur, donc il faut redessiner la page
+// pour que le texte reste à la bonne taille visuelle.
+window.addEventListener('resize', function(){
+  if(typeof bkBook!=='undefined' && bkBook && document.getElementById('pg-book').classList.contains('on')) bkRenderPage();
+});
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
     // updateViaCache:'none' -> le navigateur ne doit JAMAIS servir sw.js depuis
