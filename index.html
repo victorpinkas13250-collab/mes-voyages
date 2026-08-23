@@ -563,8 +563,8 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 
 <div class="bk-sheet" id="resize-text-sheet">
   <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🔠 <span data-i18n="title_resize_text">Agrandir tout le texte du livre</span></h3>
-    <div class="modal-sub" style="margin-bottom:14px" data-i18n="resize_text_intro">S'applique à tous les titres, numéros de page et smileys de TOUT le livre en une fois — choisis le facteur, puis Appliquer.</div>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🔠 <span data-i18n="title_resize_text">Redimensionner tout le texte du livre</span></h3>
+    <div class="modal-sub" style="margin-bottom:14px" data-i18n="resize_text_intro">S'applique à tous les titres, numéros de page et smileys de TOUT le livre en une fois — choisis le facteur (en dessous de 1 pour réduire, au-dessus pour agrandir), puis Appliquer.</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:16px">
       <button class="bk-btn" style="width:44px;height:44px;font-size:1.2rem" onclick="bkChangeResizeTextFactor(-0.1)">−</button>
       <span id="resize-text-factor-val" style="font-size:1.6rem;font-weight:900;min-width:70px;text-align:center;color:var(--primary)">1.5×</span>
@@ -612,7 +612,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.38.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.38.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -817,7 +817,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     <button class="bk-tool" onclick="bkFillMultiplePagesToSafeMargin()"><span class="ic">🔍</span><span data-i18n="tool_fill_pages">Remplir plusieurs pages</span></button>
     <button class="bk-tool" onclick="bkAddPageNumbers()"><span class="ic">🔢</span><span data-i18n="tool_pagenum">Numéroter les pages</span></button>
     <button class="bk-tool" onclick="openRecalcCropsConfirm()"><span class="ic">🔄</span><span data-i18n="tool_recalc_crops">Recalculer les recadrages</span></button>
-    <button class="bk-tool" onclick="openResizeAllTextSheet()"><span class="ic">🔠</span><span data-i18n="tool_resize_text">Agrandir tout le texte</span></button>
+    <button class="bk-tool" onclick="openResizeAllTextSheet()"><span class="ic">🔠</span><span data-i18n="tool_resize_text">Redimensionner tout le texte</span></button>
   </div>
   <div id="bk-bgswatches" style="display:flex;gap:8px;align-items:center;padding:0 14px 8px;overflow-x:auto"></div>
   <div class="bk-stage-wrap">
@@ -2467,10 +2467,10 @@ var BK_I18N={
   recalc_crops_confirm:{fr:'Recalculer le recadrage automatique de {n} photo(s) avec la formule corrigée ? Les recadrages faits à la main ne sont jamais touchés.',en:'Recalculate the automatic crop of {n} photo(s) with the corrected formula? Manually adjusted crops are never touched.',it:'Ricalcolare il ritaglio automatico di {n} foto con la formula corretta? I ritagli fatti a mano non vengono mai toccati.',es:'¿Recalcular el recorte automático de {n} foto(s) con la fórmula corregida? Los recortes ajustados a mano nunca se tocan.'},
   recalc_crops_running:{fr:'🔄 Recalcul des recadrages… ({n} photos)',en:'🔄 Recalculating crops… ({n} photos)',it:'🔄 Ricalcolo dei ritagli… ({n} foto)',es:'🔄 Recalculando los recortes… ({n} fotos)'},
   recalc_crops_done:{fr:'🔄 {n} recadrage(s) recalculé(s)',en:'🔄 {n} crop(s) recalculated',it:'🔄 {n} ritaglio/i ricalcolato/i',es:'🔄 {n} recorte(s) recalculado(s)'},
-  tool_resize_text:{fr:'Agrandir tout le texte',en:'Enlarge all text',it:'Ingrandisci tutto il testo',es:'Agrandar todo el texto'},
-  title_resize_text:{fr:'Agrandir tout le texte du livre',en:'Enlarge all the text in the book',it:'Ingrandisci tutto il testo del libro',es:'Agrandar todo el texto del libro'},
-  resize_text_intro:{fr:'S\'applique à tous les titres, numéros de page et smileys de TOUT le livre en une fois — choisis le facteur, puis Appliquer.',en:'Applies to every title, page number and smiley in the WHOLE book at once — pick the factor, then Apply.',it:'Si applica a tutti i titoli, numeri di pagina e smiley di TUTTO il libro in una volta — scegli il fattore, poi Applica.',es:'Se aplica a todos los títulos, números de página y emojis de TODO el libro a la vez — elige el factor y luego Aplicar.'},
-  resize_text_done:{fr:'🔠 {n} élément(s) de texte agrandis ×{x}',en:'🔠 {n} text element(s) enlarged ×{x}',it:'🔠 {n} elemento/i di testo ingrandito/i ×{x}',es:'🔠 {n} elemento(s) de texto agrandado(s) ×{x}'},
+  tool_resize_text:{fr:'Redimensionner tout le texte',en:'Resize all text',it:'Ridimensiona tutto il testo',es:'Redimensionar todo el texto'},
+  title_resize_text:{fr:'Redimensionner tout le texte du livre',en:'Resize all the text in the book',it:'Ridimensiona tutto il testo del libro',es:'Redimensionar todo el texto del libro'},
+  resize_text_intro:{fr:'S\'applique à tous les titres, numéros de page et smileys de TOUT le livre en une fois — choisis le facteur (en dessous de 1 pour réduire, au-dessus pour agrandir), puis Appliquer.',en:'Applies to every title, page number and smiley in the WHOLE book at once — pick the factor (below 1 to shrink, above to enlarge), then Apply.',it:'Si applica a tutti i titoli, numeri di pagina e smiley di TUTTO il libro in una volta — scegli il fattore (sotto 1 per rimpicciolire, sopra per ingrandire), poi Applica.',es:'Se aplica a todos los títulos, números de página y emojis de TODO el libro a la vez — elige el factor (por debajo de 1 para reducir, por encima para agrandar), luego Aplicar.'},
+  resize_text_done:{fr:'🔠 {n} élément(s) de texte redimensionnés ×{x}',en:'🔠 {n} text element(s) resized ×{x}',it:'🔠 {n} elemento/i di testo ridimensionato/i ×{x}',es:'🔠 {n} elemento(s) de texto redimensionado(s) ×{x}'},
   btn_pdf_hd:{fr:'Exporter PDF en qualité impression (300 DPI, plus lent)',en:'Export PDF in print quality (300 DPI, slower)',it:'Esporta PDF in qualità di stampa (300 DPI, più lento)',es:'Exportar PDF en calidad de impresión (300 DPI, más lento)'},
   pdf_hd_generating:{fr:'🖨️ Génération en haute résolution… ({n} pages, patience)',en:'🖨️ Generating in high resolution… ({n} pages, please wait)',it:'🖨️ Generazione in alta risoluzione… ({n} pagine, attendi)',es:'🖨️ Generando en alta resolución… ({n} páginas, espera)'},
   pdf_generating:{fr:'📕 Génération du PDF…',en:'📕 Generating the PDF…',it:'📕 Generazione del PDF…',es:'📕 Generando el PDF…'},
@@ -6416,7 +6416,7 @@ function openResizeAllTextSheet(){
 }
 function closeResizeAllTextSheet(){ document.getElementById('resize-text-sheet').classList.remove('on'); }
 function bkChangeResizeTextFactor(delta){
-  bkResizeTextFactor=Math.max(1.1, Math.min(3, Math.round((bkResizeTextFactor+delta)*10)/10));
+  bkResizeTextFactor=Math.max(0.3, Math.min(3, Math.round((bkResizeTextFactor+delta)*10)/10));
   document.getElementById('resize-text-factor-val').textContent=bkResizeTextFactor.toFixed(1)+'×';
 }
 function bkRunResizeAllText(){
