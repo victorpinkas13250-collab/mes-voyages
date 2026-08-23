@@ -596,7 +596,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.36.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.36.1</div>
 </div>
 
 <!-- ══════════ ALBUM ══════════ -->
@@ -6228,7 +6228,19 @@ function bkApplySmartCropsOnPage(){
       if(!saliency || el.crop) return; // déjà recadrée entre-temps (édition manuelle) : on ne touche à rien
       var img=new Image();
       img.onload=function(){
-        el.crop=bkSmartCropRect(img.width, img.height, el.w, el.h, saliency);
+        // el.w/el.h sont des pourcentages de deux dimensions DIFFÉRENTES de la
+        // page (largeur vs hauteur) — les utiliser tels quels comme un ratio
+        // largeur/hauteur est faux dès que la page n'est pas carrée (portrait
+        // ou paysage, donc presque toujours). Il faut les repondérer par les
+        // dimensions physiques réelles de la page pour obtenir le vrai ratio
+        // de la case — sinon le recadrage stocké ne correspond plus à la
+        // vraie forme de la case, et l'image ressort étirée à l'export
+        // (bug réel : certaines photos plus déformées que d'autres, selon
+        // l'écart entre le ratio de la case et celui, erroné, utilisé ici).
+        var pageWmm = bkBook.orient==='landscape' ? 297 : 210;
+        var pageHmm = bkBook.orient==='landscape' ? 210 : (bkBook.orient==='square' ? 210 : 297);
+        var slotW = el.w * pageWmm, slotH = el.h * pageHmm;
+        el.crop=bkSmartCropRect(img.width, img.height, slotW, slotH, saliency);
         savePhoto(bkAlbum.id, photo);
         if(bkBook.pages[bkPageIdx]===page) bkRenderPage();
       };
