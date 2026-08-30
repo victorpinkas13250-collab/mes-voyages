@@ -361,6 +361,10 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 .bk-slider-row{margin-top:14px;}
 .bk-slider-row label{display:block;font-size:.75rem;font-weight:800;color:var(--ink-soft);margin-bottom:4px;}
 .bk-slider-row input[type="range"]{width:100%;accent-color:var(--primary);}
+.bk-filter-preset{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.bk-filter-preset img{width:58px;height:58px;border-radius:10px;object-fit:cover;border:2px solid transparent;}
+.bk-filter-preset.on img{border-color:var(--primary);}
+.bk-filter-preset span{font-size:.62rem;font-weight:800;color:var(--ink-soft);}
 .bk-el.sel .bk-del{display:flex;}
 .bk-del{position:absolute;left:-13px;top:-13px;width:24px;height:24px;border-radius:50%;background:var(--danger);border:3px solid #fff;color:#fff;font-size:.7rem;display:none;align-items:center;justify-content:center;z-index:10;}
 
@@ -673,7 +677,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.44.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.46.0</div>
 </div>
 
 <!-- Feuille "Plus d'options" — regroupe ce qui encombrait la rangée d'en-tête
@@ -1087,7 +1091,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 <div class="bk-sheet" id="bk-crop-sheet">
   <div class="bk-sheet-box">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_crop">Recadrer</h3>
-    <div id="bk-crop-viewport" style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:14px;background:#000;touch-action:none">
+    <div id="bk-crop-viewport" style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:14px;background:#000;touch-action:none;max-height:50vh">
       <img id="bk-crop-img" style="position:absolute;pointer-events:none">
     </div>
     <div class="bk-fsize-row" style="margin-top:16px">
@@ -1106,7 +1110,8 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
 <!-- Feuille: filtres photo -->
 <div class="bk-sheet" id="bk-filter-sheet">
   <div class="bk-sheet-box">
-    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_filters">Filtres photo</h3>
+    <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:10px" data-i18n="title_filters">Filtres photo</h3>
+    <div id="bk-filter-presets" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:8px"></div>
     <div class="bk-slider-row"><label>Luminosité</label><input type="range" min="40" max="180" id="bk-f-brightness" oninput="bkFilterChanged()"></div>
     <div class="bk-slider-row"><label>Contraste</label><input type="range" min="40" max="180" id="bk-f-contrast" oninput="bkFilterChanged()"></div>
     <div class="bk-slider-row"><label>Saturation</label><input type="range" min="0" max="200" id="bk-f-saturate" oninput="bkFilterChanged()"></div>
@@ -8086,6 +8091,44 @@ function bkSetShapeColor(c){
 
 /* ── Filtres photo ── */
 var BK_DEFAULT_FILTER={brightness:100, contrast:100, saturate:100, grayscale:0};
+// Préréglages en un tap — en plus des curseurs manuels déjà là (jamais à la
+// place), pour donner tout de suite une vraie variété visuelle sans devoir
+// tâtonner sur 4 curseurs bruts. Chaque vignette utilise la VRAIE photo
+// sélectionnée, pas un aperçu générique, pour bien voir le rendu réel.
+var BK_FILTER_PRESETS=[
+  {id:'original', label:'Original', f:{brightness:100, contrast:100, saturate:100, grayscale:0}},
+  {id:'vif', label:'Vif', f:{brightness:105, contrast:115, saturate:150, grayscale:0}},
+  {id:'doux', label:'Doux', f:{brightness:108, contrast:92, saturate:88, grayscale:0}},
+  {id:'nb', label:'N&B', f:{brightness:105, contrast:110, saturate:100, grayscale:100}},
+  {id:'vintage', label:'Vintage', f:{brightness:106, contrast:88, saturate:68, grayscale:0}},
+  {id:'dramatique', label:'Dramatique', f:{brightness:92, contrast:140, saturate:105, grayscale:0}}
+];
+function bkRenderFilterPresets(){
+  var el=bkCurEl(); if(!el || !el.photoId) return;
+  var ph=bkPhotoById(el.photoId); if(!ph) return;
+  var src=bkPhotoSrc(ph,'thumb');
+  var cur=el.filter||BK_DEFAULT_FILTER;
+  var h='';
+  BK_FILTER_PRESETS.forEach(function(p){
+    var isOn=JSON.stringify(p.f)===JSON.stringify(cur);
+    var css=bkFilterCSS(p.f);
+    h+='<div class="bk-filter-preset'+(isOn?' on':'')+'" onclick="bkApplyFilterPreset(\''+p.id+'\')">'
+      +'<img src="'+src+'" style="filter:'+css+'">'
+      +'<span>'+p.label+'</span></div>';
+  });
+  document.getElementById('bk-filter-presets').innerHTML=h;
+}
+function bkApplyFilterPreset(id){
+  var el=bkCurEl(); if(!el) return;
+  var preset=BK_FILTER_PRESETS.find(function(p){ return p.id===id; });
+  if(!preset) return;
+  el.filter=JSON.parse(JSON.stringify(preset.f));
+  document.getElementById('bk-f-brightness').value=el.filter.brightness;
+  document.getElementById('bk-f-contrast').value=el.filter.contrast;
+  document.getElementById('bk-f-saturate').value=el.filter.saturate;
+  document.getElementById('bk-f-grayscale').value=el.filter.grayscale;
+  bkFilterChanged(); // met aussi à jour le contour actif, pas besoin de reconstruire toute la rangée
+}
 /* ── Recadrage libre ──
    Le recadrage se fait via une fenêtre normalisée [0,1] dans l'image d'origine
    (el.crop = {sx,sy,sw,sh}). Les maths (fenêtre de couverture + zoom/pan bornés)
@@ -8097,7 +8140,15 @@ function bkCropCoverRect(imgAspect, frameAspect){
   return { sx:(1-sw)/2, sy:(1-sh)/2, sw:sw, sh:sh };
 }
 function bkCropZoom(base, zoom, panX, panY){
-  var sw = base.sw/zoom, sh = base.sh/zoom;
+  // Chaque dimension est plafonnée à 1 (100% de l'image) INDÉPENDAMMENT —
+  // avant, les deux étaient divisées par le même zoom sans plafond propre,
+  // ce qui rendait tout zoom en dessous de 1 mathématiquement invalide (une
+  // des deux dimensions dépassait l'image elle-même). Avec ce plafond
+  // séparé, on peut vraiment dézoomer pour voir plus — jusqu'à toute
+  // l'image — la dimension qui touche son plafond avant l'autre laisse
+  // simplement apparaître le fond noir de la zone de recadrage autour
+  // (comme un vrai mode "ajuster" au lieu de "remplir").
+  var sw = Math.min(1, base.sw/zoom), sh = Math.min(1, base.sh/zoom);
   var maxX = 1-sw, maxY = 1-sh;
   var sx = Math.min(Math.max((1-sw)/2 + panX, 0), maxX);
   var sy = Math.min(Math.max((1-sh)/2 + panY, 0), maxY);
@@ -8112,6 +8163,16 @@ function openCropSheet(){
     var imgAspect=img.naturalWidth/img.naturalHeight;
     var pageRatio = bkBook.orient==='square' ? 1 : (bkBook.orient==='portrait' ? 210/297 : 297/210);
     var frameAspect=el.w/el.h * pageRatio;
+    // La zone d'aperçu du recadrage doit avoir la MÊME forme que la vraie
+    // case (ronde, en bande large, en colonne étroite...) — avant, elle
+    // était toujours carrée quelle que soit la case, donc on recadrait à
+    // l'aveugle sur des cases non carrées (bug réel, mesuré : ratio 1.00
+    // affiché pour une case de ratio réel 3.77). Une limite de sécurité
+    // (0.4 à 3) évite qu'un ratio extrême ne rende la zone inutilisable à
+    // l'écran (trop fine ou trop plate) — le recadrage réel reste correct
+    // même quand l'aperçu est plafonné, seul l'espace affiché est limité.
+    var viewportRatio=Math.max(0.4, Math.min(3, frameAspect));
+    document.getElementById('bk-crop-viewport').style.aspectRatio=viewportRatio;
     var base=bkCropCoverRect(imgAspect, frameAspect);
     var zoom=1, panX=0, panY=0;
     if(el.crop){
@@ -8131,27 +8192,67 @@ function bkUpdateCropView(){
   var s=bkCropState; if(!s) return;
   var r=bkCropZoom(s.base, s.zoom, s.panX, s.panY);
   var img=document.getElementById('bk-crop-img');
-  img.style.left=(-(r.sx/r.sw)*100)+'%';
-  img.style.top=(-(r.sy/r.sh)*100)+'%';
-  img.style.width=(100/r.sw)+'%';
-  img.style.height=(100/r.sh)+'%';
+  var vp=document.getElementById('bk-crop-viewport');
+  var vpRect=vp.getBoundingClientRect();
+  // Calcul en pixels réels plutôt qu'en pourcentages : nécessaire pour
+  // pouvoir vraiment dézoomer en dessous de 1 sans déformer l'image. La
+  // zone sélectionnée (r.sw × r.sh de l'image d'origine) est mise à
+  // l'échelle en mode "contenir" (jamais étirer, jamais dépasser le
+  // viewport) — si elle ne remplit pas tout le viewport dans un sens
+  // (zoom faible sur un axe), le fond noir du viewport apparaît en
+  // bandes autour, au lieu de déformer l'image pour forcer le remplissage.
+  var selW=r.sw*s.naturalW, selH=r.sh*s.naturalH;
+  var scale=Math.min(vpRect.width/selW, vpRect.height/selH);
+  var fullImgW=s.naturalW*scale, fullImgH=s.naturalH*scale;
+  var centerOffsetX=(vpRect.width - selW*scale)/2;
+  var centerOffsetY=(vpRect.height - selH*scale)/2;
+  img.style.width=fullImgW+'px';
+  img.style.height=fullImgH+'px';
+  img.style.left=(-r.sx*fullImgW + centerOffsetX)+'px';
+  img.style.top=(-r.sy*fullImgH + centerOffsetY)+'px';
   document.getElementById('bk-crop-zoom-val').textContent=s.zoom.toFixed(1)+'x';
 }
 function bkCropZoomStep(delta){
   var s=bkCropState; if(!s) return;
-  s.zoom=Math.max(1, Math.min(6, s.zoom+delta));
+  // Zoom autorisé de 0.5x (dézoomer, voir plus large que le cadrage
+  // serré, avec des bandes autour si besoin) à 6x (zoomer très près) —
+  // avant, impossible de descendre sous 1x.
+  s.zoom=Math.max(0.5, Math.min(6, s.zoom+delta));
   bkUpdateCropView();
 }
-var bkCropDrag=null;
+// Pincement à deux doigts pour zoomer, en plus du glisser à un doigt pour
+// cadrer — répond au geste naturel qu'on essaie instinctivement sur mobile,
+// jusqu'ici seuls les boutons +/- fonctionnaient.
+var bkCropDrag=null, bkCropPointers={}, bkCropPinchStartDist=null, bkCropPinchStartZoom=null;
 document.getElementById('bk-crop-viewport').addEventListener('pointerdown', function(e){
   if(!bkCropState) return;
-  var vp=document.getElementById('bk-crop-viewport').getBoundingClientRect();
-  bkCropDrag={startX:e.clientX, startY:e.clientY, startPanX:bkCropState.panX, startPanY:bkCropState.panY, vpW:vp.width, vpH:vp.height};
+  bkCropPointers[e.pointerId]={x:e.clientX, y:e.clientY};
+  var ids=Object.keys(bkCropPointers);
+  if(ids.length===1){
+    var vp=document.getElementById('bk-crop-viewport').getBoundingClientRect();
+    bkCropDrag={startX:e.clientX, startY:e.clientY, startPanX:bkCropState.panX, startPanY:bkCropState.panY, vpW:vp.width, vpH:vp.height};
+  } else if(ids.length===2){
+    bkCropDrag=null; // le pincement à deux doigts prend le relais du glisser
+    var p1=bkCropPointers[ids[0]], p2=bkCropPointers[ids[1]];
+    bkCropPinchStartDist=Math.hypot(p2.x-p1.x, p2.y-p1.y);
+    bkCropPinchStartZoom=bkCropState.zoom;
+  }
   window.addEventListener('pointermove', bkCropPointerMove);
   window.addEventListener('pointerup', bkCropPointerUp);
+  window.addEventListener('pointercancel', bkCropPointerUp);
 });
 function bkCropPointerMove(e){
-  if(!bkCropDrag || !bkCropState) return;
+  if(!bkCropState) return;
+  if(bkCropPointers[e.pointerId]) bkCropPointers[e.pointerId]={x:e.clientX, y:e.clientY};
+  var ids=Object.keys(bkCropPointers);
+  if(ids.length===2 && bkCropPinchStartDist){
+    var p1=bkCropPointers[ids[0]], p2=bkCropPointers[ids[1]];
+    var dist=Math.hypot(p2.x-p1.x, p2.y-p1.y);
+    bkCropState.zoom=Math.max(0.5, Math.min(6, bkCropPinchStartZoom*(dist/bkCropPinchStartDist)));
+    bkUpdateCropView();
+    return;
+  }
+  if(!bkCropDrag) return;
   var s=bkCropState, d=bkCropDrag;
   var r=bkCropZoom(s.base, s.zoom, 0, 0); // fenêtre actuelle (pour convertir px -> normalisé)
   var dxNorm=(e.clientX-d.startX)/d.vpW * r.sw;
@@ -8160,12 +8261,18 @@ function bkCropPointerMove(e){
   s.panY=d.startPanY - dyNorm;
   bkUpdateCropView();
 }
-function bkCropPointerUp(){
-  bkCropDrag=null;
-  window.removeEventListener('pointermove', bkCropPointerMove);
-  window.removeEventListener('pointerup', bkCropPointerUp);
+function bkCropPointerUp(e){
+  delete bkCropPointers[e.pointerId];
+  var ids=Object.keys(bkCropPointers);
+  if(ids.length<2) bkCropPinchStartDist=null;
+  if(ids.length===0){
+    bkCropDrag=null;
+    window.removeEventListener('pointermove', bkCropPointerMove);
+    window.removeEventListener('pointerup', bkCropPointerUp);
+    window.removeEventListener('pointercancel', bkCropPointerUp);
+  }
 }
-function closeBkCropSheet(){ document.getElementById('bk-crop-sheet').classList.remove('on'); bkCropState=null; }
+function closeBkCropSheet(){ document.getElementById('bk-crop-sheet').classList.remove('on'); bkCropState=null; bkCropPointers={}; bkCropDrag=null; bkCropPinchStartDist=null; }
 function bkApplyCrop(){
   var el=bkCurEl(); if(!el || !bkCropState) return;
   bkSnapshot();
@@ -8191,6 +8298,7 @@ function openFilterSheet(){
   document.getElementById('bk-f-contrast').value=el.filter.contrast;
   document.getElementById('bk-f-saturate').value=el.filter.saturate;
   document.getElementById('bk-f-grayscale').value=el.filter.grayscale;
+  bkRenderFilterPresets();
   document.getElementById('bk-filter-sheet').classList.add('on');
 }
 function bkFilterChanged(){
@@ -8203,6 +8311,12 @@ function bkFilterChanged(){
   };
   var node=document.querySelector('#bk-canvas .bk-el[data-id="'+el.id+'"] img');
   if(node) node.style.filter=bkFilterCSS(el.filter);
+  // met juste à jour le contour actif (sans reconstruire toute la rangée,
+  // pour rester fluide pendant qu'on glisse un curseur)
+  var cur=JSON.stringify(el.filter);
+  document.querySelectorAll('.bk-filter-preset').forEach(function(node, i){
+    node.classList.toggle('on', JSON.stringify(BK_FILTER_PRESETS[i].f)===cur);
+  });
 }
 function bkResetFilter(){
   var el=bkCurEl(); if(!el) return;
