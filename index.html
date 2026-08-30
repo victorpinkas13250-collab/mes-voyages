@@ -678,7 +678,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.47.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.47.1</div>
 </div>
 
 <!-- Feuille "Plus d'options" — regroupe ce qui encombrait la rangée d'en-tête
@@ -1098,10 +1098,10 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     <div id="bk-crop-viewport" style="position:relative;width:100%;height:50vh;overflow:hidden;border-radius:14px;background:#000;touch-action:none">
       <img id="bk-crop-img" style="position:absolute;pointer-events:none">
       <div id="bk-crop-box" style="position:absolute;border:2px solid #fff;box-shadow:0 0 0 2000px rgba(0,0,0,.55);touch-action:none;cursor:move">
-        <div class="bk-crop-handle" data-corner="tl" style="position:absolute;top:-11px;left:-11px;width:26px;height:26px;touch-action:none"></div>
-        <div class="bk-crop-handle" data-corner="tr" style="position:absolute;top:-11px;right:-11px;width:26px;height:26px;touch-action:none"></div>
-        <div class="bk-crop-handle" data-corner="bl" style="position:absolute;bottom:-11px;left:-11px;width:26px;height:26px;touch-action:none"></div>
-        <div class="bk-crop-handle" data-corner="br" style="position:absolute;bottom:-11px;right:-11px;width:26px;height:26px;touch-action:none"></div>
+        <div class="bk-crop-handle" data-corner="tl" style="position:absolute;top:-24px;left:-24px;width:48px;height:48px;touch-action:none"></div>
+        <div class="bk-crop-handle" data-corner="tr" style="position:absolute;top:-24px;right:-24px;width:48px;height:48px;touch-action:none"></div>
+        <div class="bk-crop-handle" data-corner="bl" style="position:absolute;bottom:-24px;left:-24px;width:48px;height:48px;touch-action:none"></div>
+        <div class="bk-crop-handle" data-corner="br" style="position:absolute;bottom:-24px;right:-24px;width:48px;height:48px;touch-action:none"></div>
       </div>
     </div>
     <div style="text-align:center;color:var(--ink-soft);font-size:.72rem;font-weight:700;margin-top:8px" data-i18n="crop_hint">Glisse le cadre pour le déplacer, tire un coin pour le redimensionner.</div>
@@ -8221,7 +8221,7 @@ document.querySelectorAll('.bk-crop-handle').forEach(function(handle){
     window.addEventListener('pointerup', bkCropResizeUp);
   });
 });
-var BK_CROP_MIN_BOX=44; // taille minimale du cadre en pixels écran, pour qu'il reste manipulable
+var BK_CROP_MIN_BOX=110; // taille minimale du cadre en pixels écran — assez grande pour que les 4 zones tactiles de 48px des poignées ne se chevauchent jamais entre elles
 function bkCropResizeMove(e){
   if(!bkCropResize || !bkCropState) return;
   var s=bkCropState, rz=bkCropResize;
