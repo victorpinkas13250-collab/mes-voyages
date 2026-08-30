@@ -678,7 +678,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.48.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.48.1</div>
 </div>
 
 <!-- Feuille "Plus d'options" — regroupe ce qui encombrait la rangée d'en-tête
@@ -8221,6 +8221,21 @@ function bkCropBoxUp(){
   window.removeEventListener('pointermove', bkCropBoxMove);
   window.removeEventListener('pointerup', bkCropBoxUp);
 }
+// bkCropState.boxX/boxY/imgLeft/imgTop sont tous en coordonnées LOCALES à
+// #bk-crop-viewport (0 = son propre coin haut-gauche) — alors que
+// e.clientX/e.clientY d'un vrai événement sont TOUJOURS en coordonnées
+// ABSOLUES de la fenêtre du navigateur. Mélanger les deux sans convertir
+// est un vrai bug (repéré et corrigé) : ça faussait tous les calculs de
+// redimensionnement d'un décalage constant (la position de la zone de
+// recadrage dans la page), ce qui pouvait bloquer le cadre en position
+// maximale dès le début du geste, sans plus jamais réagir ensuite — d'où
+// l'impression de ne plus pouvoir bouger le bord du bas. Seul le
+// déplacement du cadre entier (ci-dessus) était épargné, car il ne
+// travaille qu'avec des ÉCARTS (delta), où ce décalage s'annule tout seul.
+function bkCropViewportOffset(){
+  var r=document.getElementById('bk-crop-viewport').getBoundingClientRect();
+  return { left:r.left, top:r.top };
+}
 // Glisser une POIGNÉE DE COIN : redimensionne le cadre LIBREMENT (largeur et
 // hauteur indépendantes, aucun ratio imposé) — le coin opposé reste fixe.
 var bkCropResize=null;
@@ -8231,7 +8246,7 @@ document.querySelectorAll('.bk-crop-handle').forEach(function(handle){
     var s=bkCropState, corner=handle.getAttribute('data-corner');
     var anchorX = (corner==='tl'||corner==='bl') ? s.boxX+s.boxW : s.boxX;
     var anchorY = (corner==='tl'||corner==='tr') ? s.boxY+s.boxH : s.boxY;
-    bkCropResize={corner:corner, anchorX:anchorX, anchorY:anchorY};
+    bkCropResize={corner:corner, anchorX:anchorX, anchorY:anchorY, vpOff:bkCropViewportOffset()};
     window.addEventListener('pointermove', bkCropResizeMove);
     window.addEventListener('pointerup', bkCropResizeUp);
   });
@@ -8240,10 +8255,11 @@ var BK_CROP_MIN_BOX=90; // taille minimale du cadre en pixels écran
 function bkCropResizeMove(e){
   if(!bkCropResize || !bkCropState) return;
   var s=bkCropState, rz=bkCropResize;
+  var localX=e.clientX-rz.vpOff.left, localY=e.clientY-rz.vpOff.top;
   var signX = (rz.corner==='tr'||rz.corner==='br') ? 1 : -1;
   var signY = (rz.corner==='bl'||rz.corner==='br') ? 1 : -1;
-  var rawW = signX*(e.clientX-rz.anchorX);
-  var rawH = signY*(e.clientY-rz.anchorY);
+  var rawW = signX*(localX-rz.anchorX);
+  var rawH = signY*(localY-rz.anchorY);
   var maxWByImg = signX>0 ? (s.imgLeft+s.imgDispW-rz.anchorX) : (rz.anchorX-s.imgLeft);
   var maxHByImg = signY>0 ? (s.imgTop+s.imgDispH-rz.anchorY) : (rz.anchorY-s.imgTop);
   var newW=Math.min(Math.max(BK_CROP_MIN_BOX, rawW), maxWByImg);
@@ -8267,7 +8283,7 @@ document.querySelectorAll('.bk-crop-edge').forEach(function(handle){
     var s=bkCropState, edge=handle.getAttribute('data-edge');
     var anchorX = edge==='l' ? s.boxX+s.boxW : s.boxX;
     var anchorY = edge==='t' ? s.boxY+s.boxH : s.boxY;
-    bkCropEdgeResize={edge:edge, anchorX:anchorX, anchorY:anchorY, fixedX:s.boxX, fixedY:s.boxY, fixedW:s.boxW, fixedH:s.boxH};
+    bkCropEdgeResize={edge:edge, anchorX:anchorX, anchorY:anchorY, vpOff:bkCropViewportOffset()};
     window.addEventListener('pointermove', bkCropEdgeResizeMove);
     window.addEventListener('pointerup', bkCropEdgeResizeUp);
   });
@@ -8276,15 +8292,16 @@ var bkCropEdgeResize=null;
 function bkCropEdgeResizeMove(e){
   if(!bkCropEdgeResize || !bkCropState) return;
   var s=bkCropState, rz=bkCropEdgeResize;
+  var localX=e.clientX-rz.vpOff.left, localY=e.clientY-rz.vpOff.top;
   if(rz.edge==='l' || rz.edge==='r'){
     var signX = rz.edge==='r' ? 1 : -1;
-    var rawW = signX*(e.clientX-rz.anchorX);
+    var rawW = signX*(localX-rz.anchorX);
     var maxWByImg = signX>0 ? (s.imgLeft+s.imgDispW-rz.anchorX) : (rz.anchorX-s.imgLeft);
     var newW=Math.min(Math.max(BK_CROP_MIN_BOX, rawW), maxWByImg);
     s.boxW=newW; s.boxX = signX>0 ? rz.anchorX : rz.anchorX-newW;
   } else {
     var signY = rz.edge==='b' ? 1 : -1;
-    var rawH = signY*(e.clientY-rz.anchorY);
+    var rawH = signY*(localY-rz.anchorY);
     var maxHByImg = signY>0 ? (s.imgTop+s.imgDispH-rz.anchorY) : (rz.anchorY-s.imgTop);
     var newH=Math.min(Math.max(BK_CROP_MIN_BOX, rawH), maxHByImg);
     s.boxH=newH; s.boxY = signY>0 ? rz.anchorY : rz.anchorY-newH;
