@@ -592,13 +592,13 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
   <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_more">Plus d'options</h3>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();openBookOverview()" data-i18n-title="btn_overview" title="Vue d'ensemble de toutes les pages"><span>🔲</span><span data-i18n="btn_overview">Vue d'ensemble des pages</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();openReadMode()" data-i18n-title="btn_read_mode" title="Mode lecture (plein écran, sans risque de modifier)"><span>👁️</span><span data-i18n="btn_read_mode">Mode lecture</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();openVersionHistory()" data-i18n-title="btn_history" title="Historique des versions"><span>🕐</span><span data-i18n="btn_history">Historique des versions</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();exportPageAsImage()" data-i18n-title="btn_export_image" title="Exporter la page en image"><span>🖼️</span><span data-i18n="btn_export_image">Exporter la page en image</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();exportBookStory()" data-i18n-title="btn_share_story" title="Exporter en format story"><span>📱</span><span data-i18n="btn_share_story">Exporter en format story</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();exportBookStrip()" data-i18n-title="export_strip" title="Exporter en bande"><span>📏</span><span data-i18n="export_strip">Exporter en bande</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();exportBookPDFHD()" data-i18n-title="btn_pdf_hd" title="Exporter PDF en qualité impression"><span>🖨️</span><span data-i18n="btn_pdf_hd">PDF qualité impression (300 DPI)</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();openBookOverview()" data-i18n-title="btn_overview" title="Vue d'ensemble de toutes les pages"><span>🔲</span><span data-i18n="btn_overview">Vue d'ensemble des pages</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();openReadMode()" data-i18n-title="btn_read_mode" title="Mode lecture (plein écran, sans risque de modifier)"><span>👁️</span><span data-i18n="btn_read_mode">Mode lecture</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();openVersionHistory()" data-i18n-title="btn_history" title="Historique des versions"><span>🕐</span><span data-i18n="btn_history">Historique des versions</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();exportPageAsImage()" data-i18n-title="btn_export_image" title="Exporter la page en image"><span>🖼️</span><span data-i18n="btn_export_image">Exporter la page en image</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();exportBookStory()" data-i18n-title="btn_share_story" title="Exporter en format story"><span>📱</span><span data-i18n="btn_share_story">Exporter en format story</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();exportBookStrip()" data-i18n-title="export_strip" title="Exporter en bande"><span>📏</span><span data-i18n="export_strip">Exporter en bande</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeBkTopMoreSheet();exportBookPDFHD()" data-i18n-title="btn_pdf_hd" title="Exporter PDF en qualité impression"><span>🖨️</span><span data-i18n="btn_pdf_hd">PDF qualité impression (300 DPI)</span></button>
     </div>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeBkTopMoreSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
@@ -678,7 +678,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
   </div>
   <div class="albums-grid" id="albums-grid"></div>
-  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.49.0</div>
+  <div id="app-version-footer" style="text-align:center;color:var(--ink-soft);font-size:.68rem;font-weight:700;padding:6px 0 18px;opacity:.6">Mes Voyages · v5.52.0</div>
 </div>
 
 <!-- Feuille "Plus d'options" — regroupe ce qui encombrait la rangée d'en-tête
@@ -690,11 +690,11 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
   <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_more">Plus d'options</h3>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" id="layout-toggle-btn" onclick="bkToggleLayoutMode()" data-i18n-title="btn_layout_toggle" title="Basculer entre affichage mobile et ordinateur"><span id="layout-toggle-icon">🖥️</span><span data-i18n="btn_layout_toggle_label">Affichage bureau</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px;display:none" id="globalmap-btn" onclick="closeHdrMoreSheet();openGlobalMapScreen()" data-i18n-title="btn_globalmap" title="Tous mes voyages sur une carte"><span>🗺️</span><span data-i18n="btn_globalmap">Tous mes voyages sur une carte</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px;display:none" id="stats-btn" onclick="closeHdrMoreSheet();openTravelStatsSheet()" data-i18n-title="btn_stats" title="Mon bilan de voyage"><span>📊</span><span data-i18n="btn_stats">Mon bilan de voyage</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeHdrMoreSheet();openBackupSheet()"><span>💾</span><span data-i18n="btn_backup_label">Sauvegarder / restaurer</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeHdrMoreSheet();openHelpSheet()"><span>❔</span><span data-i18n="btn_help_label">Aide</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" id="layout-toggle-btn" onclick="bkToggleLayoutMode()" data-i18n-title="btn_layout_toggle" title="Basculer entre affichage mobile et ordinateur"><span id="layout-toggle-icon">🖥️</span><span data-i18n="btn_layout_toggle_label">Affichage bureau</span></button>
+      <button class="bk-btn" style="align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px;display:none" id="globalmap-btn" onclick="closeHdrMoreSheet();openGlobalMapScreen()" data-i18n-title="btn_globalmap" title="Tous mes voyages sur une carte"><span>🗺️</span><span data-i18n="btn_globalmap">Tous mes voyages sur une carte</span></button>
+      <button class="bk-btn" style="align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px;display:none" id="stats-btn" onclick="closeHdrMoreSheet();openTravelStatsSheet()" data-i18n-title="btn_stats" title="Mon bilan de voyage"><span>📊</span><span data-i18n="btn_stats">Mon bilan de voyage</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeHdrMoreSheet();openBackupSheet()"><span>💾</span><span data-i18n="btn_backup_label">Sauvegarder / restaurer</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closeHdrMoreSheet();openHelpSheet()"><span>❔</span><span data-i18n="btn_help_label">Aide</span></button>
     </div>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closeHdrMoreSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
@@ -710,11 +710,11 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
   <div class="bk-sheet-box" style="max-height:85vh;overflow-y:auto">
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_more">Plus d'options</h3>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" id="photo-color-btn" onclick="closePhotoMoreSheet();toggleColorStrip()" data-i18n-title="btn_color" title="Filtrer par couleur"><span>🎨</span><span data-i18n="btn_color">Filtrer par couleur</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" id="photo-tag-btn" onclick="closePhotoMoreSheet();toggleTagStrip()" data-i18n-title="btn_tags" title="Filtrer par étiquette"><span>🏷️</span><span data-i18n="btn_tags">Filtrer par étiquette</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closePhotoMoreSheet();openDuplicatesFinder()" data-i18n-title="btn_duplicates" title="Détecter les doublons"><span>👯</span><span data-i18n="btn_duplicates">Détecter les doublons</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" id="photo-group-btn" onclick="closePhotoMoreSheet();togglePhotoGroupByDay()" data-i18n-title="btn_group_day" title="Ranger par jour"><span>📅</span><span data-i18n="btn_group_day">Ranger par jour</span></button>
-      <button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closePhotoMoreSheet();deleteAllPhotos()" data-i18n-title="btn_delete_all" title="Tout supprimer"><span>🗑️</span><span data-i18n="btn_delete_all">Tout supprimer</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" id="photo-color-btn" onclick="closePhotoMoreSheet();toggleColorStrip()" data-i18n-title="btn_color" title="Filtrer par couleur"><span>🎨</span><span data-i18n="btn_color">Filtrer par couleur</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" id="photo-tag-btn" onclick="closePhotoMoreSheet();toggleTagStrip()" data-i18n-title="btn_tags" title="Filtrer par étiquette"><span>🏷️</span><span data-i18n="btn_tags">Filtrer par étiquette</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closePhotoMoreSheet();openDuplicatesFinder()" data-i18n-title="btn_duplicates" title="Détecter les doublons"><span>👯</span><span data-i18n="btn_duplicates">Détecter les doublons</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" id="photo-group-btn" onclick="closePhotoMoreSheet();togglePhotoGroupByDay()" data-i18n-title="btn_group_day" title="Ranger par jour"><span>📅</span><span data-i18n="btn_group_day">Ranger par jour</span></button>
+      <button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px" onclick="closePhotoMoreSheet();deleteAllPhotos()" data-i18n-title="btn_delete_all" title="Tout supprimer"><span>🗑️</span><span data-i18n="btn_delete_all">Tout supprimer</span></button>
     </div>
     <div class="modal-btns"><button class="mbtn mbtn-cancel" style="width:100%" onclick="closePhotoMoreSheet()"><span data-i18n="btn_close_sheet">Fermer</span></button></div>
   </div>
@@ -1034,7 +1034,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     </div>
 
     <div class="pdf-lbl" style="margin-top:16px" data-i18n="autobook_main_color">Couleur principale</div>
-    <div id="bk-autobook-colors" style="display:flex;gap:8px"></div>
+    <div id="bk-autobook-colors" style="display:flex;flex-wrap:wrap;gap:8px"></div>
 
     <div class="pdf-lbl" style="margin-top:16px" data-i18n="autobook_emojis">Smileys favoris (optionnel, plusieurs possibles)</div>
     <div id="bk-autobook-emojis" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
@@ -1148,9 +1148,9 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
     <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px" data-i18n="title_gradient">Dégradé</h3>
     <button class="bk-btn" id="bk-gradient-toggle" onclick="bkToggleGradient()" style="margin-bottom:14px">Activer le dégradé</button>
     <div class="pdf-lbl">Couleur de départ</div>
-    <div style="display:flex;gap:8px;margin-bottom:10px" id="bk-gradient-from"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px" id="bk-gradient-from"></div>
     <div class="pdf-lbl">Couleur d'arrivée</div>
-    <div style="display:flex;gap:8px" id="bk-gradient-to"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px" id="bk-gradient-to"></div>
     <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeGradientSheet()"><span data-i18n="btn_ok">OK</span></button></div>
   </div>
 </div>
@@ -1165,7 +1165,7 @@ html.layout-desktop .upload-progress-holder{max-width:868px;margin:0 auto;}
       <button onclick="bkChangeBorderWidth(1)">+</button>
       <span style="color:var(--ink-soft);font-size:.75rem;font-weight:700;margin-left:6px">épaisseur (0 = aucune)</span>
     </div>
-    <div style="display:flex;gap:8px;margin-top:14px" id="bk-border-colors"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px" id="bk-border-colors"></div>
     <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeBorderSheet()"><span data-i18n="btn_ok">OK</span></button></div>
   </div>
 </div>
@@ -1358,9 +1358,16 @@ function toastUndo(msg, onUndo, delayMs){
 
 /* ══════════════════ NAVIGATION ══════════════════ */
 function go(screen){
-  ['home','album','lb'].forEach(function(s){
+  // Ferme TOUS les écrans existants, pas seulement les 3 historiques
+  // (home/album/lb) — l'éditeur de livre en particulier restait actif en
+  // arrière-plan après un retour à l'accueil (bug réel, trouvé par
+  // balayage systématique : ses éléments continuaient à apparaître dans
+  // des mesures faites sur l'écran d'accueil). Lister tous les écrans ici,
+  // plutôt que de compter sur chaque appelant pour fermer le sien avant
+  // d'appeler go(), évite que ce genre d'oubli se reproduise à l'avenir.
+  ['home','album','lb','book','globalmap','map','pdf','readmode'].forEach(function(s){
     var el=document.getElementById('pg-'+s);
-    el.classList.remove('on');
+    if(el) el.classList.remove('on');
   });
   document.getElementById('pg-'+screen).classList.add('on');
   if(screen==='home') renderHome();
@@ -1516,7 +1523,11 @@ function bkCountAllPlaces(){
 function bkRefreshGlobalMapEntry(){
   var btn=document.getElementById('globalmap-btn');
   if(!btn) return;
-  btn.style.display = bkCountAllPlaces()>0 ? '' : 'none';
+  // 'flex' explicite et non une chaîne vide : sinon, l'affichage retombe sur
+  // celui de la classe .bk-btn (qui n'est pas flex), perdant l'alignement
+  // icône/texte du bouton une fois montré (bug réel, repéré à l'œil — le
+  // texte collait à l'icône sans le moindre espace entre les deux).
+  btn.style.display = bkCountAllPlaces()>0 ? 'flex' : 'none';
 }
 /* ══════════════════ MON BILAN DE VOYAGE ══════════════════
    Troisième fonctionnalité à traverser tous les albums d'un coup (après le
@@ -1548,7 +1559,8 @@ function bkComputeTravelStats(){
 function bkRefreshStatsEntry(){
   var btn=document.getElementById('stats-btn');
   if(!btn) return;
-  btn.style.display = albums.filter(function(a){ return !a.isBestOf; }).length>0 ? '' : 'none';
+  // même correction que bkRefreshGlobalMapEntry ci-dessus : 'flex' explicite
+  btn.style.display = albums.filter(function(a){ return !a.isBestOf; }).length>0 ? 'flex' : 'none';
 }
 function openTravelStatsSheet(){
   var s=bkComputeTravelStats();
@@ -3101,7 +3113,7 @@ function bkPhotoMatchesSearch(p, query){
    ambiance de couleur plutôt qu'une analyse précise). Le résultat est mis en
    cache sur la photo (p.colorBuckets) pour ne jamais le recalculer deux fois.
    BK_COLOR_VERSION force un recalcul automatique si la palette change. */
-var BK_COLOR_VERSION=2;
+var BK_COLOR_VERSION=3; // relevé : seuil de détection abaissé (20%->8%), recalcule les couleurs déjà en cache
 var BK_COLOR_BUCKETS=[
   {key:'rouge', label:'Rouge', hex:'#E53935', rgb:[229,57,53]},
   {key:'orange', label:'Orange', hex:'#FB8C00', rgb:[251,140,0]},
@@ -3130,7 +3142,13 @@ function bkComputeColorBucketsFromImg(img){
   // chaque pixel de la miniature réduite est classé dans sa couleur la plus
   // proche, puis toute couleur qui représente au moins 20% de la photo est
   // retenue — une même photo peut donc avoir plusieurs couleurs.
-  var SIZE=20, THRESHOLD=20;
+  // Seuil abaissé de 20% à 8% : un sujet coloré (fleur, vêtement, objet)
+  // occupe souvent moins de 20% du cadre sans être pour autant négligeable
+  // — testé en vrai avec une photo où un sujet rouge à 9,6% de l'image
+  // n'était PAS détecté du tout avec l'ancien seuil (bug réel, signalé et
+  // corrigé). 8% reste assez haut pour ignorer un vrai bruit résiduel
+  // (quelques pixels isolés) tout en retenant un sujet visuellement présent.
+  var SIZE=20, THRESHOLD=8;
   var c=document.createElement('canvas'); c.width=SIZE; c.height=SIZE;
   var ctx=c.getContext('2d');
   ctx.drawImage(img,0,0,SIZE,SIZE);
@@ -4555,7 +4573,7 @@ document.getElementById('pg-lb').addEventListener('touchend',function(e){
    Chaque élément : {id, type:'photo'|'text', x, y, w, h (tout en % du cadre, x/y = CENTRE), rot (deg),
                      photoId? (pour type photo), text?, fontSize?, color? (pour type texte)} */
 var BK_COLORS=['#241E38','#7B2FF7','#FF5A6E','#00C2A8','#FFFFFF','#FFD93D','#000000','#FF8FA3','#1E88E5','#FB8C00','#2D8659','#9E9E9E'];
-var BK_BGS=['#FFFFFF','#F7F5FC','#241E38','#FFD93D','#7B2FF7','#00C2A8','#000000','#FF8FA3','#1E88E5','#FB8C00','#2D8659','#EDE0D4'];
+var BK_BGS=['#FFFFFF','#F7F5FC','#241E38','#FFD93D','#7B2FF7','#00C2A8','#000000','#F0384B','#FF8FA3','#1E88E5','#FB8C00','#2D8659','#EDE0D4'];
 /* ══════════════════ MOTIFS DE FOND — 60 CRÉATIONS ORIGINALES ══════════════════
    Chaque motif est un vrai dessin vectoriel (SVG) généré par du code — jamais
    une image importée de quelque part, donc aucun souci de droits d'auteur,
@@ -7011,7 +7029,6 @@ function bkOpenSpecificBook(id){
   bkUndoStack=[]; bkRedoStack=[];
   closeBookListSheet();
   document.getElementById('pg-book').classList.add('on');
-  document.getElementById('pg-book').style.display='flex';
   renderBkSwatches();
   bkRenderPage();
   bkRenderPages();
@@ -7038,7 +7055,6 @@ function closeBook(){
   saveBook();
   if(bkAutoSaveTimer){ clearInterval(bkAutoSaveTimer); bkAutoSaveTimer=null; }
   document.getElementById('pg-book').classList.remove('on');
-  document.getElementById('pg-book').style.display='none';
 }
 function bkSwitchBook(){
   bkSaveVersionSnapshot();
@@ -7993,7 +8009,7 @@ function bkRenderSelBar(){
     h+='<button class="bk-btn" onclick="openPhotoPicker()">'+t('sel_photo')+'</button>';
     h+='<button class="bk-btn" onclick="openFilterSheet()">'+t('sel_filters')+'</button>';
     h+='<button class="bk-btn" onclick="openCropSheet()">'+t('sel_crop')+'</button>';
-    more+='<button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();openBgRemoveSheet()">'+t('sel_bg')+'</button>';
+    more+='<button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();openBgRemoveSheet()">'+t('sel_bg')+'</button>';
   } else if(el.type==='icon'){
     h+='<button class="bk-btn" onclick="openShapeColorPicker()">'+t('sel_color')+'</button>';
   } else if(el.type==='group'){
@@ -8004,11 +8020,11 @@ function bkRenderSelBar(){
     h+='<button class="bk-btn" onclick="openBorderSheet()">'+t('sel_border')+'</button>';
   }
   h+='<button class="bk-btn" onclick="bkToggleShadow()">'+t('sel_shadow')+(el.shadow?' ✓':'')+'</button>';
-  more+='<button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();bkDuplicateEl()">'+t('sel_duplicate')+'</button>';
-  more+='<button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();bkToggleLock()">'+(el.locked?t('sel_locked'):t('sel_unlock'))+'</button>';
+  more+='<button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();bkDuplicateEl()">'+t('sel_duplicate')+'</button>';
+  more+='<button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();bkToggleLock()">'+(el.locked?t('sel_locked'):t('sel_unlock'))+'</button>';
   if(!el.locked){
-    more+='<button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();bkReorder(-1)">'+t('sel_back')+'</button>';
-    more+='<button class="bk-btn" style="justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();bkReorder(1)">'+t('sel_front')+'</button>';
+    more+='<button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();bkReorder(-1)">'+t('sel_back')+'</button>';
+    more+='<button class="bk-btn" style="display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:12px 14px;width:100%" onclick="closeBkSelMoreSheet();bkReorder(1)">'+t('sel_front')+'</button>';
   }
   h+='<button class="bk-btn" onclick="openBkSelMoreSheet()">⋯</button>';
   bar.innerHTML=h;
